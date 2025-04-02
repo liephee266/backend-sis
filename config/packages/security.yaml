@@ -1,0 +1,33 @@
+# config/packages/security.yaml
+security:
+    # enable_authenticator_manager: true
+    # ...
+    password_hashers:
+        # Use native password hasher, which auto-selects and migrates the best
+        # possible hashing algorithm (which currently is "bcrypt")
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        login:
+            pattern: ^/api/v1/connexion
+            stateless: true
+            json_login:
+                check_path: /api/v1/connexion
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+                provider: app_user_provider
+        api:
+            pattern:   ^/api
+            stateless: true
+            jwt: ~
+
+    access_control:
+        - { path: ^/api/v1/connexion, roles: PUBLIC_ACCESS }
+        # - { path: ^/api/v1/main/powerbi/*, roles: PUBLIC_ACCESS }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        
+        
