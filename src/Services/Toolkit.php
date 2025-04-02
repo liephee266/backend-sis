@@ -52,15 +52,6 @@ class Toolkit
             if (str_ends_with($value, 's')) {
                 $value = substr($value, 0, -1);
             }
-            if ($value == 'Coutprestation') {
-                $value = 'CoutPrestations';
-            }
-            if ($value == 'Operationcaisse') {
-                $value = 'OperationCaisse';
-            }
-            if ($value == 'Administration-partenaire') {
-                $value = 'AdministrationPartenaires';
-            }
             return $value;
         }, $dataSelect);
     }
@@ -235,13 +226,6 @@ class Toolkit
         if (!str_ends_with($class_name, 's')) {
             $class_name = $class_name . 's';
         }
-        // Cas particulier pour "CoutPrestations" et "RoleUser" qui nécessite un nom personnalisé dans l'URL
-        if ($class_name == 'CoutPrestations') {
-            $class_name = 'cout-prestations';
-        }
-        if ($class_name == 'RoleUser') {
-            $class_name = 'role-users';
-        }
         return $this->p($pagerfanta, json_decode($data), $page, $maxPerPage, $class_name);
     }
 
@@ -397,11 +381,13 @@ class Toolkit
     {
         // Récupère l'objet par son UUID
         $ressource = $this->entityManager->getRepository($entityName)->findOneBy(['uuid' => $id]);
-        
         // Si l'objet n'existe pas, on essaie de le récupérer par son ID
-        if (!$ressource) {
+        if (!$ressource && is_numeric($id)) {
             $ressource = $this->entityManager->getRepository($entityName)->find($id);
+        }else{
+            $ressource = null;
         }
+        //si l'objet n'existe pas, on retourne null
         return $ressource;
     }
 }
