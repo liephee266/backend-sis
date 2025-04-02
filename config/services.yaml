@@ -6,8 +6,6 @@
 parameters:
     app.environment: dev
     app.debug: true
-    $apiKey: '%env(DGTT_API_KEY)%'
-
 services:
     App\Service\Toolkit: ~
     # App\Service\CardPressoMicroService: ~

@@ -54,113 +54,180 @@ class AppController extends AbstractController
         return new JsonResponse($allSelectEntity, Response::HTTP_OK);        
     }
 
-    /**
-     * Recherche globale sur les entités
+    #[Route('/globalSearch', name: 'app_search', methods: ['POST'])]
+        /**
+     * Recherche un service en fonction des critères fournis dans la requête.
      * 
-     * @param Request $request
-     * @return JsonResponse
+     * @param Request $request Requête contenant les paramètres de recherche.
+     * @return JsonResponse Réponse JSON contenant les résultats de la recherche ou un message d'erreur.
      * 
      * @author Orphée Lié <lieloumloum@gmail.com>
+
      */
-    #[Route('/globalSearch', name: 'app_search', methods: ['POST'])]
     public function searchService(Request $request): JsonResponse
     {
-        // Récupérer les données du corps de la requête (JSON)
-        $data = json_decode($request->getContent(), true);
-        // Extraire les valeurs de l'objet JSON
-        $searchTerm = $data['searchTerm'] ?? null;
-        $documentType = $data['document_type'] ?? null;
-        $dateRange = $data['date_range'] ?? null;
-        $startDate = $dateRange['from'] ?? null;
-        $endDate = $dateRange['to'] ?? null;
-
-        // Initialiser les résultats pour les permis de conduire et les cartes grises
-        $entity1Results = [];
-        $entity2Results = [];
-
-        // Vérifier les entités à rechercher
-        $entities = match ($documentType) {
-            'all' => ['App\Entity\Entity1'::class, 'App\Entity\Entity2'::class],
-            default => null,
-        };
-
+        // Récupération de la configuration de recherche
+        $searchConfig = $this->getSearchConfiguration();
+        $searchParams = $this->extractSearchParameters($request);
+        
+        // Détermination des entités à rechercher en fonction du type de document
+        $entities = $this->getSearchableEntities($searchParams['documentType']);
         if (!$entities) {
             return new JsonResponse(
-                ["message" => "Type non valide. Utilisez 'driving-license', 'registration-card' ou 'all'."],
+                ["message" => "Type spécifié invalide."],
                 JsonResponse::HTTP_BAD_REQUEST
             );
         }
 
-        // Construire la requête et récupérer les résultats
-        foreach ($entities as $entityClass) {
-            $qb = $this->defaultEntityManager->getRepository($entityClass)->createQueryBuilder('e');
-            // Ajouter la condition de recherche par mot-clé (searchTerm)
-            if (!empty($searchTerm)) {
-                if ($entityClass === "App\Entity\Entity1"::class) {
-                    $qb->andWhere(
-                        $qb->expr()->orX(
-                            $qb->expr()->like('e.first_name', ':searchTerm'),
-                            $qb->expr()->like('e.last_name', ':searchTerm'),
-                            $qb->expr()->like('e.cashier_short_code', ':searchTerm')
-                        )
-                    );
-                } elseif ($entityClass === 'App\Entity\Entity2'::class) {
-                    $qb->andWhere(
-                        $qb->expr()->orX(
-                            $qb->expr()->like('e.owner_first_name', ':searchTerm'),
-                            $qb->expr()->like('e.owner_last_name', ':searchTerm'),
-                            $qb->expr()->like('e.cashier_short_code', ':searchTerm')
-                        )
-                    );
-                }
-                $qb->setParameter('searchTerm', '%' . $searchTerm . '%');
-            }
-
-            // Ajouter la condition de date (si spécifiée)
-            if (!empty($startDate) && !empty($endDate)) {
-                $qb->andWhere('e.created_at BETWEEN :start_date AND :end_date')
-                    ->setParameter('start_date', new \DateTime($startDate))
-                    ->setParameter('end_date', new \DateTime($endDate));
-            }
-
-            // Exécuter la requête et séparer les résultats en fonction de l'entité
-            $results = $qb->getQuery()->getResult();
-            if ($entityClass === 'App\Entity\Entity1'::class) {
-                $entity1Results = array_merge($entity1Results, $results);
-            } elseif ($entityClass === 'App\Entity\Entity2'::class) {
-                $entity2Results = array_merge($entity2Results, $results);
-            }
+        $results = [];
+        foreach ($entities as $entityKey => $entityConfig) {
+            // Exécution de la recherche pour chaque entité correspondante
+            $searchResults = $this->performEntitySearch(
+                $entityConfig['class'],
+                $searchParams,
+                $entityConfig['searchFields'],
+                $entityConfig['serializationGroup']
+            );
+            $results[$entityKey] = $searchResults;
         }
 
-        // Si les deux tableaux sont vides, retourner un message
-        if (empty($entity1Results) && empty($entity2Results)) {
+        // Vérification si aucun résultat n'a été trouvé
+        if ($this->areAllResultsEmpty($results)) {
             return new JsonResponse(
                 ["message" => "Aucun résultat trouvé pour les critères spécifiés."],
                 JsonResponse::HTTP_NOT_FOUND
             );
         }
 
-        // Sérialiser les résultats pour chaque type de document
-        $entity1ResultsData = $this->serializer->serialize(
-            $entity1Results,
-            'json',
-            ['groups' => ['driving_license:read']]
-        );
-
-        $entity2ResultsData = $this->serializer->serialize(
-            $entity2Results,
-            'json',
-            ['groups' => ['registration_card:read']]
-        );
-
-        // Structure de la réponse séparée par type de document
-        $responseData = [
-            'driving_license' => json_decode($entity1ResultsData), // Résultats pour le permis de conduire
-            'registration_card' => json_decode($entity2ResultsData),    // Résultats pour la carte grise
-        ];
-
-        return new JsonResponse($responseData, Response::HTTP_OK);
+        return new JsonResponse($results, Response::HTTP_OK);
     }
+
+    /**
+     * Retourne la configuration des recherches disponibles.
+     * 
+     * @return array Configuration des entités et leurs critères de recherche.
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    private function getSearchConfiguration(): array
+    {
+        return [
+            'driving_license' => [
+                'class' => 'App\Entity\Entity1',
+                'searchFields' => ['first_name', 'last_name', 'cashier_short_code'],
+                'serializationGroup' => 'driving_license:read'
+            ],
+            'registration_card' => [
+                'class' => 'App\Entity\Entity2',
+                'searchFields' => ['owner_first_name', 'owner_last_name', 'cashier_short_code'],
+                'serializationGroup' => 'registration_card:read'
+            ]
+        ];
+    }
+
+    /**
+     * Extrait les paramètres de recherche à partir de la requête HTTP.
+     * 
+     * @param Request $request Requête contenant les données JSON.
+     * @return array Paramètres extraits de la requête.
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    private function extractSearchParameters(Request $request): array
+    {
+        $data = json_decode($request->getContent(), true);
+        $dateRange = $data['date_range'] ?? [];
+        
+        return [
+            'searchTerm' => $data['searchTerm'] ?? null,
+            'documentType' => $data['document_type'] ?? null,
+            'startDate' => $dateRange['from'] ?? null,
+            'endDate' => $dateRange['to'] ?? null
+        ];
+    }
+
+    /**
+     * Récupère les entités à rechercher en fonction du type de document spécifié.
+     * 
+     * @param string|null $documentType Type de document à rechercher.
+     * @return array|null Tableau des entités correspondantes ou null si aucune correspondance.
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    private function getSearchableEntities(?string $documentType): ?array
+    {
+        $config = $this->getSearchConfiguration();
+        
+        if ($documentType === 'all') {
+            return $config;
+        }
+        
+        return isset($config[$documentType]) ? [$documentType => $config[$documentType]] : null;
+    }
+
+    /**
+     * Exécute la recherche d'entités en fonction des paramètres spécifiés.
+     * 
+     * @param string $entityClass Classe de l'entité à rechercher.
+     * @param array $searchParams Paramètres de recherche.
+     * @param array $searchFields Champs dans lesquels effectuer la recherche.
+     * @param string $serializationGroup Groupe de sérialisation pour le formatage des résultats.
+     * @return array Résultats de la recherche sous forme de tableau JSON.
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    private function performEntitySearch(
+        string $entityClass,
+        array $searchParams,
+        array $searchFields,
+        string $serializationGroup
+    ): array {
+        $qb = $this->defaultEntityManager->getRepository($entityClass)->createQueryBuilder('e');
+        
+        // Ajout des conditions de recherche basées sur le terme de recherche
+        if (!empty($searchParams['searchTerm'])) {
+            $conditions = [];
+            foreach ($searchFields as $field) {
+                $conditions[] = $qb->expr()->like("e.$field", ':searchTerm');
+            }
+            $qb->andWhere($qb->expr()->orX(...$conditions))
+               ->setParameter('searchTerm', '%' . $searchParams['searchTerm'] . '%');
+        }
+
+        // Ajout des conditions basées sur la plage de dates
+        if (!empty($searchParams['startDate']) && !empty($searchParams['endDate'])) {
+            $qb->andWhere('e.created_at BETWEEN :start_date AND :end_date')
+               ->setParameter('start_date', new \DateTime($searchParams['startDate']))
+               ->setParameter('end_date', new \DateTime($searchParams['endDate']));
+        }
+
+        $results = $qb->getQuery()->getResult();
+        
+        return json_decode($this->serializer->serialize(
+            $results,
+            'json',
+            ['groups' => [$serializationGroup]]
+        ));
+    }
+
+    /**
+     * Vérifie si tous les résultats de recherche sont vides.
+     * 
+     * @param array $results Tableau contenant les résultats des différentes recherches.
+     * @return bool Retourne true si aucun résultat n'est trouvé, sinon false.
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    private function areAllResultsEmpty(array $results): bool
+    {
+        foreach ($results as $result) {
+            if (!empty($result)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     function nettoyer_json($json) {
         // Supprimer les retours à la ligne et les espaces
@@ -186,17 +253,7 @@ class AppController extends AbstractController
             return new JsonResponse(['message' => 'Accès non autorisé'], Response::HTTP_BAD_REQUEST);
         }
         $datapowerbi = [
-            'biometric-datas' => 'BiometricData',
-            'categorie-vehicules' => 'CategorieVehicule',
-            'client_types' => 'ClientType',
-            'departments' => 'Department',
-            'documents' => 'Document',
-            'driving-licenses' => 'DrivingLicense',
-            'locations' => 'Location',
-            'operation-type' => 'OperationType',
-            'registration-cards' => 'RegistrationCard',
-            'users' => 'User',
-            'status-history' => 'StatusHistory'
+            // 'users' => 'User',
         ];
 
         if (!array_key_exists($entity_name, $datapowerbi)) {
