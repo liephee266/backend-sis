@@ -404,4 +404,10 @@ class Toolkit
         }
         return $ressource;
     }
+
+    public function containsSpace(string $string): bool
+{
+    // Vérifie la présence d'au moins un espace (y compris en début/fin)
+    return strlen($string) !== strlen(str_replace(' ', '', $string));
+}
 }

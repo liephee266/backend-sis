@@ -88,4 +88,18 @@ class MinioService
             return 'Erreur lors de la suppression du bucket: ' . $e->getMessage();
         }
     }
+
+    /**
+     * Vérifier si un bucket existe dans S3 Minio
+     * 
+     * @param string $bucketName
+     * 
+     * @return bool
+     * 
+     * @author Michel Miyalou <michelmiyalou0@@gmail.com>
+     */
+    public function bucketExists(string $bucketName): bool
+    {
+        return $this->s3Client->doesBucketExist($bucketName);
+    }
 }
