@@ -87,6 +87,7 @@ class UserController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
+        $data['birth'] = new \DateTime($data['birth']);
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data);
 
