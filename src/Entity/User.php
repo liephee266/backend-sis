@@ -9,6 +9,8 @@ use Symfony\Component\Uid\Uuid; // Add this line
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -77,11 +79,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read"])]
     private $updated_at;
 
+    /**
+     * @var Collection<int, Receptionist>
+     */
+    #[ORM\OneToMany(targetEntity: Receptionist::class, mappedBy: 'user_id')]
+    private Collection $receptionist_id;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->receptionist_id = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -226,7 +235,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->tel = $tel;
         return $this;
     }
-     public function getGender(): bool
+    public function getGender(): bool
     {
         return $this->gender;
     }
@@ -237,7 +246,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
 
     }
-   public function getBirth(): ?\DateTimeInterface
+    public function getBirth(): ?\DateTimeInterface
     {
         return $this->birth;
     }
@@ -267,6 +276,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Receptionist>
+     */
+    public function getReceptionistId(): Collection
+    {
+        return $this->receptionist_id;
+    }
+
+    public function addReceptionistId(Receptionist $receptionistId): static
+    {
+        if (!$this->receptionist_id->contains($receptionistId)) {
+            $this->receptionist_id->add($receptionistId);
+            $receptionistId->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceptionistId(Receptionist $receptionistId): static
+    {
+        if ($this->receptionist_id->removeElement($receptionistId)) {
+            // set the owning side to null (unless already changed)
+            if ($receptionistId->getUserId() === $this) {
+                $receptionistId->setUserId(null);
+            }
+        }
+
         return $this;
     }
 

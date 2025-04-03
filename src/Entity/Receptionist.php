@@ -13,25 +13,26 @@ class Receptionist
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
-    private ?User $user = null;
+    #[ORM\ManyToOne(inversedBy: 'receptionist_id')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user_id = null;
 
-    // ✅ Getters & Setters
-
+    // Getters et Setters
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUserId(): ?User
     {
-        return $this->user;
+        return $this->user_id;
     }
 
-    public function setUser(User $user): self
+    public function setUserId(?User $user_id): static
     {
-        $this->user = $user;
+        $this->user_id = $user_id;
+
         return $this;
     }
+
 }

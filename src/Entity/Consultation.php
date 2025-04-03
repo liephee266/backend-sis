@@ -26,7 +26,7 @@ class Consultation
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    private ?Hopital $hospital = null;
+    private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description = null;
@@ -76,12 +76,12 @@ class Consultation
         return $this;
     }
 
-    public function getHospital(): ?Hopital
+    public function getHospital(): ?Hospital
     {
         return $this->hospital;
     }
 
-    public function setHospital(?Hopital $hospital): self
+    public function setHospital(?Hospital $hospital): self
     {
         $this->hospital = $hospital;
         return $this;
