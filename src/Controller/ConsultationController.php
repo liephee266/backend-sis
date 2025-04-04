@@ -46,6 +46,7 @@ class ConsultationController extends AbstractController
   #[Route('/', name: 'consultation_index', methods: ['GET'])]
   public function index(Request $request): Response
   {
+
     // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
     $filtre = [];
 
