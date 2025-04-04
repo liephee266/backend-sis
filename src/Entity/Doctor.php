@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Entity\Service;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "doctor")]
@@ -13,41 +14,53 @@ class Doctor
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
+    #[Groups(["doctor:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["doctor:read"])]
     private ?User $user = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?string $medLisenceNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?string $speciality = null;
 
     #[ORM\Column(type: "integer", nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?int $experience = null;
 
     #[ORM\Column(type: "date", nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?\DateTimeInterface $serviceStartingDate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Groups(["doctor:read"])]
     private ?string $diplome = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Groups(["doctor:read"])]
     private ?string $other = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?string $cni = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?string $medicalLisenceCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["doctor:read"])]
     private ?string $cv = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class)]
     #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["doctor:read"])]
     private ?Service $service = null;
 
     public function getId(): ?int

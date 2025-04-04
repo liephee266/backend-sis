@@ -35,10 +35,6 @@ class Hospital
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     private ?string $ceo = null;
 
-    #[ORM\ManyToOne(targetEntity: Service::class)]
-    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    private ?Service $service = null;
-
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     private ?string $accreditation = null;
 
@@ -142,17 +138,6 @@ class Hospital
     public function setCeo(string $ceo): self
     {
         $this->ceo = $ceo;
-        return $this;
-    }
-
-    public function getService(): ?Service
-    {
-        return $this->service;
-    }
-
-    public function setService(?Service $service): self
-    {
-        $this->service = $service;
         return $this;
     }
 
