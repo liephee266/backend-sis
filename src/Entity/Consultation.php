@@ -17,7 +17,7 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['consultation:read', 'patient:read', 'doctor:read', 'examination:read'])]
+    #[Groups(['consultation:read', 'patient:read', 'doctor:read', 'examination:read', 'hospital:read', 'treatment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
@@ -66,9 +66,16 @@ class Consultation
     #[ORM\OneToMany(targetEntity: Examination::class, mappedBy: 'consultation')]
     private Collection $examinations;
 
+    /**
+     * @var Collection<int, Treatment>
+     */
+    #[ORM\OneToMany(targetEntity: Treatment::class, mappedBy: 'consultation')]
+    private Collection $treatments;
+
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
+        $this->treatments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -213,6 +220,36 @@ class Consultation
             // set the owning side to null (unless already changed)
             if ($examination->getConsultation() === $this) {
                 $examination->setConsultation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Treatment>
+     */
+    public function getTreatments(): Collection
+    {
+        return $this->treatments;
+    }
+
+    public function addTreatment(Treatment $treatment): static
+    {
+        if (!$this->treatments->contains($treatment)) {
+            $this->treatments->add($treatment);
+            $treatment->setConsultation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTreatment(Treatment $treatment): static
+    {
+        if ($this->treatments->removeElement($treatment)) {
+            // set the owning side to null (unless already changed)
+            if ($treatment->getConsultation() === $this) {
+                $treatment->setConsultation(null);
             }
         }
 

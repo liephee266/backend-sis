@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "patient")]
@@ -15,21 +16,23 @@ class Patient
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[ORM\Groups(["patient:read", "consultation:read", "user:read"])]
+    #[ORM\Groups(["patient:read", "consultation:read", "user:read"])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    private ?User $user = null;
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    private ?User $tutor = null;
 
     /**
      * @var Collection<int, Consultation>
      */
     #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'patient')]
     private Collection $consultations;
+
+    #[ORM\ManyToOne(inversedBy: 'patients')]
+    #[ORM\Groups(["patient:read", "user:read"])]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'patient')]
+    #[ORM\Groups(["patient:read", "user:read"])]
+    private ?User $tutor = null;
 
     public function __construct()
     {
@@ -41,27 +44,6 @@ class Patient
         return $this->id;
     }
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-        return $this;
-    }
-
-    public function getTutor(): ?User
-    {
-        return $this->tutor;
-    }
-
-    public function setTutor(?User $tutor): self
-    {
-        $this->tutor = $tutor;
-        return $this;
-    }
 
     /**
      * @return Collection<int, Consultation>
@@ -89,6 +71,30 @@ class Patient
                 $consultation->setPatient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getTutor(): ?User
+    {
+        return $this->tutor;
+    }
+
+    public function setTutor(?User $tutor): static
+    {
+        $this->tutor = $tutor;
 
         return $this;
     }

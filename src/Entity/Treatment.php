@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "treatment")]
@@ -11,16 +12,19 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(['treatment:read', 'consultation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Groups(['treatment:read', 'consultation:read'])]
     private ?string $description = null;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(['treatment:read', 'consultation:read'])]
     private bool $status;
 
-    #[ORM\ManyToOne(targetEntity: Consultation::class)]
-    #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\ManyToOne(inversedBy: 'treatments')]
+    #[Groups(['treatment:read', 'consultation:read'])]
     private ?Consultation $consultation = null;
 
     // ✅ Getters & Setters
@@ -57,9 +61,10 @@ class Treatment
         return $this->consultation;
     }
 
-    public function setConsultation(?Consultation $consultation): self
+    public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
         return $this;
     }
 }

@@ -21,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "agent_hopital:read", "receptionist:read", "doctor:read", "hospital_admin:read", "hospital:read"])]
+    #[Groups(["user:read", "agent_hopital:read", "receptionist:read", "doctor:read", "hospital_admin:read", "hospital:read", "patient:read", "consultation:read", "message:read", "sis_admin:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -115,6 +115,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'receiver')]
     private Collection $message;
 
+    /**
+     * @var Collection<int, Patient>
+     */
+    #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'user')]
+    private Collection $patients;
+
+    /**
+     * @var Collection<int, Patient>
+     */
+    #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'tutor')]
+    private Collection $patient;
+
+    /**
+     * @var Collection<int, SisAdmin>
+     */
+    #[ORM\OneToMany(targetEntity: SisAdmin::class, mappedBy: 'user')]
+    private Collection $sisAdmins;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -126,6 +144,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->hospitalAdmins = new ArrayCollection();
         $this->messages = new ArrayCollection();
         $this->message = new ArrayCollection();
+        $this->patients = new ArrayCollection();
+        $this->patient = new ArrayCollection();
+        $this->sisAdmins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -470,6 +491,74 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getMessage(): Collection
     {
         return $this->message;
+    }
+
+    /**
+     * @return Collection<int, Patient>
+     */
+    public function getPatients(): Collection
+    {
+        return $this->patients;
+    }
+
+    public function addPatient(Patient $patient): static
+    {
+        if (!$this->patients->contains($patient)) {
+            $this->patients->add($patient);
+            $patient->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePatient(Patient $patient): static
+    {
+        if ($this->patients->removeElement($patient)) {
+            // set the owning side to null (unless already changed)
+            if ($patient->getUser() === $this) {
+                $patient->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Patient>
+     */
+    public function getPatient(): Collection
+    {
+        return $this->patient;
+    }
+
+    /**
+     * @return Collection<int, SisAdmin>
+     */
+    public function getSisAdmins(): Collection
+    {
+        return $this->sisAdmins;
+    }
+
+    public function addSisAdmin(SisAdmin $sisAdmin): static
+    {
+        if (!$this->sisAdmins->contains($sisAdmin)) {
+            $this->sisAdmins->add($sisAdmin);
+            $sisAdmin->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSisAdmin(SisAdmin $sisAdmin): static
+    {
+        if ($this->sisAdmins->removeElement($sisAdmin)) {
+            // set the owning side to null (unless already changed)
+            if ($sisAdmin->getUser() === $this) {
+                $sisAdmin->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
 }

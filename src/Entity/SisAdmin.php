@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "sis_admin")]
@@ -12,16 +13,13 @@ class SisAdmin
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, unique: true)]
+    #[ORM\Groups(['sis_admin:read', 'user:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $username = null;
+    #[ORM\ManyToOne(inversedBy: 'sisAdmins')]
+    #[ORM\Groups(['sis_admin:read', 'user:read'])]
+    private ?User $user = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $password = null;
-
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    private ?int $userId = null;
 
     public function getId(): ?int
     {
@@ -50,14 +48,16 @@ class SisAdmin
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?int $userId): self
+    public function setUser(?User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
+
         return $this;
     }
+
 }
