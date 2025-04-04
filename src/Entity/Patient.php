@@ -16,7 +16,6 @@ class Patient
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[ORM\Groups(["patient:read", "consultation:read", "user:read"])]
-    #[ORM\Groups(["patient:read", "consultation:read", "user:read"])]
     private ?int $id = null;
 
 
@@ -27,11 +26,11 @@ class Patient
     private Collection $consultations;
 
     #[ORM\ManyToOne(inversedBy: 'patients')]
-    #[ORM\Groups(["patient:read", "user:read"])]
+    #[Groups(["patient:read", "user:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'patient')]
-    #[ORM\Groups(["patient:read", "user:read"])]
+    #[Groups(["patient:read", "user:read"])]
     private ?User $tutor = null;
 
     public function __construct()

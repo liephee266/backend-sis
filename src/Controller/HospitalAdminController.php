@@ -49,7 +49,7 @@ class HospitalAdminController extends AbstractController
         $filtre = [];
 
         // Récupération des HospitalAdmins avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'HospitalAdmin', 'hospitaladmin:read', $filtre);
+        $response = $this->toolkit->getPagitionOption($request, 'HospitalAdmin', 'hospital_admin:read', $filtre);
 
         // Retour d'une réponse JSON avec les HospitalAdmins et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
@@ -67,7 +67,7 @@ class HospitalAdminController extends AbstractController
     public function show(HospitalAdmin $hospitaladmin): Response
     {
         // Sérialisation de l'entité HospitalAdmin en JSON avec le groupe de sérialisation 'HospitalAdmin:read'
-        $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospitaladmin:read']);
+        $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospital_admin:read']);
     
         // Retour de la réponse JSON avec les données de l'HospitalAdmin et un code HTTP 200
         return new JsonResponse(["data" => json_decode($hospitaladmin, true), "code" => 200], Response::HTTP_OK);

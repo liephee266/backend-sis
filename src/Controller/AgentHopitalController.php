@@ -49,7 +49,7 @@ class AgentHopitalController extends AbstractController
         $filtre = [];
 
         // Récupération des AgentHopitals avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'AgentHopital', 'agenthopital:read', $filtre);
+        $response = $this->toolkit->getPagitionOption($request, 'AgentHopital', 'agent_hopital:read', $filtre);
 
         // Retour d'une réponse JSON avec les AgentHopitals et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
@@ -67,7 +67,7 @@ class AgentHopitalController extends AbstractController
     public function show(AgentHopital $agenthopital): Response
     {
         // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
-        $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agenthopital:read']);
+        $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agent_hopital:read']);
     
         // Retour de la réponse JSON avec les données de l'AgentHopital et un code HTTP 200
         return new JsonResponse(["data" => json_decode($agenthopital, true), "code" => 200], Response::HTTP_OK);

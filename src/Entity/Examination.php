@@ -15,12 +15,15 @@ class Examination
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Groups(['examination:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: "integer")]
+    #[Groups(['examination:read'])]
     private ?int $price = null;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Groups(['examination:read'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'examinations')]

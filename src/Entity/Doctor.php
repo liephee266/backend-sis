@@ -55,6 +55,14 @@ class Doctor
     #[Groups(["doctor:read"])]
     private ?string $cv = null;
 
+     #[ORM\ManyToOne(inversedBy: 'doctors')] 
+    #[Groups(["doctor:read","user:read"])]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'doctors')]
+    #[Groups(["doctor:read","service:read"])]
+    private ?Service $service = null;
+
     /**
      * @var Collection<int, Affiliation>
      */
@@ -78,14 +86,6 @@ class Doctor
      */
     #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'doctor')]
 
-    #[ORM\ManyToOne(inversedBy: 'doctors')] 
-    #[Groups(["doctor:read","user:read"])]
-    private ?User $user = null;
-
-    #[ORM\ManyToOne(inversedBy: 'doctors')]
-    #[Groups(["doctor:read","service:read"])]
-
-    private ?Service $service = null;
 
     public function __construct()
     {
