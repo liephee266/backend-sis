@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "notification")]
@@ -11,25 +12,32 @@ class Notification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(['notification:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "integer")]
+    #[Groups(['notification:read'])]
     private ?int $from = null;
 
     #[ORM\Column(type: "integer")]
+    #[Groups(['notification:read'])]
     private ?int $to = null;
 
     #[ORM\Column(type: "text")]
+    #[Groups(['notification:read'])]
     private ?string $content = null;
 
     #[ORM\Column(type: "datetime")]
+    #[Groups(['notification:read'])]
     private ?\DateTimeInterface $dateExp = null;
 
-    #[ORM\Column(type: "integer")]
-    private ?int $stateId = null;
+    #[ORM\ManyToOne(inversedBy: 'notifications')]
+    #[Groups(['notification:read', 'notification_type:read'])]
+    private ?State $state = null;
 
-    #[ORM\Column(type: "integer")]
-    private ?int $notifTypeId = null;
+    #[ORM\ManyToOne(inversedBy: 'notifications')]
+    #[Groups(['notification:read', 'notification_type:read'])]
+    private ?NotificationType $notificationType = null;
 
     // ✅ Getters & Setters
 
@@ -81,18 +89,6 @@ class Notification
         $this->dateExp = $dateExp;
         return $this;
     }
-
-    public function getStateId(): ?int
-    {
-        return $this->stateId;
-    }
-
-    public function setStateId(int $stateId): self
-    {
-        $this->stateId = $stateId;
-        return $this;
-    }
-
     public function getNotifTypeId(): ?int
     {
         return $this->notifTypeId;
@@ -101,6 +97,30 @@ class Notification
     public function setNotifTypeId(int $notifTypeId): self
     {
         $this->notifTypeId = $notifTypeId;
+        return $this;
+    }
+
+    public function getState(): ?State
+    {
+        return $this->state;
+    }
+
+    public function setState(?State $state): static
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getNotificationType(): ?NotificationType
+    {
+        return $this->notificationType;
+    }
+
+    public function setNotificationType(?NotificationType $notificationType): static
+    {
+        $this->notificationType = $notificationType;
+
         return $this;
     }
 }

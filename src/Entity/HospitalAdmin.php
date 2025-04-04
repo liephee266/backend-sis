@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital_admin")]
@@ -13,12 +14,12 @@ class HospitalAdmin
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\ManyToOne(inversedBy: 'hospitalAdmins')]
+    #[Groups(['hospital_admin:read', 'user:read'])]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(targetEntity: Hospital::class)]
-    #[ORM\JoinColumn(name: "hopital_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\ManyToOne(inversedBy: 'hospitalAdmins')]
+    #[Groups(['hospital_admin:read', 'hospital:read'])]
     private ?Hospital $hospital = null;
 
     // ✅ Getters & Setters
@@ -33,9 +34,10 @@ class HospitalAdmin
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?User $user): static
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -44,9 +46,10 @@ class HospitalAdmin
         return $this->hospital;
     }
 
-    public function setHospital(?Hospital $hospital): self
+    public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
         return $this;
     }
 }

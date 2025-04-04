@@ -15,7 +15,7 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['hospital:read', 'affiliation:read', 'doctor:read',])]
+    #[Groups(['hospital:read', 'affiliation:read', 'doctor:read','consultation:read','hospital_admin:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -76,10 +76,24 @@ class Hospital
     #[ORM\OneToMany(targetEntity: Agenda::class, mappedBy: 'hospital')]
     private Collection $agenda;
 
+    /**
+     * @var Collection<int, Consultation>
+     */
+    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'hospital')]
+    private Collection $consultations;
+
+    /**
+     * @var Collection<int, HospitalAdmin>
+     */
+    #[ORM\OneToMany(targetEntity: HospitalAdmin::class, mappedBy: 'hospital')]
+    private Collection $hospitalAdmins;
+
     public function __construct()
     {
         $this->affiliations = new ArrayCollection();
         $this->agenda = new ArrayCollection();
+        $this->consultations = new ArrayCollection();
+        $this->hospitalAdmins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -306,6 +320,66 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($agenda->getHospital() === $this) {
                 $agenda->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): static
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): static
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getHospital() === $this) {
+                $consultation->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HospitalAdmin>
+     */
+    public function getHospitalAdmins(): Collection
+    {
+        return $this->hospitalAdmins;
+    }
+
+    public function addHospitalAdmin(HospitalAdmin $hospitalAdmin): static
+    {
+        if (!$this->hospitalAdmins->contains($hospitalAdmin)) {
+            $this->hospitalAdmins->add($hospitalAdmin);
+            $hospitalAdmin->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHospitalAdmin(HospitalAdmin $hospitalAdmin): static
+    {
+        if ($this->hospitalAdmins->removeElement($hospitalAdmin)) {
+            // set the owning side to null (unless already changed)
+            if ($hospitalAdmin->getHospital() === $this) {
+                $hospitalAdmin->setHospital(null);
             }
         }
 

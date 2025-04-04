@@ -16,13 +16,8 @@ class Doctor
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["doctor:read", "affiliation:read"])]
+    #[Groups(["doctor:read", "affiliation:read", "hospital:read", "user:read","availability:read","agenda:read","consultation:read"])]
     private ?int $id = null;
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["doctor:read"])]
-    private ?User $user = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["doctor:read"])]
@@ -60,11 +55,6 @@ class Doctor
     #[Groups(["doctor:read"])]
     private ?string $cv = null;
 
-    #[ORM\ManyToOne(targetEntity: Service::class)]
-    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["doctor:read"])]
-    private ?Service $service = null;
-
     /**
      * @var Collection<int, Affiliation>
      */
@@ -83,27 +73,31 @@ class Doctor
     #[ORM\OneToMany(targetEntity: Availability::class, mappedBy: 'doctor')]
     private Collection $availabilities;
 
+    /**
+     * @var Collection<int, Consultation>
+     */
+    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'doctor')]
+
+    #[ORM\ManyToOne(inversedBy: 'doctors')] 
+    #[Groups(["doctor:read","user:read"])]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'doctors')]
+    #[Groups(["doctor:read","service:read"])]
+
+    private ?Service $service = null;
+
     public function __construct()
     {
         $this->affiliations = new ArrayCollection();
         $this->agenda = new ArrayCollection();
         $this->availabilities = new ArrayCollection();
+        $this->consultations = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-        return $this;
     }
 
     public function getMedLisenceNumber(): ?string
@@ -205,17 +199,6 @@ class Doctor
         return $this;
     }
 
-    public function getService(): ?Service
-    {
-        return $this->service;
-    }
-
-    public function setService(?Service $service): self
-    {
-        $this->service = $service;
-        return $this;
-    }
-
     /**
      * @return Collection<int, Affiliation>
      */
@@ -302,6 +285,60 @@ class Doctor
                 $availability->setDoctor(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): static
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): static
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getDoctor() === $this) {
+                $consultation->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getService(): ?Service
+    {
+        return $this->service;
+    }
+
+    public function setService(?Service $service): static
+    {
+        $this->service = $service;
 
         return $this;
     }

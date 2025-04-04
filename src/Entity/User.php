@@ -21,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "agent_hopital:read", "receptionist:read", "doctor:read", "hospital_admin:read", "hospital:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -91,6 +91,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: AgentHopital::class, mappedBy: 'user')]
     private Collection $agentHopitals;
 
+    /**
+     * @var Collection<int, Doctor>
+     */
+    #[ORM\OneToMany(targetEntity: Doctor::class, mappedBy: 'user')]
+    private Collection $doctors;
+
+    /**
+     * @var Collection<int, HospitalAdmin>
+     */
+    #[ORM\OneToMany(targetEntity: HospitalAdmin::class, mappedBy: 'user')]
+    private Collection $hospitalAdmins;
+
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'sender')]
+    private Collection $messages;
+
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'receiver')]
+    private Collection $message;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -98,6 +122,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->updated_at = new \DateTime();
         $this->receptionist_id = new ArrayCollection();
         $this->agentHopitals = new ArrayCollection();
+        $this->doctors = new ArrayCollection();
+        $this->hospitalAdmins = new ArrayCollection();
+        $this->messages = new ArrayCollection();
+        $this->message = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -344,6 +372,104 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Doctor>
+     */
+    public function getDoctors(): Collection
+    {
+        return $this->doctors;
+    }
+
+    public function addDoctor(Doctor $doctor): static
+    {
+        if (!$this->doctors->contains($doctor)) {
+            $this->doctors->add($doctor);
+            $doctor->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctor(Doctor $doctor): static
+    {
+        if ($this->doctors->removeElement($doctor)) {
+            // set the owning side to null (unless already changed)
+            if ($doctor->getUser() === $this) {
+                $doctor->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HospitalAdmin>
+     */
+    public function getHospitalAdmins(): Collection
+    {
+        return $this->hospitalAdmins;
+    }
+
+    public function addHospitalAdmin(HospitalAdmin $hospitalAdmin): static
+    {
+        if (!$this->hospitalAdmins->contains($hospitalAdmin)) {
+            $this->hospitalAdmins->add($hospitalAdmin);
+            $hospitalAdmin->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHospitalAdmin(HospitalAdmin $hospitalAdmin): static
+    {
+        if ($this->hospitalAdmins->removeElement($hospitalAdmin)) {
+            // set the owning side to null (unless already changed)
+            if ($hospitalAdmin->getUser() === $this) {
+                $hospitalAdmin->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessage(): Collection
+    {
+        return $this->message;
     }
 
 }

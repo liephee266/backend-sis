@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "examination")]
@@ -22,9 +23,10 @@ class Examination
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(targetEntity: Consultation::class)]
-    #[ORM\JoinColumn(name: "id_consultation", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\ManyToOne(inversedBy: 'examinations')]
+    #[Groups(['examination:read', 'consultation:read'])]
     private ?Consultation $consultation = null;
+
 
     // ✅ Getters & Setters
 
@@ -71,9 +73,11 @@ class Examination
         return $this->consultation;
     }
 
-    public function setConsultation(?Consultation $consultation): self
+    public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
         return $this;
     }
+
 }
