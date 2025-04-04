@@ -10,20 +10,19 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Table(name: "message")]
 class Message
 {
-
   #[ORM\Id]
   #[ORM\GeneratedValue]
-  #[ORM\Column(type: "integer", unique: true)]
+  #[ORM\Column(type: "integer")]
   #[Groups('message:read')]
   private ?int $id = null;
 
   #[ORM\ManyToOne(targetEntity: User::class)]
-  #[ORM\JoinColumn(name: "from", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+  #[ORM\JoinColumn(name: "sender", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
   #[Groups('message:read')]
   private ?User $sender = null;
 
   #[ORM\ManyToOne(targetEntity: User::class)]
-  #[ORM\JoinColumn(name: "to", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+  #[ORM\JoinColumn(name: "receiver", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
   #[Groups('message:read')]
   private ?User $receiver = null;
 

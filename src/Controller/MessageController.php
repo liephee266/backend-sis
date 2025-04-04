@@ -84,21 +84,22 @@ class MessageController extends AbstractController
   #[Route('/', name: 'message_create', methods: ['POST'])]
   public function create(Request $request): Response
   {
-    // Décodage du contenu JSON envoyé dans la requête
+    // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
     $data = json_decode($request->getContent(), true);
     $data['date'] = date_create($data['date']);
 
-    // Appel à la méthode persistEntity pour insérer les données dans la base
+
+    // Appel à la méthode persistEntity pour mettre à jour l'entité Message dans la base de données
     $errors = $this->genericEntityManager->persistEntity("App\Entity\Message", $data);
 
-    // Vérification des erreurs après la persistance des données
+    // Vérification si l'entité a été mise à jour sans erreur
     if (!empty($errors['entity'])) {
-      // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-      return $this->json(['code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
+      // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
+      return $this->json(['code' => 200, 'message' => "Message modifié avec succès"], Response::HTTP_OK);
     }
 
-    // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-    return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
+    // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
+    return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Message"], Response::HTTP_INTERNAL_SERVER_ERROR);
   }
 
   /**
