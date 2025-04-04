@@ -26,6 +26,16 @@ class MeetingController extends AbstractController
     private $serializer;
     private $genericEntityManager;
 
+    /**
+     * Constructeur de la classe MeetingController
+     * 
+     * @param GenericEntityManager $genericEntityManager Gestionnaire d'entité générique
+     * @param EntityManagerInterface $entityManager Gestionnaire d'entité de Doctrine
+     * @param SerializerInterface $serializer Srialiseur de données
+     * @param Toolkit $toolkit Boite à outils de l'application
+     * 
+     * @author  Orphée Lié <lieloumloum@gmail.com>
+     */
     public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
     {
         $this->toolkit = $toolkit;
@@ -35,7 +45,7 @@ class MeetingController extends AbstractController
     }
 
     /**
-     * Liste des Meeting
+     * Liste des Meetin
      *
      * @param Request $request
      * @return Response
@@ -86,7 +96,10 @@ class MeetingController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
-        
+
+        // Conversion de la date en objet DateTime
+        $data["date"] = new \DateTime($data["date"]);
+
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);
 
@@ -97,7 +110,7 @@ class MeetingController extends AbstractController
         }
 
         // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -114,6 +127,9 @@ class MeetingController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        // Conversion de la date en objet DateTime
+        $data["date"] = new \DateTime($data["date"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;

@@ -21,15 +21,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private ?string $email = null;
 
     /**
@@ -48,38 +48,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "boolean")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private bool $gender;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read", "urgentist:read"])]
     private $updated_at;
 
     /**
