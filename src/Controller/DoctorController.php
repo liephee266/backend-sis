@@ -87,6 +87,7 @@ class DoctorController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
+        // Conversion de la date de service en objet DateTime
         $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
@@ -117,8 +118,18 @@ class DoctorController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     
+        //Verification de l'existence de l'entite
+        $doctor = $this->entityManager->getRepository(Doctor::class)->find($id);
+        
+        if (!$doctor) {
+            return $this->json(['code' => 404, 'message' => "Ce doctor specifier n'existe pas"], Response::HTTP_NOT_FOUND);
+        }
+
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
+
+        // Conversion de la date de service en objet DateTime
+        $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Doctor", $data, true);
@@ -143,8 +154,15 @@ class DoctorController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'doctor_delete', methods: ['DELETE'])]
-    public function delete(Doctor $doctor, EntityManagerInterface $entityManager): Response
+    public function delete(Doctor $doctor = null, EntityManagerInterface $entityManager): Response
     {
+        if (!$doctor) {
+            return $this->json(
+                ['code' => 404, 'message' => "Ce doctor n'existe pas ou a deja été supprimé"],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
         // Suppression de l'entité Doctor passée en paramètre
         $entityManager->remove($doctor);
     

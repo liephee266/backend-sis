@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "state")]
@@ -11,9 +12,11 @@ class State
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups("state:read")]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Groups("state:read")]
     private ?string $name = null;
 
     // ✅ Getters & Setters

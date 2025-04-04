@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Entity\Service;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "doctor")]
@@ -59,7 +59,7 @@ class Doctor
     private ?string $cv = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class)]
-    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: true, onDelete: "CASCADE")]
     #[Groups(["doctor:read"])]
     private ?Service $service = null;
 
