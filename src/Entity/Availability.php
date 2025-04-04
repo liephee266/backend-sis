@@ -14,10 +14,6 @@ class Availability
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Doctor::class)]
-    #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    private ?Doctor $doctor = null;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $timeInterval = null;
 
@@ -27,6 +23,10 @@ class Availability
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\ManyToOne(inversedBy: 'availabilities')]
+     #[Groups(['availability:read', 'doctor:read'])]
+    private ?Doctor $doctor = null;
+
     // ✅ Getters & Setters
 
     public function getId(): ?int
@@ -34,16 +34,6 @@ class Availability
         return $this->id;
     }
 
-    public function getDoctor(): ?Doctor
-    {
-        return $this->doctor;
-    }
-
-    public function setDoctor(?Doctor $doctor): self
-    {
-        $this->doctor = $doctor;
-        return $this;
-    }
 
     public function getTimeInterval(): ?\DateTimeInterface
     {
@@ -75,6 +65,18 @@ class Availability
     public function setDate(?\DateTimeInterface $date): self
     {
         $this->date = $date;
+        return $this;
+    }
+
+    public function getDoctor(): ?Doctor
+    {
+        return $this->doctor;
+    }
+
+    public function setDoctor(?Doctor $doctor): static
+    {
+        $this->doctor = $doctor;
+
         return $this;
     }
 }

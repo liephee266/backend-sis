@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Entity\Service;
@@ -14,7 +16,7 @@ class Doctor
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["doctor:read"])]
+    #[Groups(["doctor:read", "affiliation:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -62,6 +64,31 @@ class Doctor
     #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
     #[Groups(["doctor:read"])]
     private ?Service $service = null;
+
+    /**
+     * @var Collection<int, Affiliation>
+     */
+    #[ORM\OneToMany(targetEntity: Affiliation::class, mappedBy: 'doctor')]
+    private Collection $affiliations;
+
+    /**
+     * @var Collection<int, Agenda>
+     */
+    #[ORM\OneToMany(targetEntity: Agenda::class, mappedBy: 'doctor')]
+    private Collection $agenda;
+
+    /**
+     * @var Collection<int, Availability>
+     */
+    #[ORM\OneToMany(targetEntity: Availability::class, mappedBy: 'doctor')]
+    private Collection $availabilities;
+
+    public function __construct()
+    {
+        $this->affiliations = new ArrayCollection();
+        $this->agenda = new ArrayCollection();
+        $this->availabilities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -186,6 +213,96 @@ class Doctor
     public function setService(?Service $service): self
     {
         $this->service = $service;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Affiliation>
+     */
+    public function getAffiliations(): Collection
+    {
+        return $this->affiliations;
+    }
+
+    public function addAffiliation(Affiliation $affiliation): static
+    {
+        if (!$this->affiliations->contains($affiliation)) {
+            $this->affiliations->add($affiliation);
+            $affiliation->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffiliation(Affiliation $affiliation): static
+    {
+        if ($this->affiliations->removeElement($affiliation)) {
+            // set the owning side to null (unless already changed)
+            if ($affiliation->getDoctor() === $this) {
+                $affiliation->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agenda>
+     */
+    public function getAgenda(): Collection
+    {
+        return $this->agenda;
+    }
+
+    public function addAgenda(Agenda $agenda): static
+    {
+        if (!$this->agenda->contains($agenda)) {
+            $this->agenda->add($agenda);
+            $agenda->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgenda(Agenda $agenda): static
+    {
+        if ($this->agenda->removeElement($agenda)) {
+            // set the owning side to null (unless already changed)
+            if ($agenda->getDoctor() === $this) {
+                $agenda->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Availability>
+     */
+    public function getAvailabilities(): Collection
+    {
+        return $this->availabilities;
+    }
+
+    public function addAvailability(Availability $availability): static
+    {
+        if (!$this->availabilities->contains($availability)) {
+            $this->availabilities->add($availability);
+            $availability->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvailability(Availability $availability): static
+    {
+        if ($this->availabilities->removeElement($availability)) {
+            // set the owning side to null (unless already changed)
+            if ($availability->getDoctor() === $this) {
+                $availability->setDoctor(null);
+            }
+        }
+
         return $this;
     }
 }

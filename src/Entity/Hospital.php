@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Service;
 
@@ -12,9 +14,11 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
+    #[Groups(['hospital:read', 'affiliation:read', 'doctor:read',])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -58,6 +62,24 @@ class Hospital
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $logo = null;
+
+    /**
+     * @var Collection<int, Affiliation>
+     */
+    #[ORM\OneToMany(targetEntity: Affiliation::class, mappedBy: 'hospital')]
+    private Collection $affiliations;
+
+    /**
+     * @var Collection<int, Agenda>
+     */
+    #[ORM\OneToMany(targetEntity: Agenda::class, mappedBy: 'hospital')]
+    private Collection $agenda;
+
+    public function __construct()
+    {
+        $this->affiliations = new ArrayCollection();
+        $this->agenda = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -226,6 +248,66 @@ class Hospital
     public function setLogo(?string $logo): self
     {
         $this->logo = $logo;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Affiliation>
+     */
+    public function getAffiliations(): Collection
+    {
+        return $this->affiliations;
+    }
+
+    public function addAffiliation(Affiliation $affiliation): static
+    {
+        if (!$this->affiliations->contains($affiliation)) {
+            $this->affiliations->add($affiliation);
+            $affiliation->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffiliation(Affiliation $affiliation): static
+    {
+        if ($this->affiliations->removeElement($affiliation)) {
+            // set the owning side to null (unless already changed)
+            if ($affiliation->getHospital() === $this) {
+                $affiliation->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agenda>
+     */
+    public function getAgenda(): Collection
+    {
+        return $this->agenda;
+    }
+
+    public function addAgenda(Agenda $agenda): static
+    {
+        if (!$this->agenda->contains($agenda)) {
+            $this->agenda->add($agenda);
+            $agenda->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgenda(Agenda $agenda): static
+    {
+        if ($this->agenda->removeElement($agenda)) {
+            // set the owning side to null (unless already changed)
+            if ($agenda->getHospital() === $this) {
+                $agenda->setHospital(null);
+            }
+        }
+
         return $this;
     }
 }
