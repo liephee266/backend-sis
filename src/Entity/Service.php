@@ -12,11 +12,11 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["service:read", "doctor:read", "meeting:read"])]
+    #[Groups(["service:read", "doctor:read", "meeting:read", "consultation:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["service:read", "doctor:read", "meeting:read"])]
+    #[Groups(["service:read", "doctor:read", "meeting:read", "consultation:read"])]
     private string $name;
 
     // ✅ Getters & Setters

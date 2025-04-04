@@ -86,6 +86,8 @@ class ConsultationController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
+
+        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);
@@ -114,6 +116,8 @@ class ConsultationController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;

@@ -12,11 +12,11 @@ class State
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups("state:read")]
+    #[Groups(["state:read", "message:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Groups("state:read")]
+    #[Groups(["state:read", "message:read"])]
     private ?string $name = null;
 
     // ✅ Getters & Setters

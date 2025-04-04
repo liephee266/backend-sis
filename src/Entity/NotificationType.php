@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "notification_type")]
@@ -11,9 +12,11 @@ class NotificationType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups("notificationtype:read")]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Groups("notificationtype:read")]
     private ?string $name = null;
 
     // ✅ Getters & Setters

@@ -86,6 +86,8 @@ class MessageController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
+
+        $data["date"] = new \DateTime($data["date"]);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Message", $data);

@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Service;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital")]
@@ -13,27 +13,28 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['hospital:read', 'urgency:read'])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["hospital:read","urgency:read", "consultation:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
     private ?string $address = null;
-    #[Groups(['hospital:read'])]
+    
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -57,11 +58,11 @@ class Hospital
     private ?string $rccm = null;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read"])]
     private ?bool $hasUrgency = false;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read"])]
     private ?bool $hasAmbulance = false;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -73,7 +74,7 @@ class Hospital
     private ?string $accreditationCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read"])]
     private ?string $logo = null;
 
     public function getId(): ?int

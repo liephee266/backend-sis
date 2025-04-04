@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "content_Message")]
@@ -11,15 +12,19 @@ class ContentMessage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $msg = null;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $type = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $path = null;
 
     // ✅ Getters & Setters
