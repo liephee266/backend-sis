@@ -13,7 +13,7 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', 'urgency:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -21,10 +21,11 @@ class Hospital
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-
     private ?string $address = null;
     #[Groups(['hospital:read'])]
+
     #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[Groups(['hospital:read'])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
