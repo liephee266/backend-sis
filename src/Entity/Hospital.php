@@ -13,68 +13,68 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read","urgency:read", "consultation:read"])]
+    #[Groups(["hospital:read","urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $address = null;
     
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read"])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read"])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read"])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $registrationNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $ceo = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $accreditation = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $niu = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $rccm = null;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read', "urgency:read"])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
     private ?bool $hasUrgency = false;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read', "urgency:read"])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
     private ?bool $hasAmbulance = false;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $exploitationLisence = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $accreditationCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(['hospital:read', "urgency:read"])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read", "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $logo = null;
 
     public function getId(): ?int

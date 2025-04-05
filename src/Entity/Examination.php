@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "examination")]
@@ -11,19 +12,24 @@ class Examination
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(["examination:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Groups(["examination:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "integer")]
+    #[Groups(["examination:read"])]
     private ?int $price = null;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Groups(["examination:read"])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Consultation::class)]
     #[ORM\JoinColumn(name: "id_consultation", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["examination:read"])]
     private ?Consultation $consultation = null;
 
     // ✅ Getters & Setters

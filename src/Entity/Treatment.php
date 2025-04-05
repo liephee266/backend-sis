@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\PseudoTypes\True_;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "treatment")]
@@ -11,17 +13,21 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(["treatment:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Groups(["treatment:read"])]
     private ?string $description = null;
-
-    #[ORM\Column(type: "boolean")]
-    private bool $status;
 
     #[ORM\ManyToOne(targetEntity: Consultation::class)]
     #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["treatment:read"])]
     private ?Consultation $consultation = null;
+
+    #[ORM\Column]
+    #[Groups(["treatment:read"])]
+    private ?bool $statut = true;
 
     // ✅ Getters & Setters
 
@@ -41,17 +47,6 @@ class Treatment
         return $this;
     }
 
-    public function getStatus(): bool
-    {
-        return $this->status;
-    }
-
-    public function setStatus(bool $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
     public function getConsultation(): ?Consultation
     {
         return $this->consultation;
@@ -60,6 +55,18 @@ class Treatment
     public function setConsultation(?Consultation $consultation): self
     {
         $this->consultation = $consultation;
+        return $this;
+    }
+
+    public function isStatut(): ?bool
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(bool $statut): static
+    {
+        $this->statut = $statut;
+
         return $this;
     }
 }

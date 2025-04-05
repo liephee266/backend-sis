@@ -20,8 +20,11 @@ class SisAdmin
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $password = null;
 
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(inversedBy: 'sisAdmins')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user_id = null;
+
+    
 
     public function getId(): ?int
     {
@@ -50,14 +53,15 @@ class SisAdmin
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUserId(): ?User
     {
-        return $this->userId;
+        return $this->user_id;
     }
 
-    public function setUserId(?int $userId): self
+    public function setUserId(?User $user_id): static
     {
-        $this->userId = $userId;
+        $this->user_id = $user_id;
+
         return $this;
     }
 }

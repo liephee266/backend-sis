@@ -116,6 +116,8 @@ class MessageController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        $data["date"] = new \DateTime($data["date"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;

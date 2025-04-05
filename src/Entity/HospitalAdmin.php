@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital_admin")]
@@ -11,14 +12,17 @@ class HospitalAdmin
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(["hospitaladmin:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["hospitaladmin:read"])]   
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "hopital_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["hospitaladmin:read"])]
     private ?Hospital $hospital = null;
 
     // ✅ Getters & Setters
