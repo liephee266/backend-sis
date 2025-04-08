@@ -242,10 +242,10 @@ class Toolkit
         $authorizationHeader = $request->headers->get('Authorization');
         $token = substr($authorizationHeader, 7); 
         $payload = $this->jwtManager->decode($token);
-        $d =  $this->entityManager->getRepository(User::class)->findOneBy([
+        $id =  $this->entityManager->getRepository(User::class)->findOneBy([
             "email" => $payload["username"]
         ]);
-        return $d;
+        return $id;
     
     }
 

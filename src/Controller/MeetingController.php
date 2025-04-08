@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Meeting
@@ -25,13 +26,16 @@ class MeetingController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private Security $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
+
     }
 
     /**
@@ -45,6 +49,14 @@ class MeetingController extends AbstractController
     #[Route('/', name: 'meeting_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,6 +78,15 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
     public function show(Meeting $meeting): Response
     {
+        
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
+
         // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
         $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
     
@@ -84,6 +105,11 @@ class MeetingController extends AbstractController
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
@@ -112,6 +138,14 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     
@@ -143,6 +177,11 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_delete', methods: ['DELETE'])]
     public function delete(Meeting $meeting, EntityManagerInterface $entityManager): Response
     {
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité Meeting passée en paramètre
         $entityManager->remove($meeting);
     
