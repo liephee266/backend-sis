@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Doctor
@@ -25,13 +27,15 @@ class DoctorController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -45,6 +49,13 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,6 +77,13 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_show', methods: ['GET'])]
     public function show(Doctor $doctor): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Sérialisation de l'entité Doctor en JSON avec le groupe de sérialisation 'Doctor:read'
         $doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
     
@@ -84,6 +102,13 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+        
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 

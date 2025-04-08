@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -43,6 +44,7 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'patient_index', methods: ['GET'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function index(Request $request): Response
     {
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
@@ -64,6 +66,7 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function show(Patient $patient): Response
     {
         // Sérialisation de l'entité Patient en JSON avec le groupe de sérialisation 'Patient:read'
@@ -82,6 +85,7 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'patient_create', methods: ['POST'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function create(Request $request): Response
     {
         // Décodage du contenu JSON envoyé dans la requête

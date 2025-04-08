@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Meeting
@@ -25,6 +27,7 @@ class MeetingController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
     /**
      * Constructeur de la classe MeetingController
@@ -36,12 +39,13 @@ class MeetingController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -53,6 +57,7 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'meeting_index', methods: ['GET'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function index(Request $request): Response
     {
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
@@ -76,6 +81,13 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
     public function show(Meeting $meeting): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
         $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
     
@@ -92,6 +104,7 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function create(Request $request): Response
     {
         // Décodage du contenu JSON envoyé dans la requête
@@ -123,6 +136,7 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function update(Request $request,  $id): Response
     {
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
@@ -157,6 +171,7 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'meeting_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function delete(Meeting $meeting, EntityManagerInterface $entityManager): Response
     {
         // Suppression de l'entité Meeting passée en paramètre
