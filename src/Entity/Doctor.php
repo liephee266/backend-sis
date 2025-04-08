@@ -14,12 +14,14 @@ class Doctor
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read", "affiliation:read", "agenda:read", "availability:read"])]
+    #[Groups(["doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
+    "affiliation:read", "agenda:read", "availability:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read", "affiliation:read", "agenda:read", "availability:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
+    "affiliation:read", "agenda:read", "availability:read"])]
     private ?User $user = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -27,7 +29,8 @@ class Doctor
     private ?string $medLisenceNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read", "affiliation:read", "agenda:read", "availability:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
+    "affiliation:read", "agenda:read", "availability:read"])]
     private ?string $speciality = null;
 
     #[ORM\Column(type: "integer", nullable: false)]
@@ -60,7 +63,8 @@ class Doctor
 
     #[ORM\ManyToOne(targetEntity: Service::class)]
     #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: true, onDelete: "CASCADE")]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read", "affiliation:read", "agenda:read", "availability:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
+    "affiliation:read", "agenda:read", "availability:read"])]
     private ?Service $service = null;
 
     public function getId(): ?int
