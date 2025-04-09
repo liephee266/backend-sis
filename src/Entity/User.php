@@ -330,36 +330,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Receptionist>
-     */
-    public function getReceptionistId(): Collection
-    {
-        return $this->receptionist_id;
-    }
-
-    public function addReceptionistId(Receptionist $receptionistId): static
-    {
-        if (!$this->receptionist_id->contains($receptionistId)) {
-            $this->receptionist_id->add($receptionistId);
-            $receptionistId->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeReceptionistId(Receptionist $receptionistId): static
-    {
-        if ($this->receptionist_id->removeElement($receptionistId)) {
-            // set the owning side to null (unless already changed)
-            if ($receptionistId->getUserId() === $this) {
-                $receptionistId->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Notification>
      */
     public function getNotifications(): Collection
