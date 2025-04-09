@@ -126,6 +126,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: SisAdmin::class, mappedBy: 'user_id')]
     private Collection $sisAdmins;
 
+    /**
+     * @var Collection<int, Receptionist>
+     */
+    #[ORM\OneToMany(targetEntity: Receptionist::class, mappedBy: 'user')]
+    private Collection $receptionists;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -134,6 +140,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->receptionist_id = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->sisAdmins = new ArrayCollection();
+        $this->receptionists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -287,8 +294,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->gender = $gender;
         return $this;
-
     }
+    
     public function getBirth(): ?\DateTimeInterface
     {
         return $this->birth;
@@ -406,6 +413,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($sisAdmin->getUserId() === $this) {
                 $sisAdmin->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Receptionist>
+     */
+    public function getReceptionists(): Collection
+    {
+        return $this->receptionists;
+    }
+
+    public function addReceptionist(Receptionist $receptionist): static
+    {
+        if (!$this->receptionists->contains($receptionist)) {
+            $this->receptionists->add($receptionist);
+            $receptionist->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceptionist(Receptionist $receptionist): static
+    {
+        if ($this->receptionists->removeElement($receptionist)) {
+            // set the owning side to null (unless already changed)
+            if ($receptionist->getUser() === $this) {
+                $receptionist->setUser(null);
             }
         }
 

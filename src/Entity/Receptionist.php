@@ -15,10 +15,9 @@ class Receptionist
     #[Groups(['receptionist:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'receptionist_id')]
+    #[ORM\ManyToOne(inversedBy: 'receptionists')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['receptionist:read'])]
-    private ?User $user_id = null;
+    private ?User $user = null;
 
     // Getters et Setters
     public function getId(): ?int
@@ -26,16 +25,17 @@ class Receptionist
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(?User $user_id): static
+    public function setUser(?User $user): static
     {
-        $this->user_id = $user_id;
+        $this->user = $user;
 
         return $this;
     }
+
 
 }

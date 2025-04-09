@@ -112,20 +112,37 @@ class DoctorController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
-        // Conversion de la date de service en objet DateTime
+        // Début de la transaction
+        $this->entityManager->beginTransaction();
+
+        // Création du User
+        $user_data = [
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'roles' => ["ROLE_DOCTOR"],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+        ];
+
         $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
         
-        // Appel à la méthode persistEntity pour insérer les données dans la base
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Doctor", $data);
+        // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
+            $this->entityManager->commit();
             return $this->json(['code' => 200, 'message' => "Doctor crée avec succès"], Response::HTTP_OK);
         }
 
         // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Doctor"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Doctor"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**

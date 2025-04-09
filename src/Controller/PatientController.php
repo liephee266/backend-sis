@@ -102,26 +102,44 @@ class PatientController extends AbstractController
     #[Route('/', name: 'patient_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
+        // // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        //     return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        // }
 
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
-        // Appel à la méthode persistEntity pour insérer les données dans la base
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Patient", $data);
+        // Début de la transaction
+        $this->entityManager->beginTransaction();
+
+        // Création du User
+        $user_data = [
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'roles' => ["ROLE_PATIENT"],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+        ];
+        
+        // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
+            $this->entityManager->commit();
             return $this->json(['code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
         }
 
         // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
