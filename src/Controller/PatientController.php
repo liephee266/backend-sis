@@ -6,6 +6,7 @@ use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,13 +27,15 @@ class PatientController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -44,9 +47,15 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'patient_index', methods: ['GET'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function index(Request $request): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,9 +75,15 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function show(Patient $patient): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Sérialisation de l'entité Patient en JSON avec le groupe de sérialisation 'Patient:read'
         $patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
     
@@ -85,9 +100,14 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'patient_create', methods: ['POST'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function create(Request $request): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         

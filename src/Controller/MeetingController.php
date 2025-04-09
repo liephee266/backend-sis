@@ -57,7 +57,6 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'meeting_index', methods: ['GET'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function index(Request $request): Response
     {
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
@@ -82,8 +81,15 @@ class MeetingController extends AbstractController
     public function show(Meeting $meeting): Response
     {
 
+
         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')   && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL' ) && !$this->security->isGranted('ROLE_DOCTOR') ) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
         }
@@ -104,9 +110,15 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function create(Request $request): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_PATIENT')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -136,9 +148,15 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function update(Request $request,  $id): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
 
@@ -171,7 +189,6 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'meeting_delete', methods: ['DELETE'])]
-    #[IsGranted('ROLE_AGENT_HOPITAL', message: 'Accès non autorisé')]
     public function delete(Meeting $meeting, EntityManagerInterface $entityManager): Response
     {
         // Suppression de l'entité Meeting passée en paramètre
