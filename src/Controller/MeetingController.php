@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Doctor;
 use App\Entity\Meeting;
+use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,11 +56,32 @@ class MeetingController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
-        // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
+
+        // Récupération de l'utilisateur connectéù&
+        $user = $this->toolkit->getUser($request);
+
+        // Vérifier si l'utilisateur est un patient
+        $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
+        if ($patient) {
+            $filtre['patient'] = $patient->getId();
+        }
+
+        // Vérifier si l'utilisateur est un médecin
+        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        // Si un médecin est trouvé, appliquer le filtre sur l'ID du médecin
+        if ($doctor) {
+            $filtre['doctor'] = $doctor->getId();
+        }
+
+        // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
+        if (!$patient && !$doctor) {
+            return new JsonResponse(['code' => 404, 'message' => "Aucun patient ou médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
+        }
 
         // Récupération des Meetings avec pagination
         $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
@@ -76,7 +99,7 @@ class MeetingController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
-    public function show(Meeting $meeting): Response
+    public function show(Meeting $meeting, Request $request): Response
     {
         
         // Vérification des autorisations de l'utilisateur connecté
@@ -84,8 +107,32 @@ class MeetingController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
+           // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser($request);
+
+        // Récupérer le patient lié à l'utilisateur connecté
+        $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        // Si l'utilisateur est un patient, on vérifie qu'il est associé à cette consultation
+        if ($this->security->isGranted('ROLE_PATIENT')) {
+            // On vérifie si le patient est bien associé à cette consultation
+            if ($meeting->getPatient()->getId() !== $patient->getId()) {
+                // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cette consultation."], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+         // Récupérer le patient lié à l'utilisateur connecté
+        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        // Si l'utilisateur est un médecin, il peut voir toutes les consultations qui lui sont attribuées
+        if ($this->security->isGranted('ROLE_DOCTOR')) {
+            // Vérifie si la consultation est liée à ce médecin
+            if ($meeting->getDoctor()->getId() !== $doctor->getId()) {
+                // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cette consultation."], Response::HTTP_FORBIDDEN);
+            }
+        }
 
         // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
         $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
@@ -143,9 +190,27 @@ class MeetingController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser($request);
+        
+         // Vérifier si l'utilisateur est un médecin
+        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        // Si un médecin est trouvé, appliquer le filtre sur l'ID du médecin
+        if ($doctor) {
+            $filtre['doctor'] = $doctor->getId();
+        }
+
+        // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
+        if (!$doctor) {
+            return new JsonResponse(['code' => 404, 'message' => "Aucun médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
+        }
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     
@@ -178,7 +243,7 @@ class MeetingController extends AbstractController
     public function delete(Meeting $meeting, EntityManagerInterface $entityManager): Response
     {
          // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }

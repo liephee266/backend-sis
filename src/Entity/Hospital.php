@@ -102,6 +102,10 @@ class Hospital
     #[ORM\OneToMany(targetEntity: HospitalAdmin::class, mappedBy: 'hospital')]
     private Collection $hospitalAdmins;
 
+    #[ORM\ManyToOne(inversedBy: 'hospitals')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Status $status = null;
+
     public function __construct()
     {
         $this->affiliations = new ArrayCollection();
@@ -396,6 +400,18 @@ class Hospital
                 $hospitalAdmin->setHospital(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }
