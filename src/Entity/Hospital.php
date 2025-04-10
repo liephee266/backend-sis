@@ -84,6 +84,12 @@ class Hospital
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $logo = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isArchived = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isSuspended = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -251,6 +257,30 @@ class Hospital
     public function setLogo(?string $logo): self
     {
         $this->logo = $logo;
+        return $this;
+    }
+
+    public function isArchived(): ?bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setIsArchived(?bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function isSuspended(): ?bool
+    {
+        return $this->isSuspended;
+    }
+
+    public function setIsSuspended(?bool $isSuspended): static
+    {
+        $this->isSuspended = $isSuspended;
+
         return $this;
     }
 }

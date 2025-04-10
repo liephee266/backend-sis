@@ -87,12 +87,30 @@ class UrgentistController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
-        // Appel à la méthode persistEntity pour insérer les données dans la base
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgentist", $data);
+        // Début de la transaction
+        $this->entityManager->beginTransaction();
+
+        // Création du User
+        $user_data = [
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'roles' => ["ROLE_URGENTIST"],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+        ];
+        
+        // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Urgentist", $user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
+            $this->entityManager->commit();
             return $this->json(['code' => 200, 'message' => "Urgentist crée avec succès"], Response::HTTP_OK);
         }
 

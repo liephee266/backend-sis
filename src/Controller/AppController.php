@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur principal de l'application
@@ -20,14 +21,16 @@ class AppController extends AbstractController
 {
 
     private $toolkit;
-    private $defaultEntityManager;
+    private $entityManager;
     private $serializer;
+    private $security;
 
-    public function __construct(Toolkit $toolKit, EntityManagerInterface $defaultEntityManager,  SerializerInterface $serializer)
+    public function __construct(Toolkit $toolKit, EntityManagerInterface $entityManager,  SerializerInterface $serializer, Security $security)
     {
         $this->toolkit = $toolKit;
-        $this->defaultEntityManager = $defaultEntityManager;
+        $this->entityManager = $entityManager;
         $this->serializer = $serializer;
+        $this->security = $security;
     }
 
     /**
@@ -182,7 +185,7 @@ class AppController extends AbstractController
         array $searchFields,
         string $serializationGroup
     ): array {
-        $qb = $this->defaultEntityManager->getRepository($entityClass)->createQueryBuilder('e');
+        $qb = $this->entityManager->getRepository($entityClass)->createQueryBuilder('e');
         
         // Ajout des conditions de recherche basées sur le terme de recherche
         if (!empty($searchParams['searchTerm'])) {
@@ -261,5 +264,86 @@ class AppController extends AbstractController
         }
         $response = $this->toolkit->getPagitionOption($request, $datapowerbi[$entity_name],  'powerbi');
         return new JsonResponse($response, Response::HTTP_OK);        
+    }
+
+
+    #[Route('/archivage/{entity_name}/{id}', name: 'app_archivage', methods: ['GET'])]
+    function archiver($entity_name, int $id): JsonResponse
+    {
+
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
+        $data = [
+            "doctor" => "Doctor",
+            "adminsis" => "SisAdmin",
+            "hopital" => "Hospital",
+        ];
+
+        if (!array_key_exists($entity_name, $data)) {
+            return new JsonResponse(['message' => 'Entité non trouvée', 'code' => 404], Response::HTTP_NOT_FOUND);
+        }
+
+        // Récupération de l'ID  par la methode ExistRepository
+        $entity = $this->toolkit->ExistRepository($data, $entity_name, $id);
+
+        if (!$entity) {
+            return new JsonResponse(
+                ['message' => $entity_name.' non trouvé(e)', 'code' => 404], 
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        // Archivage de l'entité
+        $entity->setIsArchived(true);
+        
+        $this->entityManager->flush();
+
+        return new JsonResponse(
+            ['message' => $entity_name.' archivé(e) avec succès'], 
+            Response::HTTP_OK
+        );
+    }
+
+    #[Route('/suspendre/{entity_name}/{id}', name: 'app_suspension', methods: ['GET'])]
+    function suspendu($entity_name, int $id): JsonResponse
+    {
+
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
+        $data = [
+            "doctor" => "Doctor",
+            "adminsis" => "SisAdmin",
+            "hopital" => "Hospital",
+        ];
+
+        if (!array_key_exists($entity_name, $data)) {
+            return new JsonResponse(['message' => 'Entité non trouvée', "code" => 404], Response::HTTP_NOT_FOUND);
+        }
+
+        // Récupération de l'ID  par la methode ExistRepository
+        $entity = $this->toolkit->ExistRepository($data, $entity_name, $id);
+
+        if (!$entity) {
+            return new JsonResponse(
+                ['message' => $entity_name.' non trouvé(e)', 'code' => 404], 
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        // Archivage de l'entité
+        $entity->setIsSuspended(true);
+        
+        $this->entityManager->flush();
+
+        return new JsonResponse(
+            ['message' => $entity_name.' suspendu(e) avec succès'], 
+            Response::HTTP_OK
+        );
     }
 }

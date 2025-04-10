@@ -67,6 +67,12 @@ class Doctor
     "affiliation:read", "agenda:read", "availability:read"])]
     private ?Service $service = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isArchived = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isSuspended = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -190,6 +196,30 @@ class Doctor
     public function setService(?Service $service): self
     {
         $this->service = $service;
+        return $this;
+    }
+
+    public function isArchived(): ?bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setIsArchived(?bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function isSuspended(): ?bool
+    {
+        return $this->isSuspended;
+    }
+
+    public function setIsSuspended(?bool $isSuspended): static
+    {
+        $this->isSuspended = $isSuspended;
+
         return $this;
     }
 }

@@ -87,9 +87,7 @@ class UserController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
-        // Conversion de la date de naissance en objet DateTime
         $data['birth'] = new \DateTime($data['birth']);
-        
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data);
 
@@ -120,9 +118,6 @@ class UserController extends AbstractController
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
-
-        // Conversion de la date de naissance en objet DateTime
-        $data['birth'] = new \DateTime($data['birth']);
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité User dans la base de données
         $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data, true);

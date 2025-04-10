@@ -49,6 +49,12 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -70,6 +76,12 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_show', methods: ['GET'])]
     public function show(Doctor $doctor): Response
     {
+
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Sérialisation de l'entité Doctor en JSON avec le groupe de sérialisation 'Doctor:read'
         $doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
     

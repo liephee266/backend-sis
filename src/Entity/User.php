@@ -24,19 +24,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read",
-    "affiliation:read", "agenda:read", "availability:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "sisadmin:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private ?string $email = null;
 
     /**
@@ -57,74 +57,62 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read", "sisadmin:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read", "sisadmin:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "agenda:read", "availability:read", "sisadmin:read"])]
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "boolean")]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private bool $gender;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "receptionist:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read"])]
+    "hospitaladmin:read", "agenthopital:read", "affiliation:read", "availability:read", "sisadmin:read"])]
     private $updated_at;
-
-    /**
-     * @var Collection<int, Receptionist>
-     */
-    #[ORM\OneToMany(targetEntity: Receptionist::class, mappedBy: 'user_id')]
-    private Collection $receptionist_id;
 
     /**
      * @var Collection<int, Notification>
      */
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'sender_id')]
     private Collection $notifications;
-
-    /**
-     * @var Collection<int, SisAdmin>
-     */
-    #[ORM\OneToMany(targetEntity: SisAdmin::class, mappedBy: 'user_id')]
-    private Collection $sisAdmins;
 
     /**
      * @var Collection<int, Receptionist>
@@ -137,9 +125,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->receptionist_id = new ArrayCollection();
         $this->notifications = new ArrayCollection();
-        $this->sisAdmins = new ArrayCollection();
         $this->receptionists = new ArrayCollection();
     }
 
@@ -360,36 +346,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, SisAdmin>
-     */
-    public function getSisAdmins(): Collection
-    {
-        return $this->sisAdmins;
-    }
-
-    public function addSisAdmin(SisAdmin $sisAdmin): static
-    {
-        if (!$this->sisAdmins->contains($sisAdmin)) {
-            $this->sisAdmins->add($sisAdmin);
-            $sisAdmin->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSisAdmin(SisAdmin $sisAdmin): static
-    {
-        if ($this->sisAdmins->removeElement($sisAdmin)) {
-            // set the owning side to null (unless already changed)
-            if ($sisAdmin->getUserId() === $this) {
-                $sisAdmin->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Receptionist>
      */
     public function getReceptionists(): Collection
@@ -418,5 +374,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
 }
