@@ -6,7 +6,6 @@ use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -56,8 +55,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
@@ -85,8 +82,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Sérialisation de l'entité Patient en JSON avec le groupe de sérialisation 'Patient:read'
         $patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
@@ -162,8 +157,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
@@ -201,8 +194,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Suppression de l'entité Patient passée en paramètre
         $entityManager->remove($patient);
