@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\SisAdmin;
+use App\Entity\User;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,14 +45,35 @@ class SisAdminController extends AbstractController
      */
     #[Route('/', name: 'sisadmin_index', methods: ['GET'])]
     public function index(Request $request): Response
-    {
-        // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
-        $filtre = [];
+    { 
+        // 1. Récupérer tous les utilisateurs
+        $users = $this->entityManager->getRepository(User::class)->findAll();
 
-        // Récupération des SisAdmins avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'SisAdmin', 'sisadmin:read', $filtre);
+        // 2. Filtrer les utilisateurs avec le rôle ROLE_ADMIN_SIS
+        $userIds = [];
+        foreach ($users as $user) {
+            if (in_array('ROLE_ADMIN_SIS', $user->getRoles())) {
+                $userIds[] = $user->getId();
+            }
+        }
 
-        // Retour d'une réponse JSON avec les SisAdmins et un statut HTTP 200 (OK)
+        // 3. Si aucun utilisateur correspondant
+        if (empty($userIds)) {
+            return new JsonResponse([
+                'data' => [],
+                'total' => 0,
+                'currentPage' => 1,
+                'maxPerPage' => 10
+            ], Response::HTTP_OK);
+        }
+
+        // 4. Appliquer le filtre sur la relation "user" dans SisAdmin
+        $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
+        // 5. Appeler ta méthode de pagination
+   
+        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', []);
+
+        // 6. Retour de la réponse JSON
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
@@ -64,13 +86,30 @@ class SisAdminController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'sisadmin_show', methods: ['GET'])]
-    public function show(SisAdmin $sisadmin): Response
+    public function show(Request $request, int $id): Response
     {
-        // Sérialisation de l'entité SisAdmin en JSON avec le groupe de sérialisation 'SisAdmin:read'
-        $sisadmin = $this->serializer->serialize($sisadmin, 'json', ['groups' => 'sisadmin:read']);
-    
-        // Retour de la réponse JSON avec les données de l'SisAdmin et un code HTTP 200
-        return new JsonResponse(["data" => json_decode($sisadmin, true), "code" => 200], Response::HTTP_OK);
+        // 1. Récupérer l'utilisateur avec l'id passé en paramètre
+        $user = $this->entityManager->getRepository(User::class)->find($id);
+
+        // 2. Vérifier si l'utilisateur existe
+        if (!$user) {
+            return new JsonResponse([
+                'message' => 'Utilisateur non trouvé.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // 3. Vérifier si l'utilisateur a le rôle ROLE_ADMIN_SIS
+        if (!in_array('ROLE_ADMIN_SIS', $user->getRoles())) {
+            return new JsonResponse([
+                'message' => 'Accès non autorisé, l\'utilisateur n\'a pas le rôle ROLE_ADMIN_SIS.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // 4. Sérialisation de l'entité User en JSON avec le groupe de sérialisation 'user:read'
+        $userData = $this->serializer->serialize($user, 'json', ['groups' => 'user:read']);
+        
+        // 5. Retourner la réponse JSON avec les données de l'utilisateur et un code HTTP 200
+        return new JsonResponse(["data" => json_decode($userData, true), "code" => 200], Response::HTTP_OK);
     }
 
     /**
