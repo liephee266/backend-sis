@@ -48,13 +48,6 @@ class UrgencyController extends AbstractController
     #[Route('/', name: 'urgency_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_URGENCE')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -76,13 +69,6 @@ class UrgencyController extends AbstractController
     #[Route('/{id}', name: 'urgency_show', methods: ['GET'])]
     public function show(Urgency $urgency): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_URGENCE')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Sérialisation de l'entité Urgency en JSON avec le groupe de sérialisation 'Urgency:read'
         $urgency = $this->serializer->serialize($urgency, 'json', ['groups' => 'urgency:read']);
     
@@ -101,13 +87,6 @@ class UrgencyController extends AbstractController
     #[Route('/', name: 'urgency_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         

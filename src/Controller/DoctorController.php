@@ -49,13 +49,6 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -77,13 +70,6 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_show', methods: ['GET'])]
     public function show(Doctor $doctor): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Sérialisation de l'entité Doctor en JSON avec le groupe de sérialisation 'Doctor:read'
         $doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
     
@@ -102,13 +88,6 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -196,15 +175,8 @@ class DoctorController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'doctor_delete', methods: ['DELETE'])]
-    public function delete(Doctor $doctor = null, EntityManagerInterface $entityManager): Response
+    public function delete(Doctor $doctor, EntityManagerInterface $entityManager): Response
     {
-        if (!$doctor) {
-            return $this->json(
-                ['code' => 404, 'message' => "Ce doctor n'existe pas ou a deja été supprimé"],
-                Response::HTTP_NOT_FOUND
-            );
-        }
-
         // Suppression de l'entité Doctor passée en paramètre
         $entityManager->remove($doctor);
     

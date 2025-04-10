@@ -48,13 +48,6 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -76,13 +69,6 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_show', methods: ['GET'])]
     public function show(Hospital $hospital): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Sérialisation de l'entité Hospital en JSON avec le groupe de sérialisation 'hospital:read'
         $hospital = $this->serializer->serialize($hospital, 'json', ['groups' => 'hospital:read']);
     
@@ -101,13 +87,6 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
@@ -136,13 +115,6 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     

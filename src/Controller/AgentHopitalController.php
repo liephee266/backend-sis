@@ -49,13 +49,6 @@ class AgentHopitalController extends AbstractController
     #[Route('/', name: 'agenthopital_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -77,13 +70,6 @@ class AgentHopitalController extends AbstractController
     #[Route('/{id}', name: 'agenthopital_show', methods: ['GET'])]
     public function show(AgentHopital $agenthopital): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
         $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agenthopital:read']);
     
@@ -102,13 +88,6 @@ class AgentHopitalController extends AbstractController
     #[Route('/', name: 'agenthopital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_HOPITAL')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         

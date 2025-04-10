@@ -80,20 +80,6 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
     public function show(Meeting $meeting): Response
     {
-
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')   && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL' ) && !$this->security->isGranted('ROLE_DOCTOR') ) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
         $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
     
@@ -112,13 +98,6 @@ class MeetingController extends AbstractController
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_PATIENT')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -150,13 +129,6 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès non autorisé"], Response::HTTP_FORBIDDEN);
-        }
-
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
 
