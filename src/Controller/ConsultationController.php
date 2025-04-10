@@ -83,8 +83,6 @@ class ConsultationController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
         // Sérialisation de l'entité Consultation en JSON avec le groupe de sérialisation 'Consultation:read'
         $consultation = $this->serializer->serialize($consultation, 'json', ['groups' => 'consultation:read']);
     
@@ -144,8 +142,6 @@ class ConsultationController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
@@ -185,8 +181,7 @@ class ConsultationController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
+        
         // Suppression de l'entité Consultation passée en paramètre
         $entityManager->remove($consultation);
     
