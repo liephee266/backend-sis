@@ -114,12 +114,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'sender_id')]
     private Collection $notifications;
 
+    /**
+     * @var Collection<int, Urgency>
+     */
+    #[ORM\OneToMany(targetEntity: Urgency::class, mappedBy: 'user')]
+    private Collection $urgencies;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->notifications = new ArrayCollection();
+        $this->urgencies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -332,6 +339,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($notification->getSenderId() === $this) {
                 $notification->setSenderId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Urgency>
+     */
+    public function getUrgencies(): Collection
+    {
+        return $this->urgencies;
+    }
+
+    public function addUrgency(Urgency $urgency): static
+    {
+        if (!$this->urgencies->contains($urgency)) {
+            $this->urgencies->add($urgency);
+            $urgency->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUrgency(Urgency $urgency): static
+    {
+        if ($this->urgencies->removeElement($urgency)) {
+            // set the owning side to null (unless already changed)
+            if ($urgency->getUser() === $this) {
+                $urgency->setUser(null);
             }
         }
 

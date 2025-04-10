@@ -25,10 +25,9 @@ class Urgency
     #[Groups("urgency:read")]
     private ?Hospital $hospital = null;
 
-    #[ORM\ManyToOne(targetEntity: Urgentist::class)]
-    #[ORM\JoinColumn(name: "id_urgentist", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups("urgency:read")]
-    private ?Urgentist $urgentist = null;
+    #[ORM\ManyToOne(inversedBy: 'urgencies')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     // ✅ Getters & Setters
 
@@ -59,14 +58,15 @@ class Urgency
         return $this;
     }
 
-    public function getUrgentist(): ?Urgentist
+    public function getUser(): ?User
     {
-        return $this->urgentist;
+        return $this->user;
     }
 
-    public function setUrgentist(?Urgentist $urgentist): self
+    public function setUser(?User $user): static
     {
-        $this->urgentist = $urgentist;
+        $this->user = $user;
+
         return $this;
     }
 }
