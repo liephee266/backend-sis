@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Urgentist;
+use App\Entity\User;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -64,7 +64,7 @@ class UrgentistController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'urgentist_show', methods: ['GET'])]
-    public function show(Urgentist $urgentist): Response
+    public function show(User $urgentist): Response
     {
         // Sérialisation de l'entité Urgentist en JSON avec le groupe de sérialisation 'Urgentist:read'
         $urgentist = $this->serializer->serialize($urgentist, 'json', ['groups' => 'urgentist:read']);
@@ -105,7 +105,7 @@ class UrgentistController extends AbstractController
         ];
         
         // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
-        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Urgentist", $user_data, $data);
+        $errors = $this->genericEntityManager->persistUser($user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
@@ -137,7 +137,7 @@ class UrgentistController extends AbstractController
         $data['id'] = $id;
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité Urgentist dans la base de données
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgentist", $data, true);
+        $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
@@ -159,7 +159,7 @@ class UrgentistController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'urgentist_delete', methods: ['DELETE'])]
-    public function delete(Urgentist $urgentist, EntityManagerInterface $entityManager): Response
+    public function delete(User $urgentist, EntityManagerInterface $entityManager): Response
     {
         // Suppression de l'entité Urgentist passée en paramètre
         $entityManager->remove($urgentist);
