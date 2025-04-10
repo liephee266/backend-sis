@@ -69,16 +69,4 @@ class Treatment
 
         return $this;
     }
-
-    public function isStatut(): ?bool
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(bool $statut): static
-    {
-        $this->statut = $statut;
-
-        return $this;
-    }
 }

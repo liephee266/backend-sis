@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Serializer\Attribute\Groups;
+
 
 #[ORM\Entity]
 #[ORM\Table(name: "notification")]
@@ -131,24 +131,24 @@ class Notification
 
     public function getState(): ?State
     {
-        return $this->state;
+        return $this->state_id;
     }
 
-    public function setState(?State $state): static
+    public function setState(?State $state_id): static
     {
-        $this->state = $state;
+        $this->state_id = $state_id;
 
         return $this;
     }
 
     public function getNotificationType(): ?NotificationType
     {
-        return $this->notificationType;
+        return $this->notification_type_id;
     }
 
-    public function setNotificationType(?NotificationType $notificationType): static
+    public function setNotificationType(?NotificationType $notification_type_id): static
     {
-        $this->notificationType = $notificationType;
+        $this->notification_type_id = $notification_type_id;
 
         return $this;
     }

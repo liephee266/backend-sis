@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Service;
+use App\Entity\Status;
 use App\Entity\Service;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -90,6 +90,10 @@ class Hospital
 
     #[ORM\Column(nullable: true)]
     private ?bool $isSuspended = null;
+
+    #[ORM\ManyToOne(inversedBy: 'hospitals')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Status $status = null;
 
     public function getId(): ?int
     {

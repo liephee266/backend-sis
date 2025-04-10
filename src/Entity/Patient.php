@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -36,9 +34,16 @@ class Patient
     #[ORM\OneToMany(targetEntity: Meeting::class, mappedBy: 'patient_id')]
     private Collection $meeting_id;
 
+    /**
+     * @var Collection<int, Consultation>
+     */
+    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'patient')]
+    private Collection $consultations;
+
     public function __construct()
     {
         $this->meeting_id = new ArrayCollection();
+        $this->consultations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -97,36 +102,6 @@ class Patient
     public function setTutor(?User $tutor): static
     {
         $this->tutor = $tutor;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Meeting>
-     */
-    public function getMeetingId(): Collection
-    {
-        return $this->meeting_id;
-    }
-
-    public function addMeetingId(Meeting $meetingId): static
-    {
-        if (!$this->meeting_id->contains($meetingId)) {
-            $this->meeting_id->add($meetingId);
-            $meetingId->setPatientId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMeetingId(Meeting $meetingId): static
-    {
-        if ($this->meeting_id->removeElement($meetingId)) {
-            // set the owning side to null (unless already changed)
-            if ($meetingId->getPatientId() === $this) {
-                $meetingId->setPatientId(null);
-            }
-        }
 
         return $this;
     }

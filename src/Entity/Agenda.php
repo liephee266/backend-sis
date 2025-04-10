@@ -34,14 +34,6 @@ class Agenda
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $timeInterval = null;
 
-    #[ORM\ManyToOne(inversedBy: 'agenda')]
-     #[Groups(['agenda:read', 'doctor:read'])]
-    private ?Doctor $doctor = null;
-
-    #[ORM\ManyToOne(inversedBy: 'agenda')]
-     #[Groups(['agenda:read', 'hospital:read'])]
-    private ?Hospital $hospital = null;
-
     // ✅ Getters & Setters
 
     public function __construct()

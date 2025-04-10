@@ -63,18 +63,6 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
 
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'patient:read'])]
-    private ?Patient $patient = null;
-
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'doctor:read'])]
-    private ?Doctor $doctor = null;
-
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'hospital:read'])]
-    private ?Hospital $hospital = null;
-
     /**
      * @var Collection<int, Examination>
      */
