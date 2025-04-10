@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Agenda;
+use App\Entity\Doctor;
+use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -53,12 +55,7 @@ class AgendaController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
-
         // Vérification des autorisations de l'utilisateur connecté
-
-        // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
         // Récupération des Agendas avec pagination
@@ -79,13 +76,11 @@ class AgendaController extends AbstractController
     #[Route('/{id}', name: 'agenda_show', methods: ['GET'])]
     public function show(Agenda $agenda): Response
     {
-             // Vérification des autorisations de l'utilisateur connecté
+         // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Sérialisation de l'entité Agenda en JSON avec le groupe de sérialisation 'Agenda:read'
         $agenda = $this->serializer->serialize($agenda, 'json', ['groups' => 'agenda:read']);
@@ -145,8 +140,6 @@ class AgendaController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
@@ -186,8 +179,6 @@ class AgendaController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser();
 
         // Suppression de l'entité Agenda passée en paramètre
         $entityManager->remove($agenda);

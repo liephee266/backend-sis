@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Consultation;
+use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
@@ -51,18 +53,42 @@ class PatientController extends AbstractController
     public function index(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR')) {
+        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCUEIL')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser($request);
 
-        // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
-        $filtre = [];
+        // Si l'utilisateur est un médecin, filtrer les patients associés à ce médecin
+        if ($this->security->isGranted('ROLE_DOCTOR')) {
+            // Récupérer le médecin associé à l'utilisateur connecté
+            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-        // Récupération des Patients avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', $filtre);
+            // Vérifier que le médecin existe
+            if (!$doctor) {
+                return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
+            }
 
-        // Retour d'une réponse JSON avec les Patients et un statut HTTP 200 (OK)
+            // Récupérer les patients associés à ce médecin
+            $patient = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')  // 'c' est l'alias racine (Consultation)
+                ->select('DISTINCT p')     // Sélection distincte des patients
+                ->join('c.patient', 'p')   // Jointure avec Patient
+                ->where('c.doctor = :doctor')
+                ->setParameter('doctor', $doctor)  // Passez l'objet Doctor entier, pas juste l'ID
+                ->getQuery()
+                ->getResult();
+            // Tableau de patients pour la pagination et autres traitements
+            $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
+                'patient' => $patient
+            ]);
+        } else {
+            // Si l'utilisateur est un agent d'accueil, récupérer tous les patients
+            $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read');
+        }
+
+            // Retour d'une réponse JSON avec les Patients et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
