@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Consultation
@@ -25,13 +26,15 @@ class ConsultationController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private Security $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -45,6 +48,15 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser($request);
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,6 +78,13 @@ class ConsultationController extends AbstractController
     #[Route('/{id}', name: 'consultation_show', methods: ['GET'])]
     public function show(Consultation $consultation): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
         // Sérialisation de l'entité Consultation en JSON avec le groupe de sérialisation 'Consultation:read'
         $consultation = $this->serializer->serialize($consultation, 'json', ['groups' => 'consultation:read']);
     
@@ -84,6 +103,11 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -112,8 +136,17 @@ class ConsultationController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'consultation_update', methods: ['PUT'])]
+
     public function update(Request $request,  $id): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
 
@@ -147,6 +180,13 @@ class ConsultationController extends AbstractController
     #[Route('/{id}', name: 'consultation_delete', methods: ['DELETE'])]
     public function delete(Consultation $consultation, EntityManagerInterface $entityManager): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+        // Récupération de l'utilisateur connecté
+        $user = $this->toolkit->getUser();
         // Suppression de l'entité Consultation passée en paramètre
         $entityManager->remove($consultation);
     

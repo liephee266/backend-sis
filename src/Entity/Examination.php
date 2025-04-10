@@ -32,6 +32,7 @@ class Examination
     #[Groups(["examination:read"])]
     private ?Consultation $consultation = null;
 
+
     // ✅ Getters & Setters
 
     public function getId(): ?int
@@ -77,9 +78,11 @@ class Examination
         return $this->consultation;
     }
 
-    public function setConsultation(?Consultation $consultation): self
+    public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
         return $this;
     }
+
 }

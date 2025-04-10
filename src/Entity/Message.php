@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "message")]
@@ -47,28 +47,6 @@ class Message
         return $this->id;
     }
 
-    public function getSender(): ?User
-    {
-        return $this->sender;
-    }
-
-    public function setSender(?User $sender): self
-    {
-        $this->sender = $sender;
-        return $this;
-    }
-
-    public function getReceiver(): ?User
-    {
-        return $this->receiver;
-    }
-
-    public function setReceiver(?User $receiver): self
-    {
-        $this->receiver = $receiver;
-        return $this;
-    }
-
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -80,14 +58,39 @@ class Message
         return $this;
     }
 
-    public function getContentMsg(): ?ContentMessage
+    public function getSender(): ?User
+    {
+        return $this->sender;
+    }
+
+    public function setSender(?User $sender): static
+    {
+        $this->sender = $sender;
+
+        return $this;
+    }
+
+    public function getReceiver(): ?User
+    {
+        return $this->receiver;
+    }
+
+    public function setReceiver(?User $receiver): static
+    {
+        $this->receiver = $receiver;
+
+        return $this;
+    }
+
+    public function getContentMsg(): ?contentMessage
     {
         return $this->contentMsg;
     }
 
-    public function setContentMsg(?ContentMessage $contentMsg): self
+    public function setContentMsg(?contentMessage $contentMsg): static
     {
         $this->contentMsg = $contentMsg;
+
         return $this;
     }
 
@@ -96,9 +99,10 @@ class Message
         return $this->state;
     }
 
-    public function setState(?State $state): self
+    public function setState(?State $state): static
     {
         $this->state = $state;
+
         return $this;
     }
 }

@@ -49,7 +49,7 @@ class ContentMessageController extends AbstractController
         $filtre = [];
 
         // Récupération des ContentMessages avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'ContentMessage', 'contentmessage:read', $filtre);
+        $response = $this->toolkit->getPagitionOption($request, 'ContentMessage', 'content_message:read', $filtre);
 
         // Retour d'une réponse JSON avec les ContentMessages et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
@@ -67,7 +67,7 @@ class ContentMessageController extends AbstractController
     public function show(ContentMessage $contentmessage): Response
     {
         // Sérialisation de l'entité ContentMessage en JSON avec le groupe de sérialisation 'ContentMessage:read'
-        $contentmessage = $this->serializer->serialize($contentmessage, 'json', ['groups' => 'contentmessage:read']);
+        $contentmessage = $this->serializer->serialize($contentmessage, 'json', ['groups' => 'content_message:read']);
     
         // Retour de la réponse JSON avec les données de l'ContentMessage et un code HTTP 200
         return new JsonResponse(["data" => json_decode($contentmessage, true), "code" => 200], Response::HTTP_OK);

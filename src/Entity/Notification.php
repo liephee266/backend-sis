@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "notification")]
@@ -14,9 +15,11 @@ class Notification
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     #[Groups(['notification:read'])]
+    #[Groups(['notification:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
+    #[Groups(['notification:read'])]
     #[Groups(['notification:read'])]
     private ?string $content = null;
 
@@ -123,6 +126,30 @@ class Notification
     public function setDateExp(\DateTimeInterface $date_exp): self
     {
         $this->date_exp = $date_exp;
+        return $this;
+    }
+
+    public function getState(): ?State
+    {
+        return $this->state;
+    }
+
+    public function setState(?State $state): static
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getNotificationType(): ?NotificationType
+    {
+        return $this->notificationType;
+    }
+
+    public function setNotificationType(?NotificationType $notificationType): static
+    {
+        $this->notificationType = $notificationType;
+
         return $this;
     }
 }

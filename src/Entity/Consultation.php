@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Patient;
 use App\Entity\Doctor;
 use App\Entity\Hospital;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "consultation")]
@@ -61,42 +63,39 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
 
+    #[ORM\ManyToOne(inversedBy: 'consultations')]
+    #[Groups(['consultation:read', 'patient:read'])]
+    private ?Patient $patient = null;
+
+    #[ORM\ManyToOne(inversedBy: 'consultations')]
+    #[Groups(['consultation:read', 'doctor:read'])]
+    private ?Doctor $doctor = null;
+
+    #[ORM\ManyToOne(inversedBy: 'consultations')]
+    #[Groups(['consultation:read', 'hospital:read'])]
+    private ?Hospital $hospital = null;
+
+    /**
+     * @var Collection<int, Examination>
+     */
+    #[ORM\OneToMany(targetEntity: Examination::class, mappedBy: 'consultation')]
+    private Collection $examinations;
+
+    /**
+     * @var Collection<int, Treatment>
+     */
+    #[ORM\OneToMany(targetEntity: Treatment::class, mappedBy: 'consultation')]
+    private Collection $treatments;
+
+    public function __construct()
+    {
+        $this->examinations = new ArrayCollection();
+        $this->treatments = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getPatient(): ?Patient
-    {
-        return $this->patient;
-    }
-
-    public function setPatient(?Patient $patient): self
-    {
-        $this->patient = $patient;
-        return $this;
-    }
-
-    public function getDoctor(): ?Doctor
-    {
-        return $this->doctor;
-    }
-
-    public function setDoctor(?Doctor $doctor): self
-    {
-        $this->doctor = $doctor;
-        return $this;
-    }
-
-    public function getHospital(): ?Hospital
-    {
-        return $this->hospital;
-    }
-
-    public function setHospital(?Hospital $hospital): self
-    {
-        $this->hospital = $hospital;
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -173,6 +172,102 @@ class Consultation
     public function setDateSymptoms(?\DateTimeInterface $dateSymptoms): self
     {
         $this->dateSymptoms = $dateSymptoms;
+        return $this;
+    }
+
+    public function getPatient(): ?Patient
+    {
+        return $this->patient;
+    }
+
+    public function setPatient(?Patient $patient): static
+    {
+        $this->patient = $patient;
+
+        return $this;
+    }
+
+    public function getDoctor(): ?Doctor
+    {
+        return $this->doctor;
+    }
+
+    public function setDoctor(?Doctor $doctor): static
+    {
+        $this->doctor = $doctor;
+
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): static
+    {
+        $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Examination>
+     */
+    public function getExaminations(): Collection
+    {
+        return $this->examinations;
+    }
+
+    public function addExamination(Examination $examination): static
+    {
+        if (!$this->examinations->contains($examination)) {
+            $this->examinations->add($examination);
+            $examination->setConsultation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExamination(Examination $examination): static
+    {
+        if ($this->examinations->removeElement($examination)) {
+            // set the owning side to null (unless already changed)
+            if ($examination->getConsultation() === $this) {
+                $examination->setConsultation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Treatment>
+     */
+    public function getTreatments(): Collection
+    {
+        return $this->treatments;
+    }
+
+    public function addTreatment(Treatment $treatment): static
+    {
+        if (!$this->treatments->contains($treatment)) {
+            $this->treatments->add($treatment);
+            $treatment->setConsultation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTreatment(Treatment $treatment): static
+    {
+        if ($this->treatments->removeElement($treatment)) {
+            // set the owning side to null (unless already changed)
+            if ($treatment->getConsultation() === $this) {
+                $treatment->setConsultation(null);
+            }
+        }
+
         return $this;
     }
 }

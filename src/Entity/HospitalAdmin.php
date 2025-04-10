@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital_admin")]
@@ -37,9 +37,10 @@ class HospitalAdmin
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?User $user): static
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -48,9 +49,10 @@ class HospitalAdmin
         return $this->hospital;
     }
 
-    public function setHospital(?Hospital $hospital): self
+    public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
         return $this;
     }
 }

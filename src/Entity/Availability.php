@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "availability")]
@@ -40,16 +40,6 @@ class Availability
         return $this->id;
     }
 
-    public function getDoctor(): ?Doctor
-    {
-        return $this->doctor;
-    }
-
-    public function setDoctor(?Doctor $doctor): self
-    {
-        $this->doctor = $doctor;
-        return $this;
-    }
 
     public function getTimeInterval(): ?\DateTimeInterface
     {

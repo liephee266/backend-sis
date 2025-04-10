@@ -78,17 +78,6 @@ class Doctor
         return $this->id;
     }
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-        return $this;
-    }
-
     public function getMedLisenceNumber(): ?string
     {
         return $this->medLisenceNumber;
@@ -188,14 +177,171 @@ class Doctor
         return $this;
     }
 
+    /**
+     * @return Collection<int, Affiliation>
+     */
+    public function getAffiliations(): Collection
+    {
+        return $this->affiliations;
+    }
+
+    public function addAffiliation(Affiliation $affiliation): static
+    {
+        if (!$this->affiliations->contains($affiliation)) {
+            $this->affiliations->add($affiliation);
+            $affiliation->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffiliation(Affiliation $affiliation): static
+    {
+        if ($this->affiliations->removeElement($affiliation)) {
+            // set the owning side to null (unless already changed)
+            if ($affiliation->getDoctor() === $this) {
+                $affiliation->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agenda>
+     */
+    public function getAgenda(): Collection
+    {
+        return $this->agenda;
+    }
+
+    public function addAgenda(Agenda $agenda): static
+    {
+        if (!$this->agenda->contains($agenda)) {
+            $this->agenda->add($agenda);
+            $agenda->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgenda(Agenda $agenda): static
+    {
+        if ($this->agenda->removeElement($agenda)) {
+            // set the owning side to null (unless already changed)
+            if ($agenda->getDoctor() === $this) {
+                $agenda->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Availability>
+     */
+    public function getAvailabilities(): Collection
+    {
+        return $this->availabilities;
+    }
+
+    public function addAvailability(Availability $availability): static
+    {
+        if (!$this->availabilities->contains($availability)) {
+            $this->availabilities->add($availability);
+            $availability->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvailability(Availability $availability): static
+    {
+        if ($this->availabilities->removeElement($availability)) {
+            // set the owning side to null (unless already changed)
+            if ($availability->getDoctor() === $this) {
+                $availability->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): static
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): static
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getDoctor() === $this) {
+                $consultation->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
     public function getService(): ?Service
     {
         return $this->service;
     }
 
-    public function setService(?Service $service): self
+    public function setService(?Service $service): static
     {
         $this->service = $service;
+
+        return $this;
+    }
+
+    public function isArchived(): ?bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setIsArchived(?bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function isSuspended(): ?bool
+    {
+        return $this->isSuspended;
+    }
+
+    public function setIsSuspended(?bool $isSuspended): static
+    {
+        $this->isSuspended = $isSuspended;
+
         return $this;
     }
 

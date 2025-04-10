@@ -4,9 +4,11 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "patient")]
@@ -44,14 +46,46 @@ class Patient
         return $this->id;
     }
 
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): static
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setPatient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): static
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getPatient() === $this) {
+                $consultation->setPatient(null);
+            }
+        }
+
+        return $this;
+    }
+
     public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?User $user): static
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -60,9 +94,40 @@ class Patient
         return $this->tutor;
     }
 
-    public function setTutor(?User $tutor): self
+    public function setTutor(?User $tutor): static
     {
         $this->tutor = $tutor;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Meeting>
+     */
+    public function getMeetingId(): Collection
+    {
+        return $this->meeting_id;
+    }
+
+    public function addMeetingId(Meeting $meetingId): static
+    {
+        if (!$this->meeting_id->contains($meetingId)) {
+            $this->meeting_id->add($meetingId);
+            $meetingId->setPatientId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMeetingId(Meeting $meetingId): static
+    {
+        if ($this->meeting_id->removeElement($meetingId)) {
+            // set the owning side to null (unless already changed)
+            if ($meetingId->getPatientId() === $this) {
+                $meetingId->setPatientId(null);
+            }
+        }
+
         return $this;
     }
 

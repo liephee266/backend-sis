@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "affiliation")]
@@ -36,27 +36,6 @@ class Affiliation
         return $this->id;
     }
 
-    public function getHospital(): ?Hospital
-    {
-        return $this->hospital;
-    }
-
-    public function setHospital(?Hospital $hospital): self
-    {
-        $this->hospital = $hospital;
-        return $this;
-    }
-
-    public function getDoctor(): ?Doctor
-    {
-        return $this->doctor;
-    }
-
-    public function setDoctor(?Doctor $doctor): self
-    {
-        $this->doctor = $doctor;
-        return $this;
-    }
 
     public function getState(): bool
     {
@@ -66,6 +45,30 @@ class Affiliation
     public function setState(bool $state): self
     {
         $this->state = $state;
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): static
+    {
+        $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getDoctor(): ?Doctor
+    {
+        return $this->doctor;
+    }
+
+    public function setDoctor(?Doctor $doctor): static
+    {
+        $this->doctor = $doctor;
+
         return $this;
     }
 }
