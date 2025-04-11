@@ -49,7 +49,7 @@ class DossierMedicaleController extends AbstractController
         $filtre = [];
 
         // Récupération des dossier_medicales avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', '$dossier_medicale:read', $filtre);
+        $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
 
         // Retour d'une réponse JSON avec les dossier_medicales et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
@@ -67,7 +67,7 @@ class DossierMedicaleController extends AbstractController
     public function show(DossierMedicale $dossier_medicale): Response
     {
         // Sérialisation de l'entité DossierMedicale en JSON avec le groupe de sérialisation 'DossierMedicale:read'
-        $dossier_medicale = $this->serializer->serialize($dossier_medicale, 'json', ['groups' => '$dossier_medicale:read']);
+        $dossier_medicale = $this->serializer->serialize($dossier_medicale, 'json', ['groups' => 'dossier_medicale:read']);
     
         // Retour de la réponse JSON avec les données de l'DossierMedicale et un code HTTP 200
         return new JsonResponse(["data" => json_decode($dossier_medicale, true), "code" => 200], Response::HTTP_OK);

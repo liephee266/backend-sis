@@ -14,16 +14,16 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["treatment:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["treatment:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Consultation::class)]
     #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["treatment:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?Consultation $consultation = null;
 
     #[ORM\Column]

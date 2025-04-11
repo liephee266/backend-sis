@@ -24,19 +24,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read",
-    "affiliation:read", "agenda:read", "availability:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $email = null;
 
     /**
@@ -57,13 +57,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
@@ -120,6 +120,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Urgency::class, mappedBy: 'user')]
     private Collection $urgencies;
 
+    /**
+     * @var Collection<int, Autorisation>
+     */
+    #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
+    private Collection $autorisations;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -127,6 +133,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->updated_at = new \DateTime();
         $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
+        $this->autorisations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -369,6 +376,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($urgency->getUser() === $this) {
                 $urgency->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Autorisation>
+     */
+    public function getAutorisations(): Collection
+    {
+        return $this->autorisations;
+    }
+
+    public function addAutorisation(Autorisation $autorisation): static
+    {
+        if (!$this->autorisations->contains($autorisation)) {
+            $this->autorisations->add($autorisation);
+            $autorisation->setDemanderId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAutorisation(Autorisation $autorisation): static
+    {
+        if ($this->autorisations->removeElement($autorisation)) {
+            // set the owning side to null (unless already changed)
+            if ($autorisation->getDemanderId() === $this) {
+                $autorisation->setDemanderId(null);
             }
         }
 
