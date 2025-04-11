@@ -50,7 +50,7 @@ class DoctorController extends AbstractController
     public function index(Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -77,7 +77,7 @@ class DoctorController extends AbstractController
     public function show(Doctor $doctor): Response
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -100,6 +100,12 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+
+        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        //     # code...
+        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        // }
+
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -148,15 +154,14 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-    
-        //Verification de l'existence de l'entite
-        $doctor = $this->entityManager->getRepository(Doctor::class)->find($id);
-        
-        if (!$doctor) {
-            return $this->json(['code' => 404, 'message' => "Ce doctor specifier n'existe pas"], Response::HTTP_NOT_FOUND);
-        }
 
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;

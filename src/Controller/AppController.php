@@ -266,12 +266,21 @@ class AppController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK);        
     }
 
-
+    /**
+     * Archivage d'une entité
+     * 
+     * 
+     * @param string $entity_name
+     * @param int $id
+     * @return JsonResponse
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com>
+     * */
     #[Route('/archivage/{entity_name}/{id}', name: 'app_archivage', methods: ['GET'])]
     function archiver($entity_name, int $id): JsonResponse
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -307,11 +316,21 @@ class AppController extends AbstractController
         );
     }
 
+    /**
+     * Suspension d'une entité
+     * 
+     * 
+     * @param string $entity_name
+     * @param int $id
+     * @return JsonResponse
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com>
+     * */
     #[Route('/suspendre/{entity_name}/{id}', name: 'app_suspension', methods: ['GET'])]
     function suspendu($entity_name, int $id): JsonResponse
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -319,7 +338,6 @@ class AppController extends AbstractController
         $data = [
             "doctor" => "Doctor",
             "adminsis" => "SisAdmin",
-            "hopital" => "Hospital",
         ];
 
         if (!array_key_exists($entity_name, $data)) {

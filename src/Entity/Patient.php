@@ -40,10 +40,17 @@ class Patient
     #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'patient')]
     private Collection $consultations;
 
+    /**
+     * @var Collection<int, DossierMedicale>
+     */
+    #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'patient_id')]
+    private Collection $dossierMedicales;
+
     public function __construct()
     {
         $this->meeting_id = new ArrayCollection();
         $this->consultations = new ArrayCollection();
+        $this->dossierMedicales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -130,6 +137,36 @@ class Patient
             // set the owning side to null (unless already changed)
             if ($meetingId->getPatientId() === $this) {
                 $meetingId->setPatientId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DossierMedicale>
+     */
+    public function getDossierMedicales(): Collection
+    {
+        return $this->dossierMedicales;
+    }
+
+    public function addDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if (!$this->dossierMedicales->contains($dossierMedicale)) {
+            $this->dossierMedicales->add($dossierMedicale);
+            $dossierMedicale->setPatientId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if ($this->dossierMedicales->removeElement($dossierMedicale)) {
+            // set the owning side to null (unless already changed)
+            if ($dossierMedicale->getPatientId() === $this) {
+                $dossierMedicale->setPatientId(null);
             }
         }
 

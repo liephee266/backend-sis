@@ -88,9 +88,6 @@ class Hospital
     #[ORM\Column(nullable: true)]
     private ?bool $isArchived = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $isSuspended = null;
-
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Status $status = null;
@@ -273,18 +270,6 @@ class Hospital
     public function setIsArchived(?bool $isArchived): static
     {
         $this->isArchived = $isArchived;
-
-        return $this;
-    }
-
-    public function isSuspended(): ?bool
-    {
-        return $this->isSuspended;
-    }
-
-    public function setIsSuspended(?bool $isSuspended): static
-    {
-        $this->isSuspended = $isSuspended;
 
         return $this;
     }
