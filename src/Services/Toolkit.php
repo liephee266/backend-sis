@@ -208,6 +208,7 @@ class Toolkit
                     if (in_array($key, ['roles', 'tags', 'permissions'])) {
                         // On utilise JSON_CONTAINS (MySQL uniquement)
                         $queryBuilder->andWhere("JSON_CONTAINS(u.$key, :$key) = 1");
+                        // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
                         // Doctrine attend une chaîne JSON ici
                         $queryBuilder->setParameter($key, json_encode($value));
                     } else {
