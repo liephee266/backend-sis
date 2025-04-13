@@ -202,15 +202,28 @@ class Toolkit
         // Appliquer les filtres si ils existent
         if ($filtre) {
             foreach ($filtre as $key => $value) {
-                if ($key === 'created_at' || $key === 'updated_at') {
-                    $queryBuilder->andWhere('u.'.$key.' >= :'.$key);
+                if (is_array($value)) {
+                    // Si la valeur est un tableau, on vérifie si le champ est aussi un tableau JSON
+                    // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
+                    if (in_array($key, ['roles', 'tags', 'permissions'])) {
+                        // On utilise JSON_CONTAINS (MySQL uniquement)
+                        $queryBuilder->andWhere("JSON_CONTAINS(u.$key, :$key) = 1");
+                        // Doctrine attend une chaîne JSON ici
+                        $queryBuilder->setParameter($key, json_encode($value));
+                    } else {
+                        // Cas classique avec IN
+                        $queryBuilder->andWhere($queryBuilder->expr()->in("u.$key", ":$key"));
+                        $queryBuilder->setParameter($key, $value);
+                    }
+                } elseif ($key === 'created_at' || $key === 'updated_at') {
+                    $queryBuilder->andWhere("u.$key >= :$key");
                     $queryBuilder->setParameter($key, $value);
-                }else {
-                    $queryBuilder->andWhere('u.'.$key.' = :'.$key);
+                } else {
+                    $queryBuilder->andWhere("u.$key = :$key");
                     $queryBuilder->setParameter($key, $value);
                 }
             }
-        }
+        }        
         $queryBuilder->orderBy('u.id', 'DESC');
         // Configuration de l'adaptateur pour Pagerfanta pour gérer la pagination
         $adapter = new QueryAdapter($queryBuilder);
