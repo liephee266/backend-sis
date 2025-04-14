@@ -14,17 +14,17 @@ class NotificationType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['notification_type:read', 'notification:read'])]
+    #[Groups(["notificationtype:read", "notification:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Groups(['notification_type:read', 'notification:read'])]
+    #[Groups(["notificationtype:read", "notification:read"])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Notification>
      */
-    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'notificationType')]
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'notification_type_id')]
     private Collection $notifications;
 
     public function __construct()
@@ -62,7 +62,7 @@ class NotificationType
     {
         if (!$this->notifications->contains($notification)) {
             $this->notifications->add($notification);
-            $notification->setNotificationType($this);
+            $notification->setNotificationTypeId($this);
         }
 
         return $this;
@@ -72,8 +72,8 @@ class NotificationType
     {
         if ($this->notifications->removeElement($notification)) {
             // set the owning side to null (unless already changed)
-            if ($notification->getNotificationType() === $this) {
-                $notification->setNotificationType(null);
+            if ($notification->getNotificationTypeId() === $this) {
+                $notification->setNotificationTypeId(null);
             }
         }
 

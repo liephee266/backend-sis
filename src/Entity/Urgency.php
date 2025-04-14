@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "urgency")]
@@ -11,19 +12,22 @@ class Urgency
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups("urgency:read")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
     #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups("urgency:read")]
     private ?Patient $patient = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups("urgency:read")]
     private ?Hospital $hospital = null;
 
-    #[ORM\ManyToOne(targetEntity: Urgentist::class)]
-    #[ORM\JoinColumn(name: "id_urgentist", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    private ?Urgentist $urgentist = null;
+    #[ORM\ManyToOne(inversedBy: 'urgencies')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     // ✅ Getters & Setters
 
@@ -54,14 +58,15 @@ class Urgency
         return $this;
     }
 
-    public function getUrgentist(): ?Urgentist
+    public function getUser(): ?User
     {
-        return $this->urgentist;
+        return $this->user;
     }
 
-    public function setUrgentist(?Urgentist $urgentist): self
+    public function setUser(?User $user): static
     {
-        $this->urgentist = $urgentist;
+        $this->user = $user;
+
         return $this;
     }
 }

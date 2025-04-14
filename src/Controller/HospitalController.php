@@ -7,13 +7,13 @@ use App\Entity\Status;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des utilisateurs
@@ -27,7 +27,7 @@ class HospitalController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
-     private Security $security;
+    private $security;
 
     public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
@@ -105,11 +105,11 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
+        //  // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        // }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -121,13 +121,6 @@ class HospitalController extends AbstractController
 
         // Ajouter le statut à la data avant persistance
         $data['status'] = $status->getId();  // Récupérer le statut "en_attente"
-        $status = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'pending']);
-        if (!$status) {
-            return $this->json(['code' => 500, 'message' => "Statut 'pending' introuvable"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        // Ajouter le statut à la data avant persistance
-        $data['status'] = $status->getId();
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Hospital", $data);
@@ -200,10 +193,11 @@ class HospitalController extends AbstractController
         if (!empty($errors['entity'])) {
             // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
             return $this->json(['code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
+            return $this->json(['code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
         }
     
         // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Hopital"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'hopital"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
     
     /**
@@ -225,6 +219,6 @@ class HospitalController extends AbstractController
         $entityManager->flush();
     
         // Retour d'une réponse JSON avec un message de succès
-        return $this->json(['code' => 200, 'message' => "Utilisateur supprimé avec succès"], Response::HTTP_OK);
+        return $this->json(['code' => 200, 'message' => "Hopital supprimé avec succès"], Response::HTTP_OK);
     }
 }

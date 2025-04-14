@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
+use App\Entity\Status;
 use App\Entity\Service;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital")]
@@ -15,104 +14,84 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['hospital:read', 'affiliation:read', 'doctor:read','consultation:read','hospital_admin:read'])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["hospital:read","urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $address = null;
+    
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $registrationNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $ceo = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $accreditation = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $niu = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $rccm = null;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
     private ?bool $hasUrgency = false;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
     private ?bool $hasAmbulance = false;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $exploitationLisence = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?string $accreditationCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(['hospital:read'])]
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read"])]
     private ?string $logo = null;
 
-    /**
-     * @var Collection<int, Affiliation>
-     */
-    #[ORM\OneToMany(targetEntity: Affiliation::class, mappedBy: 'hospital')]
-    private Collection $affiliations;
-
-    /**
-     * @var Collection<int, Agenda>
-     */
-    #[ORM\OneToMany(targetEntity: Agenda::class, mappedBy: 'hospital')]
-    private Collection $agenda;
-
-    /**
-     * @var Collection<int, Consultation>
-     */
-    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'hospital')]
-    private Collection $consultations;
-
-    /**
-     * @var Collection<int, HospitalAdmin>
-     */
-    #[ORM\OneToMany(targetEntity: HospitalAdmin::class, mappedBy: 'hospital')]
-    private Collection $hospitalAdmins;
+    #[ORM\Column(nullable: true)]
+    private ?bool $isArchived = null;
 
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?Status $status = null;
-
-    public function __construct()
-    {
-        $this->affiliations = new ArrayCollection();
-        $this->agenda = new ArrayCollection();
-        $this->consultations = new ArrayCollection();
-        $this->hospitalAdmins = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -284,122 +263,14 @@ class Hospital
         return $this;
     }
 
-    /**
-     * @return Collection<int, Affiliation>
-     */
-    public function getAffiliations(): Collection
+    public function isArchived(): ?bool
     {
-        return $this->affiliations;
+        return $this->isArchived;
     }
 
-    public function addAffiliation(Affiliation $affiliation): static
+    public function setIsArchived(?bool $isArchived): static
     {
-        if (!$this->affiliations->contains($affiliation)) {
-            $this->affiliations->add($affiliation);
-            $affiliation->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAffiliation(Affiliation $affiliation): static
-    {
-        if ($this->affiliations->removeElement($affiliation)) {
-            // set the owning side to null (unless already changed)
-            if ($affiliation->getHospital() === $this) {
-                $affiliation->setHospital(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Agenda>
-     */
-    public function getAgenda(): Collection
-    {
-        return $this->agenda;
-    }
-
-    public function addAgenda(Agenda $agenda): static
-    {
-        if (!$this->agenda->contains($agenda)) {
-            $this->agenda->add($agenda);
-            $agenda->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAgenda(Agenda $agenda): static
-    {
-        if ($this->agenda->removeElement($agenda)) {
-            // set the owning side to null (unless already changed)
-            if ($agenda->getHospital() === $this) {
-                $agenda->setHospital(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Consultation>
-     */
-    public function getConsultations(): Collection
-    {
-        return $this->consultations;
-    }
-
-    public function addConsultation(Consultation $consultation): static
-    {
-        if (!$this->consultations->contains($consultation)) {
-            $this->consultations->add($consultation);
-            $consultation->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeConsultation(Consultation $consultation): static
-    {
-        if ($this->consultations->removeElement($consultation)) {
-            // set the owning side to null (unless already changed)
-            if ($consultation->getHospital() === $this) {
-                $consultation->setHospital(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, HospitalAdmin>
-     */
-    public function getHospitalAdmins(): Collection
-    {
-        return $this->hospitalAdmins;
-    }
-
-    public function addHospitalAdmin(HospitalAdmin $hospitalAdmin): static
-    {
-        if (!$this->hospitalAdmins->contains($hospitalAdmin)) {
-            $this->hospitalAdmins->add($hospitalAdmin);
-            $hospitalAdmin->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHospitalAdmin(HospitalAdmin $hospitalAdmin): static
-    {
-        if ($this->hospitalAdmins->removeElement($hospitalAdmin)) {
-            // set the owning side to null (unless already changed)
-            if ($hospitalAdmin->getHospital() === $this) {
-                $hospitalAdmin->setHospital(null);
-            }
-        }
+        $this->isArchived = $isArchived;
 
         return $this;
     }

@@ -12,14 +12,17 @@ class HospitalAdmin
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    #[Groups(["hospitaladmin:read"])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'hospitalAdmins')]
-    #[Groups(['hospital_admin:read', 'user:read'])]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["hospitaladmin:read"])]   
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'hospitalAdmins')]
-    #[Groups(['hospital_admin:read', 'hospital:read'])]
+    #[ORM\ManyToOne(targetEntity: Hospital::class)]
+    #[ORM\JoinColumn(name: "hopital_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["hospitaladmin:read"])]
     private ?Hospital $hospital = null;
 
     // ✅ Getters & Setters

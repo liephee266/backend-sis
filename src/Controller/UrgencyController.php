@@ -6,6 +6,7 @@ use App\Entity\Urgency;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,13 +26,15 @@ class UrgencyController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**

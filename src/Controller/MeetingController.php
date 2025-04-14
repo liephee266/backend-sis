@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -28,8 +29,18 @@ class MeetingController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
-    private Security $security;
+    private $security;
 
+    /**
+     * Constructeur de la classe MeetingController
+     * 
+     * @param GenericEntityManager $genericEntityManager Gestionnaire d'entité générique
+     * @param EntityManagerInterface $entityManager Gestionnaire d'entité de Doctrine
+     * @param SerializerInterface $serializer Srialiseur de données
+     * @param Toolkit $toolkit Boite à outils de l'application
+     * 
+     * @author  Orphée Lié <lieloumloum@gmail.com>
+     */
     public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
@@ -37,11 +48,10 @@ class MeetingController extends AbstractController
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
         $this->security = $security;
-
     }
 
     /**
-     * Liste des Meeting
+     * Liste des Meetin
      *
      * @param Request $request
      * @return Response
@@ -107,32 +117,6 @@ class MeetingController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-           // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser($request);
-
-        // Récupérer le patient lié à l'utilisateur connecté
-        $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
-
-        // Si l'utilisateur est un patient, on vérifie qu'il est associé à cette consultation
-        if ($this->security->isGranted('ROLE_PATIENT')) {
-            // On vérifie si le patient est bien associé à cette consultation
-            if ($meeting->getPatient()->getId() !== $patient->getId()) {
-                // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
-                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cette consultation."], Response::HTTP_FORBIDDEN);
-            }
-        }
-
-         // Récupérer le patient lié à l'utilisateur connecté
-        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-
-        // Si l'utilisateur est un médecin, il peut voir toutes les consultations qui lui sont attribuées
-        if ($this->security->isGranted('ROLE_DOCTOR')) {
-            // Vérifie si la consultation est liée à ce médecin
-            if ($meeting->getDoctor()->getId() !== $doctor->getId()) {
-                // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
-                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cette consultation."], Response::HTTP_FORBIDDEN);
-            }
-        }
 
         // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
         $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
@@ -159,7 +143,10 @@ class MeetingController extends AbstractController
         }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
-        
+
+        // Conversion de la date en objet DateTime
+        $data["date"] = new \DateTime($data["date"]);
+
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);
 
@@ -170,7 +157,7 @@ class MeetingController extends AbstractController
         }
 
         // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -191,28 +178,11 @@ class MeetingController extends AbstractController
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
 
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
-        // Récupération de l'utilisateur connecté
-        $user = $this->toolkit->getUser($request);
-        
-         // Vérifier si l'utilisateur est un médecin
-        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-
-        // Si un médecin est trouvé, appliquer le filtre sur l'ID du médecin
-        if ($doctor) {
-            $filtre['doctor'] = $doctor->getId();
-        }
-
-        // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-        if (!$doctor) {
-            return new JsonResponse(['code' => 404, 'message' => "Aucun médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
-        }
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        // Conversion de la date en objet DateTime
+        $data["date"] = new \DateTime($data["date"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;

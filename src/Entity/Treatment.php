@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -12,20 +14,32 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['treatment:read', 'consultation:read'])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['treatment:read', 'consultation:read'])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?string $description = null;
 
-    #[ORM\Column(type: "boolean")]
-    #[Groups(['treatment:read', 'consultation:read'])]
-    private bool $status;
-
-    #[ORM\ManyToOne(inversedBy: 'treatments')]
-    #[Groups(['treatment:read', 'consultation:read'])]
+    #[ORM\ManyToOne(targetEntity: Consultation::class)]
+    #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?Consultation $consultation = null;
+
+    #[ORM\Column]
+    #[Groups(["treatment:read"])]
+    private ?bool $statut = true;
+
+    /**
+     * @var Collection<int, DossierMedicale>
+     */
+    #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'treatment_id')]
+    private Collection $dossierMedicales;
+
+    public function __construct()
+    {
+        $this->dossierMedicales = new ArrayCollection();
+    }
 
     // ✅ Getters & Setters
 
@@ -45,17 +59,6 @@ class Treatment
         return $this;
     }
 
-    public function getStatus(): bool
-    {
-        return $this->status;
-    }
-
-    public function setStatus(bool $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
     public function getConsultation(): ?Consultation
     {
         return $this->consultation;
@@ -64,6 +67,48 @@ class Treatment
     public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
+        return $this;
+    }
+
+    public function isStatut(): ?bool
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(bool $statut): static
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DossierMedicale>
+     */
+    public function getDossierMedicales(): Collection
+    {
+        return $this->dossierMedicales;
+    }
+
+    public function addDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if (!$this->dossierMedicales->contains($dossierMedicale)) {
+            $this->dossierMedicales->add($dossierMedicale);
+            $dossierMedicale->setTreatmentId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if ($this->dossierMedicales->removeElement($dossierMedicale)) {
+            // set the owning side to null (unless already changed)
+            if ($dossierMedicale->getTreatmentId() === $this) {
+                $dossierMedicale->setTreatmentId(null);
+            }
+        }
 
         return $this;
     }

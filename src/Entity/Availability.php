@@ -13,26 +13,27 @@ class Availability
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['availability:read'])]
+    #[Groups(["availability:read"])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['availability:read'])]
-    private ?\DateTimeInterface $timeInterval = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['availability:read'])]
-    private ?\DateTimeInterface $dateInterval = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Groups(['availability:read'])]
-    private ?\DateTimeInterface $date = null;
-
-    #[ORM\ManyToOne(inversedBy: 'availabilities')]
-     #[Groups(['availability:read', 'doctor:read'])]
+    #[ORM\ManyToOne(targetEntity: Doctor::class)]
+    #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["availability:read"])]
     private ?Doctor $doctor = null;
 
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    private ?\DateTimeInterface $time_interval = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_interval = null;
+
     // ✅ Getters & Setters
+
+    public function __construct()
+    {
+        $this->date_interval = new \DateTime();
+    }
+
 
     public function getId(): ?int
     {
@@ -42,46 +43,27 @@ class Availability
 
     public function getTimeInterval(): ?\DateTimeInterface
     {
-        return $this->timeInterval;
+        return $this->time_interval;
     }
 
-    public function setTimeInterval(?\DateTimeInterface $timeInterval): self
+    public function setTimeInterval(\DateTimeInterface $time_interval): static
     {
-        $this->timeInterval = $timeInterval;
+        $this->time_interval = $time_interval;
+
         return $this;
     }
 
     public function getDateInterval(): ?\DateTimeInterface
     {
-        return $this->dateInterval;
+        return $this->date_interval;
     }
 
-    public function setDateInterval(?\DateTimeInterface $dateInterval): self
+    public function setDateInterval(\DateTimeInterface $date_interval): static
     {
-        $this->dateInterval = $dateInterval;
+        $this->date_interval = $date_interval;
+
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(?\DateTimeInterface $date): self
-    {
-        $this->date = $date;
-        return $this;
-    }
-
-    public function getDoctor(): ?Doctor
-    {
-        return $this->doctor;
-    }
-
-    public function setDoctor(?Doctor $doctor): static
-    {
-        $this->doctor = $doctor;
-
-        return $this;
-    }
+    
 }

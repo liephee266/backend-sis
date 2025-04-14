@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -28,7 +29,7 @@ class PatientController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
-    private Security $security;
+    private $security;
 
     public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
@@ -36,6 +37,7 @@ class PatientController extends AbstractController
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
         $this->security = $security;
     }
 
@@ -51,7 +53,7 @@ class PatientController extends AbstractController
     public function index(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCUEIL')) {
+        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCUEIL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
@@ -106,8 +108,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        // $user = $this->toolkit->getUser();
 
         // Sérialisation de l'entité Patient en JSON avec le groupe de sérialisation 'Patient:read'
         $patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
@@ -135,17 +135,35 @@ class PatientController extends AbstractController
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
-        // Appel à la méthode persistEntity pour insérer les données dans la base
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Patient", $data);
+        // Début de la transaction
+        $this->entityManager->beginTransaction();
+
+        // Création du User
+        $user_data = [
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'roles' => ["ROLE_PATIENT"],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+        ];
+        
+        // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
+            $this->entityManager->commit();
             return $this->json(['code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
         }
 
         // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -160,13 +178,11 @@ class PatientController extends AbstractController
     #[Route('/{id}', name: 'patient_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
-        // Récupération de l'utilisateur connecté
-        // $user = $this->toolkit->getUser();
+        // // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_PATIENT')) {
+        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        // }
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
@@ -174,8 +190,20 @@ class PatientController extends AbstractController
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
     
-        // Appel à la méthode persistEntity pour mettre à jour l'entité Patient dans la base de données
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Patient", $data, true);
+        // Modification du User
+        $user_data = [
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+            'id' => $data['id']
+        ];
+    
+        // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
@@ -184,7 +212,7 @@ class PatientController extends AbstractController
         }
     
         // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
     
     /**
@@ -204,8 +232,6 @@ class PatientController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
-        // $user = $this->toolkit->getUser();
 
         // Suppression de l'entité Patient passée en paramètre
         $entityManager->remove($patient);

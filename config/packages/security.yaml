@@ -24,10 +24,10 @@ security:
             pattern:   ^/api
             stateless: true
             jwt: ~
+    role_hierarchy:
+        ROLE_SUPER_ADMIN:   [ROLE_ADMIN_SIS:, ROLE_ADMIN_HOPITAL]  # Super Admin hérite de tous les droits
 
     access_control:
         - { path: ^/api/v1/connexion, roles: PUBLIC_ACCESS }
         # - { path: ^/api/v1/main/powerbi/*, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: PUBLIC_ACCESS }
-        
-        

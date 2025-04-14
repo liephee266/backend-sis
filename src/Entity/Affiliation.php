@@ -12,21 +12,22 @@ class Affiliation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['affiliation:read'])]
+    #[Groups(["affiliation:read"])]
     private ?int $id = null;
 
-
-    #[ORM\Column(type: "boolean")]
-    #[Groups(['affiliation:read'])]
-    private bool $state;
-
-    #[ORM\ManyToOne(inversedBy: 'affiliations')]
-    #[Groups(['affiliation:read', 'hospital:read'])]
+    #[ORM\ManyToOne(targetEntity: Hospital::class)]
+    #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: false)]
+    #[Groups(["affiliation:read"])]
     private ?Hospital $hospital = null;
 
-    #[ORM\ManyToOne(inversedBy: 'affiliations')]
-    #[Groups(['affiliation:read', 'doctor:read'])]
+    #[ORM\ManyToOne(targetEntity: Doctor::class)]
+    #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false)]
+    #[Groups(["affiliation:read"])]
     private ?Doctor $doctor = null;
+
+    #[ORM\Column(type: "boolean")]
+    #[Groups(["affiliation:read"])]
+    private bool $state;
 
     // ✅ Getters & Setters
 

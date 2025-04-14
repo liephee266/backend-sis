@@ -150,13 +150,15 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
+        // // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        // }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
+
+        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);
@@ -207,6 +209,8 @@ class ConsultationController extends AbstractController
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
@@ -241,6 +245,7 @@ class ConsultationController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
+        
         // Suppression de l'entité Consultation passée en paramètre
         $entityManager->remove($consultation);
     

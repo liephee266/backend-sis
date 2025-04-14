@@ -15,9 +15,24 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[ORM\Groups(["patient:read", "consultation:read", "user:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?User $tutor = null;
+
+    /**
+     * @var Collection<int, Meeting>
+     */
+    #[ORM\OneToMany(targetEntity: Meeting::class, mappedBy: 'patient_id')]
+    private Collection $meeting_id;
 
     /**
      * @var Collection<int, Consultation>
@@ -25,17 +40,17 @@ class Patient
     #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'patient')]
     private Collection $consultations;
 
-    #[ORM\ManyToOne(inversedBy: 'patients')]
-    #[Groups(["patient:read", "user:read"])]
-    private ?User $user = null;
-
-    #[ORM\ManyToOne(inversedBy: 'patient')]
-    #[Groups(["patient:read", "user:read"])]
-    private ?User $tutor = null;
+    /**
+     * @var Collection<int, DossierMedicale>
+     */
+    #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'patient_id')]
+    private Collection $dossierMedicales;
 
     public function __construct()
     {
+        $this->meeting_id = new ArrayCollection();
         $this->consultations = new ArrayCollection();
+        $this->dossierMedicales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -94,6 +109,66 @@ class Patient
     public function setTutor(?User $tutor): static
     {
         $this->tutor = $tutor;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Meeting>
+     */
+    public function getMeetingId(): Collection
+    {
+        return $this->meeting_id;
+    }
+
+    public function addMeetingId(Meeting $meetingId): static
+    {
+        if (!$this->meeting_id->contains($meetingId)) {
+            $this->meeting_id->add($meetingId);
+            $meetingId->setPatientId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMeetingId(Meeting $meetingId): static
+    {
+        if ($this->meeting_id->removeElement($meetingId)) {
+            // set the owning side to null (unless already changed)
+            if ($meetingId->getPatientId() === $this) {
+                $meetingId->setPatientId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DossierMedicale>
+     */
+    public function getDossierMedicales(): Collection
+    {
+        return $this->dossierMedicales;
+    }
+
+    public function addDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if (!$this->dossierMedicales->contains($dossierMedicale)) {
+            $this->dossierMedicales->add($dossierMedicale);
+            $dossierMedicale->setPatientId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if ($this->dossierMedicales->removeElement($dossierMedicale)) {
+            // set the owning side to null (unless already changed)
+            if ($dossierMedicale->getPatientId() === $this) {
+                $dossierMedicale->setPatientId(null);
+            }
+        }
 
         return $this;
     }

@@ -1,11 +1,13 @@
 <?php
 namespace App\Services;
 
-use Pagerfanta\Pagerfanta;
 use App\Entity\User;
+use Pagerfanta\Pagerfanta;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -162,7 +164,7 @@ class Toolkit
         $token = substr($authorizationHeader, 7); 
         $payload = $this->jwtManager->decode($token);
         $user =  $this->entityManager->getRepository(User::class)->findOneBy([
-            "telephone" => $payload["username"]
+            "email" => $payload["username"]
         ]);
         return $user->getRoles();
     }
@@ -389,5 +391,14 @@ class Toolkit
         }
         //si l'objet n'existe pas, on retourne null
         return $ressource;
+    }
+
+
+    public function ExistRepository(array $data,string $entity_name,int $id)
+    {
+        // Récupération du repository
+        $repository_entity = $this->entityManager->getRepository('App\Entity\\'.$data[$entity_name])->find($id);
+
+        return $repository_entity;
     }
 }

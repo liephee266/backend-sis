@@ -21,15 +21,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read","agent_hopital:read", "receptionist:read", "doctor:read", "hospital_admin:read", "hospital:read", "patient:read", "consultation:read", "message:read", "sis_admin:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read",
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $email = null;
 
     /**
@@ -48,105 +55,85 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private bool $gender;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private $updated_at;
 
     /**
-     * @var Collection<int, Receptionist>
+     * @var Collection<int, Notification>
      */
-    #[ORM\OneToMany(targetEntity: Receptionist::class, mappedBy: 'user_id')]
-    private Collection $receptionist_id;
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'sender_id')]
+    private Collection $notifications;
 
     /**
-     * @var Collection<int, AgentHopital>
+     * @var Collection<int, Urgency>
      */
-    #[ORM\OneToMany(targetEntity: AgentHopital::class, mappedBy: 'user')]
-    private Collection $agentHopitals;
+    #[ORM\OneToMany(targetEntity: Urgency::class, mappedBy: 'user')]
+    private Collection $urgencies;
 
     /**
-     * @var Collection<int, Doctor>
+     * @var Collection<int, Autorisation>
      */
-    #[ORM\OneToMany(targetEntity: Doctor::class, mappedBy: 'user')]
-    private Collection $doctors;
-
-    /**
-     * @var Collection<int, HospitalAdmin>
-     */
-    #[ORM\OneToMany(targetEntity: HospitalAdmin::class, mappedBy: 'user')]
-    private Collection $hospitalAdmins;
-
-    /**
-     * @var Collection<int, Message>
-     */
-    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'sender')]
-    private Collection $messages;
-
-    /**
-     * @var Collection<int, Message>
-     */
-    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'receiver')]
-    private Collection $message;
-
-    /**
-     * @var Collection<int, Patient>
-     */
-    #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'user')]
-    private Collection $patients;
-
-    /**
-     * @var Collection<int, Patient>
-     */
-    #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'tutor')]
-    private Collection $patient;
-
-    /**
-     * @var Collection<int, SisAdmin>
-     */
-    #[ORM\OneToMany(targetEntity: SisAdmin::class, mappedBy: 'user')]
-    private Collection $sisAdmins;
+    #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
+    private Collection $autorisations;
 
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->receptionist_id = new ArrayCollection();
-        $this->agentHopitals = new ArrayCollection();
-        $this->doctors = new ArrayCollection();
-        $this->hospitalAdmins = new ArrayCollection();
-        $this->messages = new ArrayCollection();
-        $this->message = new ArrayCollection();
-        $this->patients = new ArrayCollection();
-        $this->patient = new ArrayCollection();
-        $this->sisAdmins = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+        $this->urgencies = new ArrayCollection();
+        $this->autorisations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -300,8 +287,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->gender = $gender;
         return $this;
-
     }
+    
     public function getBirth(): ?\DateTimeInterface
     {
         return $this->birth;
@@ -336,29 +323,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Receptionist>
+     * @return Collection<int, Notification>
      */
-    public function getReceptionistId(): Collection
+    public function getNotifications(): Collection
     {
-        return $this->receptionist_id;
+        return $this->notifications;
     }
 
-    public function addReceptionistId(Receptionist $receptionistId): static
+    public function addNotification(Notification $notification): static
     {
-        if (!$this->receptionist_id->contains($receptionistId)) {
-            $this->receptionist_id->add($receptionistId);
-            $receptionistId->setUserId($this);
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setSenderId($this);
         }
 
         return $this;
     }
 
-    public function removeReceptionistId(Receptionist $receptionistId): static
+    public function removeNotification(Notification $notification): static
     {
-        if ($this->receptionist_id->removeElement($receptionistId)) {
+        if ($this->notifications->removeElement($notification)) {
             // set the owning side to null (unless already changed)
-            if ($receptionistId->getUserId() === $this) {
-                $receptionistId->setUserId(null);
+            if ($notification->getSenderId() === $this) {
+                $notification->setSenderId(null);
             }
         }
 
@@ -366,29 +353,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, AgentHopital>
+     * @return Collection<int, Urgency>
      */
-    public function getAgentHopitals(): Collection
+    public function getUrgencies(): Collection
     {
-        return $this->agentHopitals;
+        return $this->urgencies;
     }
 
-    public function addAgentHopital(AgentHopital $agentHopital): static
+    public function addUrgency(Urgency $urgency): static
     {
-        if (!$this->agentHopitals->contains($agentHopital)) {
-            $this->agentHopitals->add($agentHopital);
-            $agentHopital->setUser($this);
+        if (!$this->urgencies->contains($urgency)) {
+            $this->urgencies->add($urgency);
+            $urgency->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeAgentHopital(AgentHopital $agentHopital): static
+    public function removeUrgency(Urgency $urgency): static
     {
-        if ($this->agentHopitals->removeElement($agentHopital)) {
+        if ($this->urgencies->removeElement($urgency)) {
             // set the owning side to null (unless already changed)
-            if ($agentHopital->getUser() === $this) {
-                $agentHopital->setUser(null);
+            if ($urgency->getUser() === $this) {
+                $urgency->setUser(null);
             }
         }
 
@@ -396,169 +383,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Doctor>
+     * @return Collection<int, Autorisation>
      */
-    public function getDoctors(): Collection
+    public function getAutorisations(): Collection
     {
-        return $this->doctors;
+        return $this->autorisations;
     }
 
-    public function addDoctor(Doctor $doctor): static
+    public function addAutorisation(Autorisation $autorisation): static
     {
-        if (!$this->doctors->contains($doctor)) {
-            $this->doctors->add($doctor);
-            $doctor->setUser($this);
+        if (!$this->autorisations->contains($autorisation)) {
+            $this->autorisations->add($autorisation);
+            $autorisation->setDemanderId($this);
         }
 
         return $this;
     }
 
-    public function removeDoctor(Doctor $doctor): static
+    public function removeAutorisation(Autorisation $autorisation): static
     {
-        if ($this->doctors->removeElement($doctor)) {
+        if ($this->autorisations->removeElement($autorisation)) {
             // set the owning side to null (unless already changed)
-            if ($doctor->getUser() === $this) {
-                $doctor->setUser(null);
+            if ($autorisation->getDemanderId() === $this) {
+                $autorisation->setDemanderId(null);
             }
         }
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, HospitalAdmin>
-     */
-    public function getHospitalAdmins(): Collection
-    {
-        return $this->hospitalAdmins;
-    }
-
-    public function addHospitalAdmin(HospitalAdmin $hospitalAdmin): static
-    {
-        if (!$this->hospitalAdmins->contains($hospitalAdmin)) {
-            $this->hospitalAdmins->add($hospitalAdmin);
-            $hospitalAdmin->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHospitalAdmin(HospitalAdmin $hospitalAdmin): static
-    {
-        if ($this->hospitalAdmins->removeElement($hospitalAdmin)) {
-            // set the owning side to null (unless already changed)
-            if ($hospitalAdmin->getUser() === $this) {
-                $hospitalAdmin->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Message>
-     */
-    public function getMessages(): Collection
-    {
-        return $this->messages;
-    }
-
-    public function addMessage(Message $message): static
-    {
-        if (!$this->messages->contains($message)) {
-            $this->messages->add($message);
-            $message->setSender($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMessage(Message $message): static
-    {
-        if ($this->messages->removeElement($message)) {
-            // set the owning side to null (unless already changed)
-            if ($message->getSender() === $this) {
-                $message->setSender(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Message>
-     */
-    public function getMessage(): Collection
-    {
-        return $this->message;
-    }
-
-    /**
-     * @return Collection<int, Patient>
-     */
-    public function getPatients(): Collection
-    {
-        return $this->patients;
-    }
-
-    public function addPatient(Patient $patient): static
-    {
-        if (!$this->patients->contains($patient)) {
-            $this->patients->add($patient);
-            $patient->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removePatient(Patient $patient): static
-    {
-        if ($this->patients->removeElement($patient)) {
-            // set the owning side to null (unless already changed)
-            if ($patient->getUser() === $this) {
-                $patient->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Patient>
-     */
-    public function getPatient(): Collection
-    {
-        return $this->patient;
-    }
-
-    /**
-     * @return Collection<int, SisAdmin>
-     */
-    public function getSisAdmins(): Collection
-    {
-        return $this->sisAdmins;
-    }
-
-    public function addSisAdmin(SisAdmin $sisAdmin): static
-    {
-        if (!$this->sisAdmins->contains($sisAdmin)) {
-            $this->sisAdmins->add($sisAdmin);
-            $sisAdmin->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSisAdmin(SisAdmin $sisAdmin): static
-    {
-        if ($this->sisAdmins->removeElement($sisAdmin)) {
-            // set the owning side to null (unless already changed)
-            if ($sisAdmin->getUser() === $this) {
-                $sisAdmin->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
 }

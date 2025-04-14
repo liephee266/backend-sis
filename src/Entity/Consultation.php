@@ -17,48 +17,51 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(['consultation:read', 'patient:read', 'doctor:read', 'examination:read', 'hospital:read', 'treatment:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Patient::class)]
+    #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?Patient $patient = null;
+
+    #[ORM\ManyToOne(targetEntity: Doctor::class)]
+    #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?Doctor $doctor = null;
+
+    #[ORM\ManyToOne(targetEntity: Hospital::class)]
+    #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?Hospital $hospital = null;
+
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $description = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $prescription = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $diagnostic = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $recommendation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $comment = null;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(['consultation:read'])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
-
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'patient:read'])]
-    private ?Patient $patient = null;
-
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'doctor:read'])]
-    private ?Doctor $doctor = null;
-
-    #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[Groups(['consultation:read', 'hospital:read'])]
-    private ?Hospital $hospital = null;
 
     /**
      * @var Collection<int, Examination>
@@ -72,10 +75,17 @@ class Consultation
     #[ORM\OneToMany(targetEntity: Treatment::class, mappedBy: 'consultation')]
     private Collection $treatments;
 
+    /**
+     * @var Collection<int, DossierMedicale>
+     */
+    #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'consultation_id')]
+    private Collection $dossierMedicales;
+
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
         $this->treatments = new ArrayCollection();
+        $this->dossierMedicales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -250,6 +260,36 @@ class Consultation
             // set the owning side to null (unless already changed)
             if ($treatment->getConsultation() === $this) {
                 $treatment->setConsultation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DossierMedicale>
+     */
+    public function getDossierMedicales(): Collection
+    {
+        return $this->dossierMedicales;
+    }
+
+    public function addDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if (!$this->dossierMedicales->contains($dossierMedicale)) {
+            $this->dossierMedicales->add($dossierMedicale);
+            $dossierMedicale->setConsultationId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDossierMedicale(DossierMedicale $dossierMedicale): static
+    {
+        if ($this->dossierMedicales->removeElement($dossierMedicale)) {
+            // set the owning side to null (unless already changed)
+            if ($dossierMedicale->getConsultationId() === $this) {
+                $dossierMedicale->setConsultationId(null);
             }
         }
 

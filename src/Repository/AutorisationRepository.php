@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\Receptionist;
+use App\Entity\Autorisation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Receptionist>
+ * @extends ServiceEntityRepository<Autorisation>
  */
-class ReceptionistRepository extends ServiceEntityRepository
+class AutorisationRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Receptionist::class);
+        parent::__construct($registry, Autorisation::class);
     }
 
     //    /**
-    //     * @return Receptionist[] Returns an array of Receptionist objects
+    //     * @return Autorisation[] Returns an array of Autorisation objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
+    //        return $this->createQueryBuilder('a')
+    //            ->andWhere('a.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
+    //            ->orderBy('a.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Receptionist
+    //    public function findOneBySomeField($value): ?Autorisation
     //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
+    //        return $this->createQueryBuilder('a')
+    //            ->andWhere('a.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+
 #[ORM\Entity]
 #[ORM\Table(name: "content_Message")]
 class ContentMessage
@@ -14,19 +15,19 @@ class ContentMessage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['content_message:read','message:read'])]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
-    #[Groups(['content_message:read'])]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $msg = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Groups(['content_message:read'])]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $type = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(['content_message:read'])]
+    #[Groups(["contentmessage:read", "message:read"])]
     private ?string $path = null;
 
     /**

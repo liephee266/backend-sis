@@ -16,6 +16,7 @@ class DoctorRepository extends ServiceEntityRepository
         parent::__construct($registry, Doctor::class);
     }
 
+
     //    /**
     //     * @return Doctor[] Returns an array of Doctor objects
     //     */
@@ -39,5 +40,6 @@ class DoctorRepository extends ServiceEntityRepository
     //            ->getQuery()
     //            ->getOneOrNullResult()
     //        ;
-    //    }
+    //    };
+
 }

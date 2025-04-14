@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\Urgentist;
+use App\Entity\DossierMedicale;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Urgentist>
+ * @extends ServiceEntityRepository<DossierMedicale>
  */
-class UrgentistRepository extends ServiceEntityRepository
+class DossierMedicaleRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Urgentist::class);
+        parent::__construct($registry, DossierMedicale::class);
     }
 
     //    /**
-    //     * @return Urgentist[] Returns an array of Urgentist objects
+    //     * @return DossierMedicale[] Returns an array of DossierMedicale objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
+    //        return $this->createQueryBuilder('d')
+    //            ->andWhere('d.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
+    //            ->orderBy('d.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Urgentist
+    //    public function findOneBySomeField($value): ?DossierMedicale
     //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
+    //        return $this->createQueryBuilder('d')
+    //            ->andWhere('d.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()

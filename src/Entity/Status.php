@@ -27,9 +27,16 @@ class Status
     #[ORM\OneToMany(targetEntity: Hospital::class, mappedBy: 'status')]
     private Collection $hospitals;
 
+    /**
+     * @var Collection<int, Autorisation>
+     */
+    #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'status_id')]
+    private Collection $autorisations;
+
     public function __construct()
     {
         $this->hospitals = new ArrayCollection();
+        $this->autorisations = new ArrayCollection();
     }
 
 
@@ -74,6 +81,36 @@ class Status
             // set the owning side to null (unless already changed)
             if ($hospital->getStatus() === $this) {
                 $hospital->setStatus(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Autorisation>
+     */
+    public function getAutorisations(): Collection
+    {
+        return $this->autorisations;
+    }
+
+    public function addAutorisation(Autorisation $autorisation): static
+    {
+        if (!$this->autorisations->contains($autorisation)) {
+            $this->autorisations->add($autorisation);
+            $autorisation->setStatusId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAutorisation(Autorisation $autorisation): static
+    {
+        if ($this->autorisations->removeElement($autorisation)) {
+            // set the owning side to null (unless already changed)
+            if ($autorisation->getStatusId() === $this) {
+                $autorisation->setStatusId(null);
             }
         }
 

@@ -107,6 +107,8 @@ class AgendaController extends AbstractController
         }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
+
+        $data['timeInterval'] = new \DateTimeImmutable($data['timeInterval']);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Agenda", $data);
@@ -141,6 +143,8 @@ class AgendaController extends AbstractController
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
+
+        $data['timeInterval'] = new \DateTimeImmutable($data['timeInterval']);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
