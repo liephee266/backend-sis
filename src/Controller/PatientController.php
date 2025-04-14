@@ -126,7 +126,7 @@ class PatientController extends AbstractController
                     $seen[$patient->getId()] = true;
                 }
             }
-
+            dd($patients);
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
                 'patient' => $patients
             ]);
