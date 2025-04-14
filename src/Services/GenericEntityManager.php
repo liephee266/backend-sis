@@ -35,6 +35,8 @@ class GenericEntityManager
      * @param string $entityClass Nom complet de l'entité (e.g., App\Entity\User)
      * @param array $data Données à mapper sur l'entité
      * @return array Liste des erreurs ou un tableau vide si succès
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
      */
     public function persistEntity(string $entityClass, array $data, bool $update = false): array
     {
@@ -158,7 +160,7 @@ class GenericEntityManager
 
     /**
      * Insère uniquement un user a partir de la methode persistEntity.
-     *Pratique pour inserer un user depuis le controlleur d'une autre entité
+     * Pratique pour inserer un user depuis le controlleur d'une autre entité
      * 
      * @param array $user_data tableaux de données de l'utilisateur
      * @param array $data données à mapper sur l'entité

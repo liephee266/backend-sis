@@ -46,7 +46,7 @@ class SuperAdminController extends AbstractController
     public function index(Request $request): Response
     {
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
-        $filtre = [];
+        $filtre = ['roles' => ['ROLE_SUPER_ADMIN']];
 
         // Récupération des SuperAdmins avec pagination
         $response = $this->toolkit->getPagitionOption($request, 'SuperAdmin', 'superadmin:read', $filtre);
@@ -86,6 +86,8 @@ class SuperAdminController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
+        // Ajout du rôle 'ROLE_ADMIN_SIS' aux rôles de l'utilisateur
+        $data['roles'][] = 'ROLE_SUPER_ADMIN';
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\SuperAdmin", $data);

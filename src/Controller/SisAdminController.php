@@ -48,34 +48,8 @@ class SisAdminController extends AbstractController
     #[Route('/', name: 'urgentist_index', methods: ['GET'])]
     public function index(Request $request): Response
     { 
-        // 1. Récupérer tous les utilisateurs
-        $users = $this->entityManager->getRepository(User::class)->findAll();
-
-        // 2. Filtrer les utilisateurs avec le rôle ROLE_ADMIN_SIS
-        $userIds = [];
-        foreach ($users as $user) {
-            if (in_array('ROLE_ADMIN_SIS', $user->getRoles())) {
-                $userIds[] = $user->getId();
-            }
-        }
-
-        // 3. Si aucun utilisateur correspondant
-        if (empty($userIds)) {
-            return new JsonResponse([
-                'data' => [],
-                'total' => 0,
-                'currentPage' => 1,
-                'maxPerPage' => 10
-            ], Response::HTTP_OK);
-        }
-
-        // 4. Appliquer le filtre sur la relation "user" dans SisAdmin
-        $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
-        // 5. Appeler ta méthode de pagination
-   
-        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', []);
-
-        // 6. Retour de la réponse JSON
+        $filtre = ['roles' => ['ROLE_ADMIN_SIS']];
+        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
         return new JsonResponse($response, Response::HTTP_OK);
     }
 

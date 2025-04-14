@@ -54,8 +54,7 @@ class HospitalController extends AbstractController
 
          // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-           $filtre = ['status' => 2];
-
+            $filtre = ['status' => 2];
         }
 
         // Récupération des utilisateurs avec pagination
