@@ -17,50 +17,50 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
     #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?Patient $patient = null;
 
     #[ORM\ManyToOne(targetEntity: Doctor::class)]
     #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?Doctor $doctor = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $description = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $prescription = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $diagnostic = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $recommendation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $comment = null;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
 
     /**

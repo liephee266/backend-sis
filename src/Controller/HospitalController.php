@@ -121,13 +121,6 @@ class HospitalController extends AbstractController
 
         // Ajouter le statut à la data avant persistance
         $data['status'] = $status->getId();  // Récupérer le statut "en_attente"
-        $status = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'pending']);
-        if (!$status) {
-            return $this->json(['code' => 500, 'message' => "Statut 'pending' introuvable"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        // Ajouter le statut à la data avant persistance
-        $data['status'] = $status->getId();
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Hospital", $data);

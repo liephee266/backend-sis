@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\DossierMedicaleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DossierMedicaleRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: DossierMedicaleRepository::class)]
 class DossierMedicale
@@ -11,25 +12,35 @@ class DossierMedicale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("dossier_medicale:read")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
+    #[Groups("dossier_medicale:read")]
     private ?Consultation $consultation_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
+    #[Groups("dossier_medicale:read")]
     private ?Treatment $treatment_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
+    #[Groups("dossier_medicale:read")]
     private ?Patient $patient_id = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read")]
     private ?array $antecedents_medicaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read")]
     private ?array $medications_actuelles = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read")]
     private ?array $antecedents_familiaux = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $access = null;
 
     public function getId(): ?int
     {
@@ -104,6 +115,18 @@ class DossierMedicale
     public function setAntecedentsFamiliaux(?array $antecedents_familiaux): static
     {
         $this->antecedents_familiaux = $antecedents_familiaux;
+
+        return $this;
+    }
+
+    public function getAccess(): ?array
+    {
+        return $this->access;
+    }
+
+    public function setAccess(?array $access): static
+    {
+        $this->access = $access;
 
         return $this;
     }

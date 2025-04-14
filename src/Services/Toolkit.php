@@ -164,7 +164,7 @@ class Toolkit
         $token = substr($authorizationHeader, 7); 
         $payload = $this->jwtManager->decode($token);
         $user =  $this->entityManager->getRepository(User::class)->findOneBy([
-            "telephone" => $payload["username"]
+            "email" => $payload["username"]
         ]);
         return $user->getRoles();
     }
