@@ -109,7 +109,7 @@ class PatientController extends AbstractController
 
             // Récupérer les consultations liées à cet hôpital
             $consultations = $this->entityManager->getRepository(Consultation::class)
-                ->createQueryBuilder('c')
+                ->createQueryBuilder('c.patient')
                 ->where('c.hospital = :hospital')
                 ->setParameter('hospital', $adminHospital)
                 ->getQuery()
