@@ -105,7 +105,7 @@ class PatientController extends AbstractController
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            $adminHospital = $hospitalAdmin->getHospital();
+            $adminHospital = $hospitalAdmin->getHospital()->getId();
 
             // Récupérer les consultations liées à cet hôpital
             $consultations = $this->entityManager->getRepository(Consultation::class)
