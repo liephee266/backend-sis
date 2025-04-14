@@ -104,7 +104,6 @@ class PatientController extends AbstractController
                     'message' => "Aucun hôpital trouvé pour cet admin."
                 ], Response::HTTP_FORBIDDEN);
             }
-
             $adminHospital = $hospitalAdmin->getHospital()->getId();
 
             // Récupérer les consultations liées à cet hôpital
@@ -117,25 +116,14 @@ class PatientController extends AbstractController
 
             // Extraire les patients uniques
             $patients = [];
-            $seen = [];
-
-            // foreach ($consultations as $consultation) {
-            //     $patient = $consultation-c;
-            //     if (!isset($seen[$patient->getId()])) {
-            //         $patients[] = $patient;
-            //         $seen[$patient->getId()] = true;
-            //     }
-            // }
             $ids = array_map(function($obj) {
                 return $obj->getPatient()->getId();
             }, $consultations);
 
-            // dd(array_unique());
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
                 'id' => $ids
             ]);
         }
-
         // Autres rôles : récupérer tous les patients
         else {
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read');
