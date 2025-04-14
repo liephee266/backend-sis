@@ -131,7 +131,7 @@ class PatientController extends AbstractController
                 return $obj->getPatient()->getId();
             }, $consultations);
 
-            dd($ids);
+            dd(array_unique($ids));
             // $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
             //     'patient' => $patients
             // ]);
