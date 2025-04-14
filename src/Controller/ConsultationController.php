@@ -163,7 +163,7 @@ class ConsultationController extends AbstractController
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a été correctemenm:ù enregistrée, retour d'une réponse JSON avec succès
             return $this->json(['code' => 200, 'message' => "Consultation crée avec succès"], Response::HTTP_OK);
         }
 

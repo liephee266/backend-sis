@@ -262,4 +262,5 @@ class AppController extends AbstractController
         $response = $this->toolkit->getPagitionOption($request, $datapowerbi[$entity_name],  'powerbi');
         return new JsonResponse($response, Response::HTTP_OK);        
     }
+     
 }
