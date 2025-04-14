@@ -126,6 +126,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
     private Collection $autorisations;
 
+    /**
+     * @var Collection<int, AgentHospital>
+     */
+    #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'user')]
+    private Collection $agentHospitals;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -134,6 +140,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
+        $this->agentHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -406,6 +413,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($autorisation->getDemanderId() === $this) {
                 $autorisation->setDemanderId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AgentHospital>
+     */
+    public function getAgentHospitals(): Collection
+    {
+        return $this->agentHospitals;
+    }
+
+    public function addAgentHospital(AgentHospital $agentHospital): static
+    {
+        if (!$this->agentHospitals->contains($agentHospital)) {
+            $this->agentHospitals->add($agentHospital);
+            $agentHospital->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgentHospital(AgentHospital $agentHospital): static
+    {
+        if ($this->agentHospitals->removeElement($agentHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($agentHospital->getUser() === $this) {
+                $agentHospital->setUser(null);
             }
         }
 

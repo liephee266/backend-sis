@@ -101,9 +101,16 @@ class Hospital
     #[ORM\OneToMany(targetEntity: DoctorHospital::class, mappedBy: 'hospital')]
     private Collection $doctorHospitals;
 
+    /**
+     * @var Collection<int, AgentHospitalHospital>
+     */
+    #[ORM\OneToMany(targetEntity: AgentHospitalHospital::class, mappedBy: 'hospital')]
+    private Collection $agentHospitalHospitals;
+
     public function __construct()
     {
         $this->doctorHospitals = new ArrayCollection();
+        $this->agentHospitalHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -324,6 +331,36 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($doctorHospital->getHospital() === $this) {
                 $doctorHospital->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AgentHospitalHospital>
+     */
+    public function getAgentHospitalHospitals(): Collection
+    {
+        return $this->agentHospitalHospitals;
+    }
+
+    public function addAgentHospitalHospital(AgentHospitalHospital $agentHospitalHospital): static
+    {
+        if (!$this->agentHospitalHospitals->contains($agentHospitalHospital)) {
+            $this->agentHospitalHospitals->add($agentHospitalHospital);
+            $agentHospitalHospital->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgentHospitalHospital(AgentHospitalHospital $agentHospitalHospital): static
+    {
+        if ($this->agentHospitalHospitals->removeElement($agentHospitalHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($agentHospitalHospital->getHospital() === $this) {
+                $agentHospitalHospital->setHospital(null);
             }
         }
 
