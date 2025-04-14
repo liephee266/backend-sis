@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Consultation;
 use App\Entity\Doctor;
+use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
@@ -52,46 +53,93 @@ class PatientController extends AbstractController
     #[Route('/', name: 'patient_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCUEIL') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        // Vérification des autorisations
+        if (
+            !$this->security->isGranted('ROLE_DOCTOR') &&
+            !$this->security->isGranted('ROLE_AGENT_ACCUEIL') &&
+            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+        ) {
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Récupération de l'utilisateur connecté
+
         $user = $this->toolkit->getUser($request);
 
-        // Si l'utilisateur est un médecin, filtrer les patients associés à ce médecin
+        // Si utilisateur est un médecin
         if ($this->security->isGranted('ROLE_DOCTOR')) {
-            // Récupérer le médecin associé à l'utilisateur connecté
             $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-            // Vérifier que le médecin existe
             if (!$doctor) {
                 return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
             }
 
-            // Récupérer les patients associés à ce médecin
-            $patient = $this->entityManager->getRepository(Consultation::class)
-                ->createQueryBuilder('c')  // 'c' est l'alias racine (Consultation)
-                ->select('DISTINCT p')     // Sélection distincte des patients
-                ->join('c.patient', 'p')   // Jointure avec Patient
+            // Récupérer les patients associés au médecin via consultations
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')
+                ->join('c.patient', 'p')
                 ->where('c.doctor = :doctor')
-                ->setParameter('doctor', $doctor)  // Passez l'objet Doctor entier, pas juste l'ID
+                ->setParameter('doctor', $doctor)
                 ->getQuery()
                 ->getResult();
-            // Tableau de patients pour la pagination et autres traitements
+
+            $patients = [];
+            foreach ($consultations as $consultation) {
+                $patients[] = $consultation->getPatient();
+            }
+
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
-                'patient' => $patient
+                'patient' => $patients
             ]);
-        } else {
-            // Si l'utilisateur est un agent d'accueil, récupérer tous les patients
+        }
+
+        // Si utilisateur est un admin hospitalier
+        elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Aucun hôpital trouvé pour cet admin."
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $adminHospital = $hospitalAdmin->getHospital();
+
+            // Récupérer les consultations liées à cet hôpital
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')
+                ->join('c.patient', 'p')
+                ->where('c.hospital = :hospital')
+                ->setParameter('hospital', $adminHospital)
+                ->getQuery()
+                ->getResult();
+
+            // Extraire les patients uniques
+            $patients = [];
+            $seen = [];
+
+            foreach ($consultations as $consultation) {
+                $patient = $consultation->getPatient();
+                if (!isset($seen[$patient->getId()])) {
+                    $patients[] = $patient;
+                    $seen[$patient->getId()] = true;
+                }
+            }
+
+            $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
+                'patient' => $patients
+            ]);
+        }
+
+        // Autres rôles : récupérer tous les patients
+        else {
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read');
         }
 
-            // Retour d'une réponse JSON avec les Patients et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
     }
-
     /**
      * Affichage d'un Patient par son ID
      *
@@ -101,20 +149,72 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
-    public function show(Patient $patient): Response
+    public function show(Patient $patient, Request $request): Response
     {
-               // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        // Vérification des autorisations de l'utilisateur connecté
+        if (
+            !$this->security->isGranted('ROLE_DOCTOR') &&
+            !$this->security->isGranted('ROLE_AGENT_ACCUEIL') &&
+            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+        ) {
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
 
-        // Sérialisation de l'entité Patient en JSON avec le groupe de sérialisation 'Patient:read'
-        $patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
-    
-        // Retour de la réponse JSON avec les données de l'Patient et un code HTTP 200
-        return new JsonResponse(["data" => json_decode($patient, true), "code" => 200], Response::HTTP_OK);
+        $user = $this->toolkit->getUser($request);
+
+        // Vérification si l'utilisateur est un admin de l'hôpital
+        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            // Récupérer l'HospitalAdmin de l'utilisateur connecté
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Aucun hôpital trouvé pour cet admin."
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $adminHospital = $hospitalAdmin->getHospital();
+
+
+            // Récupérer les consultations de l'hôpital de l'admin
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')
+                ->join('c.patient', 'p')
+                ->where('c.hospital = :hospital')
+                ->setParameter('hospital', $adminHospital)
+                ->getQuery()
+                ->getResult();
+
+            // Vérifier si une consultation pour ce patient existe dans cet hôpital
+            $patientFound = false;
+            foreach ($consultations as $consultation) {
+                if ($consultation->getPatient()->getId() === $patient->getId()) {
+                    $patientFound = true;
+                    break;
+                }
+            }
+
+            if (!$patientFound) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Ce patient n'a pas de consultation dans votre hôpital."
+                ], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+        // Sérialisation du patient avec le groupe de sérialisation 'patient:read'
+        $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
+
+        return new JsonResponse([
+            'data' => json_decode($patientJson, true),
+            'code' => 200
+        ], Response::HTTP_OK);
     }
+    
 
     /**
      * Création d'un nouvel Patient
