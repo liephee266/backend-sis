@@ -280,7 +280,8 @@ class AppController extends AbstractController
     function archiver($entity_name, int $id): JsonResponse
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+            && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -330,7 +331,8 @@ class AppController extends AbstractController
     function suspendu($entity_name, int $id): JsonResponse
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+            && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }

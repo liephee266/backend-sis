@@ -47,6 +47,9 @@ class Autorisation
     #[ORM\Column(nullable: true)]
     private ?int $date_limit = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $type_demande = null;
+
     public function __construct()
     {
         $this->created_at = new \DateTime();
@@ -172,6 +175,18 @@ class Autorisation
     public function setDateLimit(?int $date_limit): static
     {
         $this->date_limit = $date_limit;
+
+        return $this;
+    }
+
+    public function getTypeDemande(): ?string
+    {
+        return $this->type_demande;
+    }
+
+    public function setTypeDemande(string $type_demande): static
+    {
+        $this->type_demande = $type_demande;
 
         return $this;
     }

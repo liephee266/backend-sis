@@ -77,7 +77,7 @@ class DoctorController extends AbstractController
     public function show(Doctor $doctor): Response
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -101,7 +101,8 @@ class DoctorController extends AbstractController
     public function create(Request $request): Response
     {
 
-        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+        //         && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
         //     # code...
         //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         // }
@@ -155,7 +156,8 @@ class DoctorController extends AbstractController
     public function update(Request $request,  $id): Response
     {
 
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -166,11 +168,23 @@ class DoctorController extends AbstractController
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
 
+        // Modification du User
+        $user_data = [
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+            'id' => $data['id']
+        ];
+
         // Conversion de la date de service en objet DateTime
         $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Doctor", $data, true);
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {

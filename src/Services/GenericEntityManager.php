@@ -107,8 +107,8 @@ class GenericEntityManager
     }
 
     /**
-     * Insère une entité basée sur la création du User.
-     *Pratique pour assigner un utilisateur a une autre entité au même moment quand les créés
+     * Insère ou modifie une entité basée sur la création du User.
+     *Pratique pour assigner ou modifier un utilisateur a une autre entité au même moment quand crée ou modifie cette entité     
      * 
      * @param string $entityClass Nom complet de l'entité
      * @param array $user_data tableaux de données de l'utilisateur
@@ -117,43 +117,74 @@ class GenericEntityManager
      * 
      * @author Michel MIYALOU <michelmiyalou@gmail.com>
      */
-    public function persistEntityUser(string $entityClass ,array $user_data, $data)
+    public function persistEntityUser(string $entityClass ,array $user_data, $data, bool $update = false)
     {
 
-        // Validation des données requises
-        if (!isset($data['email']) || !isset($data['password'])) {
-            return new JsonResponse(
-                ['code' => 400, 'message' => "Données manquantes"], 
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+        if ($update==false) {
+            // Validation des données requises
+            if (!isset($data['email']) || !isset($data['password'])) {
+                return new JsonResponse(
+                    ['code' => 400, 'message' => "Données manquantes"], 
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
 
-         // Début de la transaction
-        $this->entityManager->beginTransaction();
+            // Début de la transaction
+            $this->entityManager->beginTransaction();
 
 
-        $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
+            $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
+                
+            if (!empty($errors_user['errors'])) {
+                return new JsonResponse(
+                    ['code' => 400, 'message' => "Erreur lors de la création de l'utilisateur: "], Response::HTTP_BAD_REQUEST);
+            }
             
-        if (!empty($errors_user['errors'])) {
-            return new JsonResponse(
-                ['code' => 400, 'message' => "Erreur lors de la création de l'utilisateur: "], Response::HTTP_BAD_REQUEST);
-        }
-        
-        // Préparation des données de l'entité
-        $entite_data = $data;
-        $entite_data['user'] = $errors_user['entity']->getId();
-        
-        // Création de l'entite
-        $errors_entite = $this->persistEntity($entityClass, $entite_data);
-        
-        if (!empty($errors_entite['errors'])) {
-            return new JsonResponse(
-                ['code' => 400, 'message' => "Erreur lors de la création"], Response::HTTP_BAD_REQUEST);
+            // Préparation des données de l'entité
+            $entite_data = $data;
+            $entite_data['user'] = $errors_user['entity']->getId();
+            
+            // Création de l'entite
+            $errors_entite = $this->persistEntity($entityClass, $entite_data);
+            
+            if (!empty($errors_entite['errors'])) {
+                return new JsonResponse(
+                    ['code' => 400, 'message' => "Erreur lors de la création"], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Validation de la transaction
+            $this->entityManager->commit();
+            return ["entity" => $errors_entite['entity']];
+        }else {
+
+            // Début de la transaction
+            $this->entityManager->beginTransaction();
+
+            $errors_user = $this->persistEntity("App\Entity\User", $user_data, true); 
+                
+            if (!empty($errors_user['errors'])) {
+                return new JsonResponse(
+                    ['code' => 400, 'message' => "Erreur lors de la modification de l'utilisateur: "], Response::HTTP_BAD_REQUEST);
+            }
+            
+            // Préparation des données de l'entité
+            $entite_data = $data;
+            $entite_data['user'] = $errors_user['entity']->getId();
+            
+            // Création de l'entite
+            $errors_entite = $this->persistEntity($entityClass, $entite_data, true);
+            
+            if (!empty($errors_entite['errors'])) {
+                return new JsonResponse(
+                    ['code' => 400, 'message' => "Erreur lors de la modification"], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Validation de la transaction
+            $this->entityManager->commit();
+            return ["entity" => $errors_entite['entity']];
         }
 
-        // Validation de la transaction
-        $this->entityManager->commit();
-        return ["entity" => $errors_entite['entity']];
+        
     }
 
     /**

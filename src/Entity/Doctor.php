@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Entity\Service;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -72,6 +74,17 @@ class Doctor
 
     #[ORM\Column(nullable: true)]
     private ?bool $isSuspended = null;
+
+    /**
+     * @var Collection<int, DoctorHospital>
+     */
+    #[ORM\OneToMany(targetEntity: DoctorHospital::class, mappedBy: 'doctor')]
+    private Collection $doctorHospitals;
+
+    public function __construct()
+    {
+        $this->doctorHospitals = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -221,6 +234,36 @@ class Doctor
     public function setIsSuspended(?bool $isSuspended): static
     {
         $this->isSuspended = $isSuspended;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DoctorHospital>
+     */
+    public function getDoctorHospitals(): Collection
+    {
+        return $this->doctorHospitals;
+    }
+
+    public function addDoctorHospital(DoctorHospital $doctorHospital): static
+    {
+        if (!$this->doctorHospitals->contains($doctorHospital)) {
+            $this->doctorHospitals->add($doctorHospital);
+            $doctorHospital->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctorHospital(DoctorHospital $doctorHospital): static
+    {
+        if ($this->doctorHospitals->removeElement($doctorHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($doctorHospital->getDoctor() === $this) {
+                $doctorHospital->setDoctor(null);
+            }
+        }
 
         return $this;
     }
