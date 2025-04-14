@@ -104,8 +104,8 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        //  // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        // // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
         //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
         //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         // }

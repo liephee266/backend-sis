@@ -50,7 +50,8 @@ class DoctorController extends AbstractController
     public function index(Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -77,10 +78,11 @@ class DoctorController extends AbstractController
     public function show(Doctor $doctor): Response
     {
 
-        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
-        //     # code...
-        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        // }
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
 
         // Sérialisation de l'entité Doctor en JSON avec le groupe de sérialisation 'Doctor:read'
         $doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
@@ -101,7 +103,8 @@ class DoctorController extends AbstractController
     public function create(Request $request): Response
     {
 
-        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')) {
+        // if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
+        //         && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
         //     # code...
         //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         // }
@@ -155,10 +158,11 @@ class DoctorController extends AbstractController
     public function update(Request $request,  $id): Response
     {
 
-        // if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-        //     # code...
-        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        // }
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);

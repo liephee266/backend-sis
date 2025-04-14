@@ -49,6 +49,12 @@ class AgentHopitalController extends AbstractController
     #[Route('/', name: 'agenthopital_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -70,6 +76,12 @@ class AgentHopitalController extends AbstractController
     #[Route('/{id}', name: 'agenthopital_show', methods: ['GET'])]
     public function show(User $agenthopital): Response
     {
+
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
         $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agent_hopital:read']);
     
@@ -88,6 +100,12 @@ class AgentHopitalController extends AbstractController
     #[Route('/', name: 'agenthopital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
@@ -133,6 +151,12 @@ class AgentHopitalController extends AbstractController
     #[Route('/{id}', name: 'agenthopital_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     

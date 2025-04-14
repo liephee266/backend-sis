@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\Status;
 use App\Entity\Service;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -92,6 +94,17 @@ class Hospital
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?Status $status = null;
+
+    /**
+     * @var Collection<int, DoctorHospital>
+     */
+    #[ORM\OneToMany(targetEntity: DoctorHospital::class, mappedBy: 'hospital')]
+    private Collection $doctorHospitals;
+
+    public function __construct()
+    {
+        $this->doctorHospitals = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -286,4 +299,35 @@ class Hospital
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, DoctorHospital>
+     */
+    public function getDoctorHospitals(): Collection
+    {
+        return $this->doctorHospitals;
+    }
+
+    public function addDoctorHospital(DoctorHospital $doctorHospital): static
+    {
+        if (!$this->doctorHospitals->contains($doctorHospital)) {
+            $this->doctorHospitals->add($doctorHospital);
+            $doctorHospital->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctorHospital(DoctorHospital $doctorHospital): static
+    {
+        if ($this->doctorHospitals->removeElement($doctorHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($doctorHospital->getHospital() === $this) {
+                $doctorHospital->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
 }
