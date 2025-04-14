@@ -109,7 +109,8 @@ class PatientController extends AbstractController
 
             // Récupérer les consultations liées à cet hôpital
             $consultations = $this->entityManager->getRepository(Consultation::class)
-                ->createQueryBuilder('c.patient', 'p')
+                ->createQueryBuilder('c')
+
                 ->where('c.hospital = :hospital')
                 ->setParameter('hospital', $adminHospital)
                 ->getQuery()
@@ -119,17 +120,21 @@ class PatientController extends AbstractController
             $patients = [];
             $seen = [];
 
-            foreach ($consultations as $consultation) {
-                $patient = $consultation->getPatient();
-                if (!isset($seen[$patient->getId()])) {
-                    $patients[] = $patient;
-                    $seen[$patient->getId()] = true;
-                }
-            }
-            dd($patients);
-            $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
-                'patient' => $patients
-            ]);
+            // foreach ($consultations as $consultation) {
+            //     $patient = $consultation-c;
+            //     if (!isset($seen[$patient->getId()])) {
+            //         $patients[] = $patient;
+            //         $seen[$patient->getId()] = true;
+            //     }
+            // }
+            $ids = array_map(function($obj) {
+                return $obj->getPatient()->getId();
+            }, $consultations);
+
+            dd($ids);
+            // $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
+            //     'patient' => $patients
+            // ]);
         }
 
         // Autres rôles : récupérer tous les patients
