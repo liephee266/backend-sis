@@ -61,9 +61,9 @@ class AgentHopitalController extends AbstractController
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
-         // Si c'est un admin hospitalier, on filtre les docteurs liés à son hôpital
+        $user = $this->toolkit->getUser($request);
+         // Si c'est un admin hospitalier, on filtre les agent_d'acceulls liés à son hôpital
         if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            $user = $this->toolkit->getUser($request);
 
             $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
                 ->findOneBy(['user' => $user]);
@@ -138,7 +138,7 @@ class AgentHopitalController extends AbstractController
 
             if (!$agentHospital) {
                 return new JsonResponse([
-                    "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
+                    "message" => "Cet agent hopital n'est pas rattaché à votre hôpital.",
                     "code" => 403
                 ], Response::HTTP_FORBIDDEN);
             }
@@ -228,7 +228,7 @@ class AgentHopitalController extends AbstractController
         // Récupération de l'agent hospital à modifier
         $agenthopital = $this->entityManager->getRepository(AgentHospital::class)->find($id);
         if (!$agenthopital) {
-            return $this->json(['code' => 404, 'message' => "Agentn Hospital introuvable"], Response::HTTP_NOT_FOUND);
+            return $this->json(['code' => 404, 'message' => "Agent Hospital introuvable"], Response::HTTP_NOT_FOUND);
         }
 
         // Vérification que l'admin hospitalier modifie un agent hospital de son hôpital

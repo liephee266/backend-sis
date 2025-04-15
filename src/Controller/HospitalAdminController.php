@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des HospitalAdmin
@@ -25,13 +26,16 @@ class HospitalAdminController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
+
     }
 
     /**
@@ -45,6 +49,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/', name: 'hospitaladmin_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+         if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,6 +74,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_show', methods: ['GET'])]
     public function show(HospitalAdmin $hospitaladmin): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Sérialisation de l'entité HospitalAdmin en JSON avec le groupe de sérialisation 'HospitalAdmin:read'
         $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospital_admin:read']);
     
@@ -84,6 +96,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/', name: 'hospitaladmin_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
@@ -112,6 +128,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     
@@ -143,6 +163,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_delete', methods: ['DELETE'])]
     public function delete(HospitalAdmin $hospitaladmin, EntityManagerInterface $entityManager): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité HospitalAdmin passée en paramètre
         $entityManager->remove($hospitaladmin);
     

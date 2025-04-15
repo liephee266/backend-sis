@@ -106,10 +106,10 @@ class HospitalController extends AbstractController
     public function create(Request $request): Response
     {
         // // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
-        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        // }
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -162,10 +162,10 @@ class HospitalController extends AbstractController
             return new JsonResponse(['message' => 'Hôpital non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-    // Vérification que le statut est "validated" pour permettre la modification
-    if (!$hospital->getStatus() || $hospital->getStatus()->getName() !== 'validated') {
-        return new JsonResponse(['message' => 'Le statut de l\'hôpital doit être "validated" pour la modification'], Response::HTTP_BAD_REQUEST);
-    }
+    // // Vérification que le statut est "validated" pour permettre la modification
+    // if (!$hospital->getStatus() || $hospital->getStatus()->getName() !== 'validated') {
+    //     return new JsonResponse(['message' => 'Le statut de l\'hôpital doit être "validated" pour la modification'], Response::HTTP_BAD_REQUEST);
+    // }
 
     // Si le statut est "validated", on peut mettre à jour les autres informations
     // On peut ignorer les modifications concernant le statut, car seul le super admin peut le modifier directement
@@ -212,6 +212,10 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_delete', methods: ['DELETE'])]
     public function delete(Hospital $hospital, EntityManagerInterface $entityManager): Response
     {
+         if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité Hospital passée en paramètre
         $entityManager->remove($hospital);
     

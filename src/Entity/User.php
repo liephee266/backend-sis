@@ -132,6 +132,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'user')]
     private Collection $agentHospitals;
 
+    /**
+     * @var Collection<int, AgentHospitalHospital>
+     */
+    #[ORM\OneToMany(targetEntity: AgentHospitalHospital::class, mappedBy: 'user')]
+    private Collection $agentHospitalHospitals;
+
+    /**
+     * @var Collection<int, AdminHospiatlHospital>
+     */
+    #[ORM\OneToMany(targetEntity: AdminHospitalHospital::class, mappedBy: 'user')]
+    private Collection $adminHospiatlHospitals;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -141,6 +153,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
         $this->agentHospitals = new ArrayCollection();
+        $this->agentHospitalHospitals = new ArrayCollection();
+        $this->adminHospiatlHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -443,6 +457,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($agentHospital->getUser() === $this) {
                 $agentHospital->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AgentHospitalHospital>
+     */
+    public function getAgentHospitalHospitals(): Collection
+    {
+        return $this->agentHospitalHospitals;
+    }
+
+    public function addAgentHospitalHospital(AgentHospitalHospital $agentHospitalHospital): static
+    {
+        if (!$this->agentHospitalHospitals->contains($agentHospitalHospital)) {
+            $this->agentHospitalHospitals->add($agentHospitalHospital);
+            $agentHospitalHospital->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgentHospitalHospital(AgentHospitalHospital $agentHospitalHospital): static
+    {
+        if ($this->agentHospitalHospitals->removeElement($agentHospitalHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($agentHospitalHospital->getUser() === $this) {
+                $agentHospitalHospital->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AdminHospiatlHospital>
+     */
+    public function getAdminHospiatlHospitals(): Collection
+    {
+        return $this->adminHospiatlHospitals;
+    }
+
+    public function addAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
+    {
+        if (!$this->adminHospiatlHospitals->contains($adminHospiatlHospital)) {
+            $this->adminHospiatlHospitals->add($adminHospiatlHospital);
+            $adminHospiatlHospital->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
+    {
+        if ($this->adminHospiatlHospitals->removeElement($adminHospiatlHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($adminHospiatlHospital->getUser() === $this) {
+                $adminHospiatlHospital->setUser(null);
             }
         }
 
