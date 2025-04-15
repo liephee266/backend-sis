@@ -76,14 +76,14 @@ class Doctor
     private ?bool $isSuspended = null;
 
     /**
-     * @var Collection<int, DoctorHospital>
+     * @var Collection<int, Hospital>
      */
-    #[ORM\OneToMany(targetEntity: DoctorHospital::class, mappedBy: 'doctor')]
-    private Collection $doctorHospitals;
+    #[ORM\ManyToMany(targetEntity: Hospital::class, inversedBy: 'doctors')]
+    private Collection $hospital;
 
     public function __construct()
     {
-        $this->doctorHospitals = new ArrayCollection();
+        $this->hospital = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -239,31 +239,25 @@ class Doctor
     }
 
     /**
-     * @return Collection<int, DoctorHospital>
+     * @return Collection<int, Hospital>
      */
-    public function getDoctorHospitals(): Collection
+    public function getHospital(): Collection
     {
-        return $this->doctorHospitals;
+        return $this->hospital;
     }
 
-    public function addDoctorHospital(DoctorHospital $doctorHospital): static
+    public function addHospital(Hospital $hospital): static
     {
-        if (!$this->doctorHospitals->contains($doctorHospital)) {
-            $this->doctorHospitals->add($doctorHospital);
-            $doctorHospital->setDoctor($this);
+        if (!$this->hospital->contains($hospital)) {
+            $this->hospital->add($hospital);
         }
 
         return $this;
     }
 
-    public function removeDoctorHospital(DoctorHospital $doctorHospital): static
+    public function removeHospital(Hospital $hospital): static
     {
-        if ($this->doctorHospitals->removeElement($doctorHospital)) {
-            // set the owning side to null (unless already changed)
-            if ($doctorHospital->getDoctor() === $this) {
-                $doctorHospital->setDoctor(null);
-            }
-        }
+        $this->hospital->removeElement($hospital);
 
         return $this;
     }

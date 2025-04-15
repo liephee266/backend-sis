@@ -42,6 +42,9 @@ class Meeting
     #[Groups(["meeting:read"])]
     private ?Patient $patient_id = null;
 
+    #[ORM\ManyToOne(inversedBy: 'meetings')]
+    private ?State $state_id = null;
+
     // ✅ Getters & Setters
 
     public function getId(): ?int
@@ -114,6 +117,18 @@ class Meeting
     public function setPatientId(?Patient $patient_id): static
     {
         $this->patient_id = $patient_id;
+
+        return $this;
+    }
+
+    public function getStateId(): ?State
+    {
+        return $this->state_id;
+    }
+
+    public function setStateId(?State $state_id): static
+    {
+        $this->state_id = $state_id;
 
         return $this;
     }

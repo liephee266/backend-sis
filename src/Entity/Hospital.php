@@ -96,14 +96,14 @@ class Hospital
     private ?Status $status = null;
 
     /**
-     * @var Collection<int, DoctorHospital>
+     * @var Collection<int, Doctor>
      */
-    #[ORM\OneToMany(targetEntity: DoctorHospital::class, mappedBy: 'hospital')]
-    private Collection $doctorHospitals;
+    #[ORM\ManyToMany(targetEntity: Doctor::class, mappedBy: 'hospital')]
+    private Collection $doctors;
 
     public function __construct()
     {
-        $this->doctorHospitals = new ArrayCollection();
+        $this->doctors = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -301,30 +301,27 @@ class Hospital
     }
 
     /**
-     * @return Collection<int, DoctorHospital>
+     * @return Collection<int, Doctor>
      */
-    public function getDoctorHospitals(): Collection
+    public function getDoctors(): Collection
     {
-        return $this->doctorHospitals;
+        return $this->doctors;
     }
 
-    public function addDoctorHospital(DoctorHospital $doctorHospital): static
+    public function addDoctor(Doctor $doctor): static
     {
-        if (!$this->doctorHospitals->contains($doctorHospital)) {
-            $this->doctorHospitals->add($doctorHospital);
-            $doctorHospital->setHospital($this);
+        if (!$this->doctors->contains($doctor)) {
+            $this->doctors->add($doctor);
+            $doctor->addHospital($this);
         }
 
         return $this;
     }
 
-    public function removeDoctorHospital(DoctorHospital $doctorHospital): static
+    public function removeDoctor(Doctor $doctor): static
     {
-        if ($this->doctorHospitals->removeElement($doctorHospital)) {
-            // set the owning side to null (unless already changed)
-            if ($doctorHospital->getHospital() === $this) {
-                $doctorHospital->setHospital(null);
-            }
+        if ($this->doctors->removeElement($doctor)) {
+            $doctor->removeHospital($this);
         }
 
         return $this;

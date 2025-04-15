@@ -8,7 +8,6 @@ use App\Entity\Status;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
 use App\Entity\Autorisation;
-use App\Entity\DoctorHospital;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -144,10 +143,6 @@ class AutorisationController extends AbstractController
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $data);
 
-        $doctor = $this->entityManager->getRepository(DoctorHospital::class)->setDoctor($id);
-        $this->entityManager->persist($doctor);
-        $this->entityManager->flush();
-
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
             // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
@@ -206,34 +201,68 @@ class AutorisationController extends AbstractController
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Autorisation"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }else{
-            // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
             $data = json_decode($request->getContent(), true);
 
-            $user_connect = $this->toolkit->getUser($request)->getId();
+            if ($data['status_id'] === 2) {
+                // Mise à jour de l'autorisation
+                $autorisation_affiliation = [
+                    'updated_at' => new \DateTime(),
+                    'id' => $id,
+                    'status_id' => $data['status_id'],
+                ];
+            
+                $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $autorisation_affiliation, true);
+            
+                // Récupération des entités
+                $autorisation = $this->entityManager->getRepository(Autorisation::class);
+                if (!$autorisation) {
+                    return $this->json(['code' => 404, 'message' => "Autorisation non trouvée"], Response::HTTP_NOT_FOUND);
+                }
+            
+                $demander_id = $autorisation->find($id)->getDemanderId();
+                $user = $this->entityManager->getRepository(User::class)->find($demander_id);
+                if (!$user) {
+                    return $this->json(['code' => 404, 'message' => "Utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
+                }
+            
+                $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+                if (!$doctor) {
+                    return $this->json(['code' => 404, 'message' => "Docteur non trouvé"], Response::HTTP_NOT_FOUND);
+                }
+            
+                $hospital = $this->entityManager->getRepository(Hospital::class)->find($autorisation->find($id)->getEntityId());
 
-            // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
-            $data['id'] = $id;
+                if (!$hospital) {
+                    return $this->json(['code' => 404, 'message' => "Hôpital non trouvé"], Response::HTTP_NOT_FOUND);
+                }
+            
+                // Établir la relation
+                $hospital->addDoctor($doctor);
 
-            $autorisation_affiliation = [
-                'status_id' => $data['status_id'],
-                'updated_at' => new \DateTime(),
-                'id' => $data['id'],
-            ];
+                $this->entityManager->persist($hospital); // ou $doctor selon la relation
+                $this->entityManager->flush();
 
-            // Appel à la méthode persistEntity pour mettre à jour l'entité Autorisation dans la base de données
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $autorisation_affiliation, true);
-
-            // Vérification si l'entité a été mise à jour sans erreur
-            if (!empty($errors['entity'])) {
-                // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
-                return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
+            }else {
+                // Mise à jour de l'autorisation
+                $autorisation_affiliation = [
+                    'updated_at' => new \DateTime(),
+                    'id' => $id,
+                    'status_id' => $data['status_id'],
+                ];
+            
+                $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $autorisation_affiliation, true);
+                
+                // Vérification si l'entité a été mise à jour sans erreur
+                if (!empty($errors['entity'])) {
+                    // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
+                    return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
+                }
+            
+                // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
+                return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Autorisation"], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Autorisation"], Response::HTTP_INTERNAL_SERVER_ERROR);
-
         }
-        
     }
     
     /**

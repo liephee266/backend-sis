@@ -27,9 +27,16 @@ class State
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'state_id')]
     private Collection $notifications;
 
+    /**
+     * @var Collection<int, Meeting>
+     */
+    #[ORM\OneToMany(targetEntity: Meeting::class, mappedBy: 'state_id')]
+    private Collection $meetings;
+
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
+        $this->meetings = new ArrayCollection();
     }
 
     // ✅ Getters & Setters
@@ -74,6 +81,36 @@ class State
             // set the owning side to null (unless already changed)
             if ($notification->getStateId() === $this) {
                 $notification->setStateId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Meeting>
+     */
+    public function getMeetings(): Collection
+    {
+        return $this->meetings;
+    }
+
+    public function addMeeting(Meeting $meeting): static
+    {
+        if (!$this->meetings->contains($meeting)) {
+            $this->meetings->add($meeting);
+            $meeting->setStateId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMeeting(Meeting $meeting): static
+    {
+        if ($this->meetings->removeElement($meeting)) {
+            // set the owning side to null (unless already changed)
+            if ($meeting->getStateId() === $this) {
+                $meeting->setStateId(null);
             }
         }
 

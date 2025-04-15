@@ -190,20 +190,8 @@ class PatientController extends AbstractController
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
     
-        // Modification du User
-        $user_data = [
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'nickname' => $data['nickname'],
-            'tel' => $data['tel'],
-            'birth' => new \DateTime($data['birth']),
-            'gender' => $data['gender'],
-            'address' => $data['address'],
-            'id' => $data['id']
-        ];
-    
         // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
-        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data, true);
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {

@@ -54,8 +54,7 @@ class HospitalController extends AbstractController
 
          // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-           $filtre = ['status' => 2];
-
+            $filtre = ['status' => 2];
         }
 
         // Récupération des utilisateurs avec pagination
@@ -146,10 +145,7 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-        // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
-        $data = json_decode($request->getContent(), true);
-
-         // Vérification des permissions : si l'utilisateur n'est pas un super admin ou un admin_sis
+        // Vérification des permissions : si l'utilisateur n'est pas un super admin ou un admin_sis
         if (!$this->isGranted('ROLE_ADMIN_SIS') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
             return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
         }
@@ -161,14 +157,14 @@ class HospitalController extends AbstractController
             return new JsonResponse(['message' => 'Hôpital non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-    // Vérification que le statut est "validated" pour permettre la modification
-    if (!$hospital->getStatus() || $hospital->getStatus()->getName() !== 'validated') {
-        return new JsonResponse(['message' => 'Le statut de l\'hôpital doit être "validated" pour la modification'], Response::HTTP_BAD_REQUEST);
-    }
+        // // Vérification que le statut est "validated" pour permettre la modification
+        // if (!$hospital->getStatus() || $hospital->getStatus()->getName() !== 'validated') {
+        //     return new JsonResponse(['message' => 'Le statut de l\'hôpital doit être "validated" pour la modification'], Response::HTTP_BAD_REQUEST);
+        // }
 
-    // Si le statut est "validated", on peut mettre à jour les autres informations
-    // On peut ignorer les modifications concernant le statut, car seul le super admin peut le modifier directement
-    
+        // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
+        $data = json_decode($request->getContent(), true);
+        
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
     
@@ -178,7 +174,6 @@ class HospitalController extends AbstractController
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
             // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-            return $this->json(['code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
             return $this->json(['code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
         }
     
