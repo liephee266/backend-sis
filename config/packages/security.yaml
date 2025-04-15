@@ -29,5 +29,6 @@ security:
 
     access_control:
         - { path: ^/api/v1/connexion, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/urgencys, roles: PUBLIC_ACCESS }
         # - { path: ^/api/v1/main/powerbi/*, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: PUBLIC_ACCESS }

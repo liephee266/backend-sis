@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Urgency;
 use App\Entity\User;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
@@ -12,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Urgentist
@@ -25,13 +27,15 @@ class UrgentistController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private Security $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit,Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -45,6 +49,11 @@ class UrgentistController extends AbstractController
     #[Route('/', name: 'urgentist_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+          // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -66,6 +75,11 @@ class UrgentistController extends AbstractController
     #[Route('/{id}', name: 'urgentist_show', methods: ['GET'])]
     public function show(User $urgentist): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Sérialisation de l'entité Urgentist en JSON avec le groupe de sérialisation 'Urgentist:read'
         $urgentist = $this->serializer->serialize($urgentist, 'json', ['groups' => 'urgentist:read']);
     
@@ -84,6 +98,11 @@ class UrgentistController extends AbstractController
     #[Route('/', name: 'urgentist_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
         
@@ -130,9 +149,14 @@ class UrgentistController extends AbstractController
     #[Route('/{id}', name: 'urgentist_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-    
+
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
     
@@ -161,6 +185,11 @@ class UrgentistController extends AbstractController
     #[Route('/{id}', name: 'urgentist_delete', methods: ['DELETE'])]
     public function delete(User $urgentist, EntityManagerInterface $entityManager): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité Urgentist passée en paramètre
         $entityManager->remove($urgentist);
     
