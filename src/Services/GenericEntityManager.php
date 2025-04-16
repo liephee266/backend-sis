@@ -117,7 +117,7 @@ class GenericEntityManager
      * 
      * @author Michel MIYALOU <michelmiyalou@gmail.com>
      */
-    public function persistEntityUser(string $entityClass ,array $user_data, $data, bool $update = false)
+    public function persistEntityUser(string $entityClass ,array $user_data, $data)
     {
 
         // Validation des données requises

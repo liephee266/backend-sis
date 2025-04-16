@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\AgentHospital;
-use App\Entity\AgentHospitalHospital;
 use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
@@ -15,7 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -53,10 +51,10 @@ class AgentHopitalController extends AbstractController
     public function index(Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            # code...
-            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        }
+        // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        //     # code...
+        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        // }
 
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
@@ -108,7 +106,7 @@ class AgentHopitalController extends AbstractController
     public function show(User $agenthopital, Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+        if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -163,10 +161,10 @@ class AgentHopitalController extends AbstractController
     public function create(Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
-            # code...
-            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        }
+        // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+        //     # code...
+        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        // }
 
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
@@ -178,7 +176,7 @@ class AgentHopitalController extends AbstractController
         $user_data = [
             'email' => $data['email'],
             'password' => $data['password'],
-            'roles' => ["ROLE_AGENT_HOPITAL"],
+            'roles' => ["ROLE_AGENT_HOSPITAL"],
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'nickname' => $data['nickname'],
@@ -188,7 +186,7 @@ class AgentHopitalController extends AbstractController
             'address' => $data['address'],
         ];
         
-        $errors = $this->genericEntityManager->persistUser($user_data, $data);
+        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\AgentHospital", $user_data, $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
@@ -214,7 +212,7 @@ class AgentHopitalController extends AbstractController
     public function update(Request $request,  $id): Response
     {
 
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -262,21 +260,8 @@ class AgentHopitalController extends AbstractController
         // Préparer les données de mise à jour
         $data['id'] = $id;
 
-        $user_data = [
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'nickname' => $data['nickname'],
-            'tel' => $data['tel'],
-            'birth' => new \DateTime($data['birth']),
-            'gender' => $data['gender'],
-            'address' => $data['address'],
-            'id' => $id
-        ];
-
-        $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
-
         // Appel à la méthode persistEntity pour mettre à jour l'entité AgentHopital dans la base de données
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\User",$user_data, $data, true);
+        $errors = $this->genericEntityManager->persistEntity("App\Entity\AgentHospital", $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
