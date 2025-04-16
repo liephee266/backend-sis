@@ -49,7 +49,7 @@ public function onSecurityAuthenticationSuccess(AuthenticationSuccessEvent $even
     $data_user = json_decode($data_user, true);
     $data['user'] = $data_user;
     
-    $data['user']['role'] = $user->getRoles()[0];
+    $data['user']['role'] = $user->getRoles();
     unset($data['user']['roles']);
     $event->setData($data);
     
