@@ -28,7 +28,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $uuid = null;
@@ -61,7 +61,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;

@@ -14,11 +14,11 @@ class TypeHopital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['hospital:read'])]
+    #[Groups(["data_select",'hospital:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['hospital:read'])]
+    #[Groups(["data_select",'hospital:read'])]
     private ?string $name = null;
 
     /**

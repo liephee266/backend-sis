@@ -13,17 +13,17 @@ class Urgency
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups("urgency:read")]
+    #[Groups(["data_select","urgency:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
     #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups("urgency:read")]
+    #[Groups(["data_select","urgency:read"])]
     private ?Patient $patient = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups("urgency:read")]
+    #[Groups(["data_select","urgency:read"])]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'urgencies')]
