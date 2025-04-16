@@ -3,6 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\AgentHospital;
+<<<<<<< HEAD
+use App\Entity\AgentHospitalHospital;
+use App\Entity\Hospital;
+=======
+>>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
@@ -51,10 +56,17 @@ class AgentHopitalController extends AbstractController
     public function index(Request $request): Response
     {
 
+<<<<<<< HEAD
+        if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+=======
         // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
         //     # code...
         //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         // }
+>>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
@@ -80,7 +92,7 @@ class AgentHopitalController extends AbstractController
             $doctorHops = $agentHospitalRepository->findBy(['hospital' => $hospital]);
 
             $doctorIds = array_map(function ($dh) {
-                return $dh->getAgentHospital()->getId();
+                return $dh->getId();
             }, $doctorHops);
 
             // Ajouter ce filtre pour n'afficher que les agents hospital de cet hôpital
@@ -130,7 +142,7 @@ class AgentHopitalController extends AbstractController
             // Vérifier que le docteur appartient bien à cet hôpital
             $agentHospital = $this->entityManager->getRepository(AgentHospital::class)
                 ->findOneBy([
-                    'agentHospital' => $agenthopital,
+                    'user' => $agenthopital,
                     'hospital' => $hospital
                 ]);
 
@@ -143,7 +155,7 @@ class AgentHopitalController extends AbstractController
         }
 
         // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
-        $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agent_hopital:read']);
+        $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'user:read']);
     
         // Retour de la réponse JSON avec les données de l'AgentHopital et un code HTTP 200
         return new JsonResponse(["data" => json_decode($agenthopital, true), "code" => 200], Response::HTTP_OK);
@@ -161,10 +173,17 @@ class AgentHopitalController extends AbstractController
     public function create(Request $request): Response
     {
 
+<<<<<<< HEAD
+        if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+=======
         // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
         //     # code...
         //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         // }
+>>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
@@ -212,7 +231,11 @@ class AgentHopitalController extends AbstractController
     public function update(Request $request,  $id): Response
     {
 
+<<<<<<< HEAD
+        if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+=======
         if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+>>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
