@@ -86,12 +86,7 @@ class GenericEntityManager
                     // Récupère la collection existante (pour les updates)
                     $collection = $this->propertyAccessor->getValue($entity, $field);
                     
-                    // Si c'est une ArrayCollection, on la clear d'abord
-                    if ($collection instanceof PersistentCollection || $collection instanceof ArrayCollection) {
-                        $collection->clear();
-                    } else {
-                        $collection = new ArrayCollection();
-                    }
+                    $collection = new ArrayCollection();
                     
                     // Ajoute chaque entité associée
                     foreach ($ids as $id) {

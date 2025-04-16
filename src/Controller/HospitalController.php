@@ -146,10 +146,10 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-        // Vérification des permissions : si l'utilisateur n'est pas un super admin ou un admin_sis
-        if (!$this->isGranted('ROLE_ADMIN_SIS') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
-            return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
-        }
+        // // Vérification des permissions : si l'utilisateur n'est pas un super admin ou un admin_sis
+        // if (!$this->isGranted('ROLE_ADMIN_SIS') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
+        //     return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
+        // }
 
         // Récupération de l'hôpital existant dans la base de données
         $hospital = $this->entityManager->getRepository(Hospital::class)->find($id);
