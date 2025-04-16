@@ -102,20 +102,14 @@ class Hospital
     private Collection $doctors;
 
     /**
-     * @var Collection<int, AgentHospitalHospital>
+     * @var Collection<int, AgentHospital>
      */
-    #[ORM\OneToMany(targetEntity: AgentHospitalHospital::class, mappedBy: 'hospital')]
-    private Collection $user;
-
-    /**
-    * @var Collection<int, AdminHospiatlHospital>
-    */
-    #[ORM\OneToMany(targetEntity: AdminHospitalHospital::class, mappedBy: 'hospital')]
-    private Collection $adminHospiatlHospitals;
+    #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'hospital')]
+    private Collection $agentHospitals;
 
     public function __construct()
     {
-        
+        $this->agentHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -340,59 +334,29 @@ class Hospital
     }
 
     /**
-     * @return Collection<int, AgentHospitalHospital>
+     * @return Collection<int, AgentHospital>
      */
-    public function getUser(): Collection
+    public function getAgentHospitals(): Collection
     {
-        return $this->user;
+        return $this->agentHospitals;
     }
 
-    public function addUser(AgentHospitalHospital $user): static
+    public function addAgentHospital(AgentHospital $agentHospital): static
     {
-        if (!$this->user->contains($user)) {
-            $this->user->add($user);
-            $user->setHospital($this);
+        if (!$this->agentHospitals->contains($agentHospital)) {
+            $this->agentHospitals->add($agentHospital);
+            $agentHospital->setHospital($this);
         }
 
         return $this;
     }
 
-    public function removeUser(AgentHospitalHospital $user): static
+    public function removeAgentHospital(AgentHospital $agentHospital): static
     {
-        if ($this->user->removeElement($user)) {
+        if ($this->agentHospitals->removeElement($agentHospital)) {
             // set the owning side to null (unless already changed)
-            if ($user->getHospital() === $this) {
-                $user->setHospital(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, AdminHospiatlHospital>
-     */
-    public function getAdminHospiatlHospitals(): Collection
-    {
-        return $this->adminHospiatlHospitals;
-    }
-
-    public function addAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
-    {
-        if (!$this->adminHospiatlHospitals->contains($adminHospiatlHospital)) {
-            $this->adminHospiatlHospitals->add($adminHospiatlHospital);
-            $adminHospiatlHospital->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
-    {
-        if ($this->adminHospiatlHospitals->removeElement($adminHospiatlHospital)) {
-            // set the owning side to null (unless already changed)
-            if ($adminHospiatlHospital->getHospital() === $this) {
-                $adminHospiatlHospital->setHospital(null);
+            if ($agentHospital->getHospital() === $this) {
+                $agentHospital->setHospital(null);
             }
         }
 

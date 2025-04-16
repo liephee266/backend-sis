@@ -19,6 +19,10 @@ class AgentHospital
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\ManyToOne(inversedBy: 'agentHospitals')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Hospital $hospital = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -32,6 +36,18 @@ class AgentHospital
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): static
+    {
+        $this->hospital = $hospital;
 
         return $this;
     }

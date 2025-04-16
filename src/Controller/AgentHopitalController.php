@@ -78,7 +78,7 @@ class AgentHopitalController extends AbstractController
             $hospital = $hospitalAdmin->getHospital();
 
             // Récupérer les IDs des agents hopital liés à cet hôpital via la table DoctorHospital
-            $agentHospitalRepository = $this->entityManager->getRepository(AgentHospitalHospital::class);
+            $agentHospitalRepository = $this->entityManager->getRepository(AgentHospital::class);
             $doctorHops = $agentHospitalRepository->findBy(['hospital' => $hospital]);
 
             $doctorIds = array_map(function ($dh) {
@@ -130,7 +130,7 @@ class AgentHopitalController extends AbstractController
             $hospital = $hospitalAdmin->getHospital();
 
             // Vérifier que le docteur appartient bien à cet hôpital
-            $agentHospital = $this->entityManager->getRepository(AgentHospitalHospital::class)
+            $agentHospital = $this->entityManager->getRepository(AgentHospital::class)
                 ->findOneBy([
                     'agentHospital' => $agenthopital,
                     'hospital' => $hospital
@@ -246,7 +246,7 @@ class AgentHopitalController extends AbstractController
             $hospital = $hospitalAdmin->getHospital();
 
             // Vérification via AgentHospitalHospital
-            $doctorHospital = $this->entityManager->getRepository(AgentHospitalHospital::class)->findOneBy([
+            $doctorHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy([
                 'agentHospital' => $agenthopital,
                 'hospital' => $hospital
             ]);
