@@ -48,6 +48,11 @@ class UrgencyController extends AbstractController
     #[Route('/', name: 'urgency_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_URGENTIST') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -69,6 +74,11 @@ class UrgencyController extends AbstractController
     #[Route('/{id}', name: 'urgency_show', methods: ['GET'])]
     public function show(Urgency $urgency): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_URGENTIST') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Sérialisation de l'entité Urgency en JSON avec le groupe de sérialisation 'Urgency:read'
         $urgency = $this->serializer->serialize($urgency, 'json', ['groups' => 'urgency:read']);
     
@@ -117,9 +127,26 @@ class UrgencyController extends AbstractController
     {
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-    
+        
+        $user = $this->toolkit->getUser($request);
+
+        /// On récupère l'urgence à modifier
+        $urgence = $this->entityManager->getRepository(Urgency::class)->find($id);
+
+        if (!$urgence) {
+            return $this->json(['code' => 404, 'message' => "Urgence introuvable"], Response::HTTP_NOT_FOUND);
+        }
+
+        // Vérifie que l'utilisateur connecté est bien le propriétaire de l'urgence
+        if ($urgence->getPatient()?->getUser()?->getId() !== $user->getId()) {
+            return new JsonResponse(['code' => 403, 'message' => "Vous ne pouvez modifier que vos urgences"], Response::HTTP_FORBIDDEN);
+        }
+
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
+
+        // Ajout la date de modification
+        $data['updated_at'] = new \DateTimeImmutable('now');
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité Urgency dans la base de données
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data, true);
@@ -146,6 +173,11 @@ class UrgencyController extends AbstractController
     #[Route('/{id}', name: 'urgency_delete', methods: ['DELETE'])]
     public function delete(Urgency $urgency, EntityManagerInterface $entityManager): Response
     {
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_URGENTIST') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité Urgency passée en paramètre
         $entityManager->remove($urgency);
     

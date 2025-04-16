@@ -62,7 +62,7 @@ class MeetingController extends AbstractController
     public function index(Request $request): Response
     {
          // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
@@ -77,7 +77,7 @@ class MeetingController extends AbstractController
 
         // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
         if ($patient) {
-            $filtre['patient'] = $patient->getId();
+            $filtre['patient_id'] = $patient->getId();
         }
 
         // Vérifier si l'utilisateur est un médecin
@@ -108,21 +108,38 @@ class MeetingController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
+     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
     public function show(Meeting $meeting, Request $request): Response
     {
-        
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        $user = $this->toolkit->getUser($request);
+
+        // Vérification des autorisations de base
+        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL')) {
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
+        
+        //  Règles de visibilité selon le rôle :
+        if ($this->security->isGranted('ROLE_PATIENT')) {
+            // Le patient ne peut voir que ses propres rendez-vous
+            if ($meeting->getPatientId()?->getUser()?->getId() !== $user->getId()) {
+                return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous ne vous appartient pas"], Response::HTTP_FORBIDDEN);
+            }
+        }
 
-        // Sérialisation de l'entité Meeting en JSON avec le groupe de sérialisation 'Meeting:read'
-        $meeting = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
-    
-        // Retour de la réponse JSON avec les données de l'Meeting et un code HTTP 200
-        return new JsonResponse(["data" => json_decode($meeting, true), "code" => 200], Response::HTTP_OK);
+        if ($this->security->isGranted('ROLE_DOCTOR')) {
+            // Le médecin ne peut voir que ses rendez-vous
+            if ($meeting->getPatientId()?->getUser()?->getId() !== $user->getId()) {
+                return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous n'est pas lié à vous"], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+        // Sérialisation du rendez-vous
+        $serialized = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
+
+        return new JsonResponse([
+            "data" => json_decode($serialized, true),
+            "code" => 200
+        ], Response::HTTP_OK);
     }
 
     /**

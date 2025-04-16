@@ -106,6 +106,10 @@ class Hospital
         $this->doctors = new ArrayCollection();
     }
 
+    /**
+     * @var Collection<int, AgentHospitalHospital>
+     */
+
     public function getId(): ?int
     {
         return $this->id;
@@ -301,27 +305,60 @@ class Hospital
     }
 
     /**
-     * @return Collection<int, Doctor>
+     * @return Collection<int, DoctorHospital>
      */
     public function getDoctors(): Collection
     {
-        return $this->doctors;
+        return $this->user;
     }
 
-    public function addDoctor(Doctor $doctor): static
+    public function addUser(AgentHospitalHospital $user): static
     {
-        if (!$this->doctors->contains($doctor)) {
-            $this->doctors->add($doctor);
-            $doctor->addHospital($this);
+        if (!$this->user->contains($user)) {
+            $this->user->add($user);
+            $user->setHospital($this);
         }
 
         return $this;
     }
 
-    public function removeDoctor(Doctor $doctor): static
+    public function removeUser(AgentHospitalHospital $user): static
     {
-        if ($this->doctors->removeElement($doctor)) {
-            $doctor->removeHospital($this);
+        if ($this->user->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getHospital() === $this) {
+                $user->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AdminHospiatlHospital>
+     */
+    public function getAdminHospiatlHospitals(): Collection
+    {
+        return $this->adminHospiatlHospitals;
+    }
+
+    public function addAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
+    {
+        if (!$this->adminHospiatlHospitals->contains($adminHospiatlHospital)) {
+            $this->adminHospiatlHospitals->add($adminHospiatlHospital);
+            $adminHospiatlHospital->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdminHospiatlHospital(AdminHospitalHospital $adminHospiatlHospital): static
+    {
+        if ($this->adminHospiatlHospitals->removeElement($adminHospiatlHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($adminHospiatlHospital->getHospital() === $this) {
+                $adminHospiatlHospital->setHospital(null);
+            }
         }
 
         return $this;

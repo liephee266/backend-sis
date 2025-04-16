@@ -52,6 +52,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/', name: 'hospitaladmin_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+         if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -73,6 +77,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_show', methods: ['GET'])]
     public function show(HospitalAdmin $hospitaladmin): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Sérialisation de l'entité HospitalAdmin en JSON avec le groupe de sérialisation 'HospitalAdmin:read'
         $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospital_admin:read']);
     
@@ -91,11 +99,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/', name: 'hospitaladmin_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // if (!$this->security->isGranted('ROLE_ADMIN_SIS')) {
-        //     # code...
-        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        // }
-
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -142,6 +149,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
     
@@ -173,6 +184,10 @@ class HospitalAdminController extends AbstractController
     #[Route('/{id}', name: 'hospitaladmin_delete', methods: ['DELETE'])]
     public function delete(HospitalAdmin $hospitaladmin, EntityManagerInterface $entityManager): Response
     {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            # code...
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité HospitalAdmin passée en paramètre
         $entityManager->remove($hospitaladmin);
     

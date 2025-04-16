@@ -53,8 +53,10 @@ class HospitalController extends AbstractController
         $filtre = [];
 
          // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
-        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-            $filtre = ['status' => 2];
+        if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
+        // On filtre par statut "validated" pour les utilisateurs normaux
+           $filtre = ['status' => 2];
+
         }
 
         // Récupération des utilisateurs avec pagination
@@ -104,10 +106,10 @@ class HospitalController extends AbstractController
     public function create(Request $request): Response
     {
         // // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS')) {
-        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        // }
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 
@@ -167,6 +169,19 @@ class HospitalController extends AbstractController
         
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
+
+        // Ajout de l'ID du statut dans les données reçues pour identifier l'entité à modifier
+        if (isset($data['status'])) {
+            $status = $this->entityManager->getRepository(Status::class)->find($data['status']);
+            if ($status) {
+                $data['status'] = $status->getId(); // Récupérer l'ID du statut
+            } else {
+                return new JsonResponse(['message' => 'Statut introuvable'], Response::HTTP_BAD_REQUEST);
+            }
+        } else {
+            // Si le statut n'est pas fourni, on le garde tel quel
+            $data['status'] = $hospital->getStatus()->getId();
+        }
     
         // Appel à la méthode persistEntity pour mettre à jour l'entité Hospital dans la base de données
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Hospital", $data, true);
@@ -193,6 +208,10 @@ class HospitalController extends AbstractController
     #[Route('/{id}', name: 'hospital_delete', methods: ['DELETE'])]
     public function delete(Hospital $hospital, EntityManagerInterface $entityManager): Response
     {
+         if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité Hospital passée en paramètre
         $entityManager->remove($hospital);
     

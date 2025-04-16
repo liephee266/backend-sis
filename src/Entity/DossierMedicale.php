@@ -24,11 +24,11 @@ class DossierMedicale
     private ?Treatment $treatment_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("dossier_medicale:read","urgency:read")]
     private ?Patient $patient_id = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("dossier_medicale:read","urgency:read")]
     private ?array $antecedents_medicaux = null;
 
     #[ORM\Column(nullable: true)]

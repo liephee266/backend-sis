@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Consultation;
 use App\Entity\Doctor;
+use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
@@ -47,45 +48,83 @@ class ConsultationController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'consultation_index', methods: ['GET'])]
+    #[Route('/', name: 'patient_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        // Vérification des autorisations
+        if (
+            !$this->security->isGranted('ROLE_DOCTOR') &&
+            !$this->security->isGranted('ROLE_AGENT_ACCUEIL') &&
+            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+        ) {
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-            }
+        }
+
+        $user = $this->toolkit->getUser($request);
         $filtre = [];
 
-        // Récupération de l'utilisateur connectéù&
-        $user = $this->toolkit->getUser($request);
+        // Si utilisateur est un médecin
+        if ($this->security->isGranted('ROLE_DOCTOR')) {
+            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-        // Vérifier si l'utilisateur est un patient
-        $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+            if (!$doctor) {
+                return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
+            }
 
-        // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
-        if ($patient) {
-            $filtre['patient'] = $patient->getId();
+            // Récupérer les consultations du médecin
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')
+                ->select('DISTINCT p.id')
+                ->join('c.patient', 'p')
+                ->where('c.doctor = :doctor')
+                ->setParameter('doctor', $doctor)
+                ->getQuery()
+                ->getScalarResult();
+
+            $patientIds = array_column($consultations, 'id');
+
+            // Filtrer par ID
+            $filtre['id'] = $patientIds;
         }
 
-        // Vérifier si l'utilisateur est un médecin
-        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        // Si utilisateur est un admin hospitalier
+        elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
 
-        // Si un médecin est trouvé, appliquer le filtre sur l'ID du médecin
-        if ($doctor) {
-            $filtre['doctor'] = $doctor->getId();
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Aucun hôpital trouvé pour cet admin."
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $adminHospital = $hospitalAdmin->getHospital();
+
+            // Récupérer les patients via les consultations dans cet hôpital
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->createQueryBuilder('c')
+                ->select('DISTINCT p.id')
+                ->join('c.patient', 'p')
+                ->where('c.hospital = :hospital')
+                ->setParameter('hospital', $adminHospital)
+                ->getQuery()
+                ->getScalarResult();
+
+            $patientIds = array_column($consultations, 'id');
+
+            // Appliquer le filtre par ID
+            $filtre['id'] = $patientIds;
         }
 
-        // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-        if (!$patient && !$doctor) {
-            return new JsonResponse(['code' => 404, 'message' => "Aucun patient ou médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
-        }
-        // Récupération des Consultations avec pagination en appliquant les filtres
-        $response = $this->toolkit->getPagitionOption($request, 'Consultation', 'consultation:read', $filtre);
+        // Si autres rôles, pas de filtre
+        $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', $filtre);
 
-        // Retour d'une réponse JSON avec les Consultations et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
     }
+
 
     /**
      * Affichage d'un Consultation par son ID
@@ -150,22 +189,20 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
-        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        // }
+        // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
-
-        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
         
         // Appel à la méthode persistEntity pour insérer les données dans la base
         $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            // Si l'entité a été correctemenm:ù enregistrée, retour d'une réponse JSON avec succès
             return $this->json(['code' => 200, 'message' => "Consultation crée avec succès"], Response::HTTP_OK);
         }
 
@@ -209,8 +246,6 @@ class ConsultationController extends AbstractController
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-
-        $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
     
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
@@ -245,7 +280,6 @@ class ConsultationController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        
         // Suppression de l'entité Consultation passée en paramètre
         $entityManager->remove($consultation);
     
