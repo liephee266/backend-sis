@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\AgentHospital;
+use App\Entity\AgentHospitalHospital;
+use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
@@ -50,13 +53,41 @@ class AgentHopitalController extends AbstractController
     public function index(Request $request): Response
     {
 
-        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
+        if (!$this->security->isGranted('ROLE_AGENT_HOPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
 
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
+
+        $user = $this->toolkit->getUser($request);
+         // Si c'est un admin hospitalier, on filtre les agent_d'acceulls liés à son hôpital
+        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    "message" => "Aucun hôpital associé à cet admin",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $hospital = $hospitalAdmin->getHospital();
+
+            // Récupérer les IDs des agents hopital liés à cet hôpital via la table DoctorHospital
+            $agentHospitalRepository = $this->entityManager->getRepository(AgentHospitalHospital::class);
+            $doctorHops = $agentHospitalRepository->findBy(['hospital' => $hospital]);
+
+            $doctorIds = array_map(function ($dh) {
+                return $dh->getAgentHospital()->getId();
+            }, $doctorHops);
+
+            // Ajouter ce filtre pour n'afficher que les agents hospital de cet hôpital
+            $filtre['id'] = $doctorIds;
+        }
 
         // Récupération des AgentHopitals avec pagination
         $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
@@ -74,12 +105,43 @@ class AgentHopitalController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'agenthopital_show', methods: ['GET'])]
-    public function show(User $agenthopital): Response
+    public function show(User $agenthopital, Request $request): Response
     {
 
         if (!$this->security->isGranted('ROLE_AGENT_HOPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
+        // Si c’est un admin hospitalier, vérifier que le docteur appartient bien à son hôpital
+        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            $user = $this->toolkit->getUser($request);
+
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    "message" => "Aucun hôpital trouvé pour cet admin.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $hospital = $hospitalAdmin->getHospital();
+
+            // Vérifier que le docteur appartient bien à cet hôpital
+            $agentHospital = $this->entityManager->getRepository(AgentHospitalHospital::class)
+                ->findOneBy([
+                    'agentHospital' => $agenthopital,
+                    'hospital' => $hospital
+                ]);
+
+            if (!$agentHospital) {
+                return new JsonResponse([
+                    "message" => "Cet agent hopital n'est pas rattaché à votre hôpital.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
         }
 
         // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
@@ -159,14 +221,62 @@ class AgentHopitalController extends AbstractController
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-    
-        // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
+        if (!$data) {
+            return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Récupération de l'agent hospital à modifier
+        $agenthopital = $this->entityManager->getRepository(AgentHospital::class)->find($id);
+        if (!$agenthopital) {
+            return $this->json(['code' => 404, 'message' => "Agent Hospital introuvable"], Response::HTTP_NOT_FOUND);
+        }
+
+        // Vérification que l'admin hospitalier modifie un agent hospital de son hôpital
+        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            $user = $this->toolkit->getUser($request);
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    "message" => "Aucun hôpital trouvé pour cet admin.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $hospital = $hospitalAdmin->getHospital();
+
+            // Vérification via AgentHospitalHospital
+            $doctorHospital = $this->entityManager->getRepository(AgentHospitalHospital::class)->findOneBy([
+                'agentHospital' => $agenthopital,
+                'hospital' => $hospital
+            ]);
+
+            if (!$doctorHospital) {
+                return new JsonResponse([
+                    "message" => "Cet agent hospital n'appartient pas à votre hôpital.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+        // Préparer les données de mise à jour
         $data['id'] = $id;
-    
-        $data['birth'] = new \DateTime($data['birth']);
+
+        $user_data = [
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'nickname' => $data['nickname'],
+            'tel' => $data['tel'],
+            'birth' => new \DateTime($data['birth']),
+            'gender' => $data['gender'],
+            'address' => $data['address'],
+            'id' => $id
+        ];
+
+        $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
 
         // Appel à la méthode persistEntity pour mettre à jour l'entité AgentHopital dans la base de données
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data, true);
+        $errors = $this->genericEntityManager->persistEntity("App\Entity\User",$user_data, $data, true);
     
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
@@ -190,6 +300,12 @@ class AgentHopitalController extends AbstractController
     #[Route('/{id}', name: 'agenthopital_delete', methods: ['DELETE'])]
     public function delete(User $agenthopital, EntityManagerInterface $entityManager): Response
     {
+         if (
+            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+        ) {
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Suppression de l'entité AgentHopital passée en paramètre
         $entityManager->remove($agenthopital);
     

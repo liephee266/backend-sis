@@ -101,14 +101,22 @@ class Hospital
     #[ORM\ManyToMany(targetEntity: Doctor::class, mappedBy: 'hospital')]
     private Collection $doctors;
 
-    public function __construct()
-    {
-        $this->doctors = new ArrayCollection();
-    }
-
     /**
      * @var Collection<int, AgentHospitalHospital>
      */
+    #[ORM\OneToMany(targetEntity: AgentHospitalHospital::class, mappedBy: 'hospital')]
+    private Collection $user;
+
+    /**
+    * @var Collection<int, AdminHospiatlHospital>
+    */
+    #[ORM\OneToMany(targetEntity: AdminHospitalHospital::class, mappedBy: 'hospital')]
+    private Collection $adminHospiatlHospitals;
+
+    public function __construct()
+    {
+        
+    }
 
     public function getId(): ?int
     {
@@ -305,9 +313,36 @@ class Hospital
     }
 
     /**
-     * @return Collection<int, DoctorHospital>
+     * @return Collection<int, Doctor>
      */
     public function getDoctors(): Collection
+    {
+        return $this->doctors;
+    }
+
+    public function addDoctor(Doctor $doctor): static
+    {
+        if (!$this->doctors->contains($doctor)) {
+            $this->doctors->add($doctor);
+            $doctor->addHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctor(Doctor $doctor): static
+    {
+        if ($this->doctors->removeElement($doctor)) {
+            $doctor->removeHospital($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AgentHospitalHospital>
+     */
+    public function getUser(): Collection
     {
         return $this->user;
     }

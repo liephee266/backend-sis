@@ -33,7 +33,7 @@ class Urgency
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-     #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: "datetime")]

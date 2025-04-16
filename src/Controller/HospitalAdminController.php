@@ -52,7 +52,7 @@ class HospitalAdminController extends AbstractController
     #[Route('/', name: 'hospitaladmin_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-         if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -60,7 +60,7 @@ class HospitalAdminController extends AbstractController
         $filtre = [];
 
         // Récupération des HospitalAdmins avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'HospitalAdmin', 'hospital_admin:read', $filtre);
+        $response = $this->toolkit->getPagitionOption($request, 'HospitalAdmin', 'hospitaladmin:read', $filtre);
 
         // Retour d'une réponse JSON avec les HospitalAdmins et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
@@ -82,7 +82,7 @@ class HospitalAdminController extends AbstractController
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
         // Sérialisation de l'entité HospitalAdmin en JSON avec le groupe de sérialisation 'HospitalAdmin:read'
-        $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospital_admin:read']);
+        $hospitaladmin = $this->serializer->serialize($hospitaladmin, 'json', ['groups' => 'hospitaladmin:read']);
     
         // Retour de la réponse JSON avec les données de l'HospitalAdmin et un code HTTP 200
         return new JsonResponse(["data" => json_decode($hospitaladmin, true), "code" => 200], Response::HTTP_OK);

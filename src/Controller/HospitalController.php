@@ -54,8 +54,8 @@ class HospitalController extends AbstractController
 
          // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
         if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
-        // On filtre par statut "validated" pour les utilisateurs normaux
-           $filtre = ['status' => 2];
+            // On filtre par statut "validated" pour les utilisateurs normaux
+            $filtre = ['status' => 2];
 
         }
 
@@ -158,11 +158,6 @@ class HospitalController extends AbstractController
         if (!$hospital) {
             return new JsonResponse(['message' => 'Hôpital non trouvé'], Response::HTTP_NOT_FOUND);
         }
-
-        // // Vérification que le statut est "validated" pour permettre la modification
-        // if (!$hospital->getStatus() || $hospital->getStatus()->getName() !== 'validated') {
-        //     return new JsonResponse(['message' => 'Le statut de l\'hôpital doit être "validated" pour la modification'], Response::HTTP_BAD_REQUEST);
-        // }
 
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);

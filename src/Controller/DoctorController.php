@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Doctor;
-use App\Entity\DoctorHospital;
-use App\Entity\HospitalAdmin;
+use App\Entity\Hospital;
 use App\Services\Toolkit;
+use App\Entity\HospitalAdmin;
+use App\Entity\DoctorHospital;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +17,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Doctor
@@ -81,7 +82,7 @@ class DoctorController extends AbstractController
             $hospital = $hospitalAdmin->getHospital();
 
             // Récupérer les IDs des médecins liés à cet hôpital via la table DoctorHospital
-            $doctorHospitalRepository = $this->entityManager->getRepository(DoctorHospital::class);
+            $doctorHospitalRepository = $this->entityManager->getRepository(Doctor::class);
             $doctorHops = $doctorHospitalRepository->findBy(['hospital' => $hospital]);
 
             $doctorIds = array_map(function ($dh) {
@@ -138,10 +139,9 @@ class DoctorController extends AbstractController
             $hospital = $hospitalAdmin->getHospital();
 
             // Vérifier que le docteur appartient bien à cet hôpital
-            $doctorHospital = $this->entityManager->getRepository(DoctorHospital::class)
+            $doctorHospital = $this->entityManager->getRepository(Hospital::class)
                 ->findOneBy([
                     'doctor' => $doctor,
-                    'hospital' => $hospital
                 ]);
 
             if (!$doctorHospital) {
@@ -228,8 +228,6 @@ class DoctorController extends AbstractController
         }
     }
 
-       
-
     /**
      * Modification d'un Doctor par son ID
      *
@@ -277,9 +275,8 @@ class DoctorController extends AbstractController
             $adminHospital = $hospitalAdmin->getHospital();
 
             // Vérification via DoctorHospital
-            $doctorHospital = $this->entityManager->getRepository(DoctorHospital::class)->findOneBy([
+            $doctorHospital = $this->entityManager->getRepository(Hospital::class)->findOneBy([
                 'doctor' => $doctor,
-                'hospital' => $adminHospital
             ]);
 
             if (!$doctorHospital) {

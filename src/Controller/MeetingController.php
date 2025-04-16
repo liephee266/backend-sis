@@ -108,7 +108,7 @@ class MeetingController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-     #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'meeting_show', methods: ['GET'])]
     public function show(Meeting $meeting, Request $request): Response
     {
         $user = $this->toolkit->getUser($request);
