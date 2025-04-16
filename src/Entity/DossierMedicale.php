@@ -16,7 +16,7 @@ class DossierMedicale
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read")]
+    #[Groups(["data_select","dossier_medicale:read"])]
     private ?Consultation $consultation_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]

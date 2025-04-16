@@ -13,7 +13,7 @@ class Message
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["message:read"])]
+    #[Groups(["data_select","message:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -32,7 +32,7 @@ class Message
 
     #[ORM\ManyToOne(targetEntity: ContentMessage::class)]
     #[ORM\JoinColumn(name: "content_msg_id", referencedColumnName: "id", nullable: false)]
-    #[Groups(["message:read"])]
+    #[Groups(["data_select","message:read"])]
     private ?ContentMessage $contentMsg = null;
 
     #[ORM\ManyToOne(targetEntity: State::class)]

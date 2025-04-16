@@ -17,7 +17,7 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
@@ -27,7 +27,7 @@ class Hospital
     private ?string $uuid = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read","urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $name = null;
 

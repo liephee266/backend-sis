@@ -16,13 +16,13 @@ class Doctor
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
+    #[Groups(["data_select","doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
     "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
+    #[Groups(["data_select","doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
     "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
     private ?User $user = null;
 
