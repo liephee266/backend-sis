@@ -136,15 +136,16 @@ class Hospital
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?TypeHopital $type_hospital = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private ?string $name_director = null;
+
     /**
      * @var Collection<int, Service>
      */
-    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'hospitals')]
+    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'hospital')]
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private Collection $services;
-
-    #[ORM\Column(length: 255)]
-    private ?string $name_director = null;
 
     public function __construct()
     {
@@ -469,30 +470,6 @@ class Hospital
         return $this;
     }
 
-    /**
-     * @return Collection<int, Service>
-     */
-    public function getService(): Collection
-    {
-        return $this->services;
-    }
-
-    public function addService(Service $services): static
-    {
-        if (!$this->services->contains($services)) {
-            $this->services->add($services);
-        }
-
-        return $this;
-    }
-
-    public function removeService(Service $service): static
-    {
-        $this->services->removeElement($service);
-
-        return $this;
-    }
-
     public function getNameDirector(): ?string
     {
         return $this->name_director;
@@ -501,6 +478,30 @@ class Hospital
     public function setNameDirector(string $name_director): static
     {
         $this->name_director = $name_director;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Service $service): static
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Service $service): static
+    {
+        $this->services->removeElement($service);
 
         return $this;
     }

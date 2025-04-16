@@ -32,13 +32,13 @@ class Service
     /**
      * @var Collection<int, Hospital>
      */
-    #[ORM\ManyToMany(targetEntity: Hospital::class, mappedBy: 'service')]
-    private Collection $hospitals;
+    #[ORM\ManyToMany(targetEntity: Hospital::class, mappedBy: 'services')]
+    private Collection $hospital;
 
     public function __construct()
     {
         $this->doctors = new ArrayCollection();
-        $this->hospitals = new ArrayCollection();
+        $this->hospital = new ArrayCollection();
     }
 
     // ✅ Getters & Setters
@@ -92,15 +92,15 @@ class Service
     /**
      * @return Collection<int, Hospital>
      */
-    public function getHospitals(): Collection
+    public function getHospital(): Collection
     {
-        return $this->hospitals;
+        return $this->hospital;
     }
 
     public function addHospital(Hospital $hospital): static
     {
-        if (!$this->hospitals->contains($hospital)) {
-            $this->hospitals->add($hospital);
+        if (!$this->hospital->contains($hospital)) {
+            $this->hospital->add($hospital);
             $hospital->addService($this);
         }
 
@@ -109,7 +109,7 @@ class Service
 
     public function removeHospital(Hospital $hospital): static
     {
-        if ($this->hospitals->removeElement($hospital)) {
+        if ($this->hospital->removeElement($hospital)) {
             $hospital->removeService($this);
         }
 
