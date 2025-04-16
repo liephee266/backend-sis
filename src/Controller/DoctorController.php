@@ -52,50 +52,58 @@ class DoctorController extends AbstractController
     #[Route('/', name: 'doctor_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        if (
-            !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-        ) {
-            return new JsonResponse([
-                "message" => "Vous n'avez pas accès à cette ressource",
-                "code" => 403
-            ], Response::HTTP_FORBIDDEN);
-        }
 
-        $filtre = [];
-
-        // Si c'est un admin hospitalier, on filtre les docteurs liés à son hôpital
-        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            $user = $this->toolkit->getUser($request);
-
-            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
-                ->findOneBy(['user' => $user]);
-
-            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+        try {
+            //code...
+            if (
+                !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            ) {
                 return new JsonResponse([
-                    "message" => "Aucun hôpital associé à cet admin",
+                    "message" => "Vous n'avez pas accès à cette ressource",
                     "code" => 403
                 ], Response::HTTP_FORBIDDEN);
             }
-
-            $hospital = $hospitalAdmin->getHospital();
-
-            // Récupérer les IDs des médecins liés à cet hôpital via la table DoctorHospital
-            $doctorHospitalRepository = $this->entityManager->getRepository(Doctor::class);
-            $doctorHops = $doctorHospitalRepository->findBy(['hospital' => $hospital]);
-
-            $doctorIds = array_map(function ($dh) {
-                return $dh->getDoctor()->getId();
-            }, $doctorHops);
-
-            // Ajouter ce filtre pour n'afficher que les médecins de cet hôpital
-            $filtre['id'] = $doctorIds;
+    
+            $filtre = [];
+    
+            // Si c'est un admin hospitalier, on filtre les docteurs liés à son hôpital
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+    
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                    ->findOneBy(['user' => $user]);
+    
+                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                    return new JsonResponse([
+                        "message" => "Aucun hôpital associé à cet admin",
+                        "code" => 403
+                    ], Response::HTTP_FORBIDDEN);
+                }
+    
+                $hospital = $hospitalAdmin->getHospital();
+    
+                // Récupérer les IDs des médecins liés à cet hôpital via la table DoctorHospital
+                $doctorHospitalRepository = $this->entityManager->getRepository(Doctor::class);
+                $doctorHops = $doctorHospitalRepository->findBy(['hospital' => $hospital]);
+    
+                $doctorIds = array_map(function ($dh) {
+                    return $dh->getDoctor()->getId();
+                }, $doctorHops);
+    
+                // Ajouter ce filtre pour n'afficher que les médecins de cet hôpital
+                $filtre['id'] = $doctorIds;
+            }
+    
+            $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
+    
+            return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
-
-        return new JsonResponse($response, Response::HTTP_OK);
+        
     }
 
 
@@ -110,55 +118,60 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_show', methods: ['GET'])]
     public function show(Doctor $doctor, Request $request): Response
     {
-        // Vérification des autorisations
-        if (
-            !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-        ) {
+        try {
+            //code...
+            if (
+                !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            ) {
+                return new JsonResponse([
+                    "message" => "Vous n'avez pas accès à cette ressource",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+    
+            // Si c’est un admin hospitalier, vérifier que le docteur appartient bien à son hôpital
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+    
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                    ->findOneBy(['user' => $user]);
+    
+                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                    return new JsonResponse([
+                        "message" => "Aucun hôpital trouvé pour cet admin.",
+                        "code" => 403
+                    ], Response::HTTP_FORBIDDEN);
+                }
+    
+                $hospital = $hospitalAdmin->getHospital();
+    
+                // Vérifier que le docteur appartient bien à cet hôpital
+                $doctorHospital = $this->entityManager->getRepository(Hospital::class)
+                    ->findOneBy([
+                        'doctor' => $doctor,
+                    ]);
+    
+                if (!$doctorHospital) {
+                    return new JsonResponse([
+                        "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
+                        "code" => 403
+                    ], Response::HTTP_FORBIDDEN);
+                }
+            }
+    
+            // Sérialisation avec le groupe doctor:read
+            $doctorData = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
+    
             return new JsonResponse([
-                "message" => "Vous n'avez pas accès à cette ressource",
-                "code" => 403
-            ], Response::HTTP_FORBIDDEN);
+                "data" => json_decode($doctorData, true),
+                "code" => 200
+            ], Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            //throw $th;
+            return $this->json(['code' => 500, 'message' => "Une erreur est survenue" . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        // Si c’est un admin hospitalier, vérifier que le docteur appartient bien à son hôpital
-        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            $user = $this->toolkit->getUser($request);
-
-            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
-                ->findOneBy(['user' => $user]);
-
-            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
-                return new JsonResponse([
-                    "message" => "Aucun hôpital trouvé pour cet admin.",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
-            }
-
-            $hospital = $hospitalAdmin->getHospital();
-
-            // Vérifier que le docteur appartient bien à cet hôpital
-            $doctorHospital = $this->entityManager->getRepository(Hospital::class)
-                ->findOneBy([
-                    'doctor' => $doctor,
-                ]);
-
-            if (!$doctorHospital) {
-                return new JsonResponse([
-                    "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
-            }
-        }
-
-        // Sérialisation avec le groupe doctor:read
-        $doctorData = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
-
-        return new JsonResponse([
-            "data" => json_decode($doctorData, true),
-            "code" => 200
-        ], Response::HTTP_OK);
     }
 
 
@@ -240,67 +253,74 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_update', methods: ['PUT'])]
     public function update(Request $request, $id): Response
     {
-        if (
-            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-        ) {
-            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        }
-
-        // Décodage du JSON
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data) {
-            return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
-        }
-
-        // Récupération du médecin à modifier
-        $doctor = $this->entityManager->getRepository(Doctor::class)->find($id);
-        if (!$doctor) {
-            return $this->json(['code' => 404, 'message' => "Médecin introuvable"], Response::HTTP_NOT_FOUND);
-        }
-
-        // Vérification que l'admin hospitalier modifie un médecin de son hôpital
-        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            $user = $this->toolkit->getUser($request);
-            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user]);
-
-            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
-                return new JsonResponse([
-                    "message" => "Aucun hôpital trouvé pour cet admin.",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
+        try {
+            //code...
+            if (
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            ) {
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
-
-            $adminHospital = $hospitalAdmin->getHospital();
-
-            // Vérification via DoctorHospital
-            $doctorHospital = $this->entityManager->getRepository(Hospital::class)->findOneBy([
-                'doctor' => $doctor,
-            ]);
-
-            if (!$doctorHospital) {
-                return new JsonResponse([
-                    "message" => "Ce médecin n'appartient pas à votre hôpital.",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
+    
+            // Décodage du JSON
+            $data = json_decode($request->getContent(), true);
+    
+            if (!$data) {
+                return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
             }
-        }
-
-        // Préparer les données de mise à jour
-        $data['id'] = $id;
-
-        $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
     
-        // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
-        $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $data, true);
+            // Récupération du médecin à modifier
+            $doctor = $this->entityManager->getRepository(Doctor::class)->find($id);
+            if (!$doctor) {
+                return $this->json(['code' => 404, 'message' => "Médecin introuvable"], Response::HTTP_NOT_FOUND);
+            }
     
-        // Vérification si l'entité a été mise à jour sans erreur
-        if (!empty($errors['entity'])) {
-            return $this->json(['code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
+            // Vérification que l'admin hospitalier modifie un médecin de son hôpital
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user]);
+    
+                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                    return new JsonResponse([
+                        "message" => "Aucun hôpital trouvé pour cet admin.",
+                        "code" => 403
+                    ], Response::HTTP_FORBIDDEN);
+                }
+    
+                $adminHospital = $hospitalAdmin->getHospital();
+    
+                // Vérification via DoctorHospital
+                $doctorHospital = $this->entityManager->getRepository(Hospital::class)->findOneBy([
+                    'doctor' => $doctor,
+                ]);
+    
+                if (!$doctorHospital) {
+                    return new JsonResponse([
+                        "message" => "Ce médecin n'appartient pas à votre hôpital.",
+                        "code" => 403
+                    ], Response::HTTP_FORBIDDEN);
+                }
+            }
+    
+            // Préparer les données de mise à jour
+            $data['id'] = $id;
+    
+            $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
+        
+            // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
+            $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $data, true);
+        
+            // Vérification si l'entité a été mise à jour sans erreur
+            if (!empty($errors['entity'])) {
+                return $this->json(['code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
+            }
+    
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
+    
+        } catch (\Throwable $e) {
+            //throw $th;
+            return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     
@@ -316,19 +336,27 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_delete', methods: ['DELETE'])]
     public function delete(Doctor $doctor, EntityManagerInterface $entityManager): Response
     {
-        if (
-            !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-            !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-        ) {
-            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+
+        try {
+            //code...
+            if (
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            ) {
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            }
+            // Suppression de l'entité Doctor passée en paramètre
+            $entityManager->remove($doctor);
+        
+            // Validation de la suppression dans la base de données
+            $entityManager->flush();
+        
+            // Retour d'une réponse JSON avec un message de succès
+            return $this->json(['code' => 200, 'message' => "Doctor supprimé avec succès"], Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            //throw $e;
+            return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        // Suppression de l'entité Doctor passée en paramètre
-        $entityManager->remove($doctor);
-    
-        // Validation de la suppression dans la base de données
-        $entityManager->flush();
-    
-        // Retour d'une réponse JSON avec un message de succès
-        return $this->json(['code' => 200, 'message' => "Doctor supprimé avec succès"], Response::HTTP_OK);
+        
     }
 }
