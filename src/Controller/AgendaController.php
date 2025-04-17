@@ -50,7 +50,8 @@ class AgendaController extends AbstractController
     #[Route('/', name: 'agenda_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-             // Vérification des autorisations de l'utilisateur connecté
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
@@ -63,6 +64,10 @@ class AgendaController extends AbstractController
 
         // Retour d'une réponse JSON avec les Agendas et un statut HTTP 200 (OK)
         return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des agendas" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
 
     /**
@@ -76,17 +81,22 @@ class AgendaController extends AbstractController
     #[Route('/{id}', name: 'agenda_show', methods: ['GET'])]
     public function show(Agenda $agenda): Response
     {
-         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
 
-        // Sérialisation de l'entité Agenda en JSON avec le groupe de sérialisation 'Agenda:read'
-        $agenda = $this->serializer->serialize($agenda, 'json', ['groups' => 'agenda:read']);
-    
-        // Retour de la réponse JSON avec les données de l'Agenda et un code HTTP 200
-        return new JsonResponse(["data" => json_decode($agenda, true), "code" => 200], Response::HTTP_OK);
+            // Sérialisation de l'entité Agenda en JSON avec le groupe de sérialisation 'Agenda:read'
+            $agenda = $this->serializer->serialize($agenda, 'json', ['groups' => 'agenda:read']);
+        
+            // Retour de la réponse JSON avec les données de l'Agenda et un code HTTP 200
+            return new JsonResponse(["data" => json_decode($agenda, true), "code" => 200], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche de l'agenda" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
 
     /**
@@ -100,27 +110,32 @@ class AgendaController extends AbstractController
     #[Route('/', name: 'agenda_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
-        // Décodage du contenu JSON envoyé dans la requête
-        $data = json_decode($request->getContent(), true);
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+            // Décodage du contenu JSON envoyé dans la requête
+            $data = json_decode($request->getContent(), true);
 
-        $data['timeInterval'] = new \DateTimeImmutable($data['timeInterval']);
+            $data['timeInterval'] = new \DateTimeImmutable($data['timeInterval']);
+            
+            // Appel à la méthode persistEntity pour insérer les données dans la base
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\Agenda", $data);
+
+            // Vérification des erreurs après la persistance des données
+            if (!empty($errors['entity'])) {
+                // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+                return $this->json(['code' => 200, 'message' => "Agenda crée avec succès"], Response::HTTP_OK);
+            }
+
+            // Si une erreur se produit, retour d'une réponse JSON avec une erreur
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Agenda"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $th) {
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Agenda" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
         
-        // Appel à la méthode persistEntity pour insérer les données dans la base
-        $errors = $this->genericEntityManager->persistEntity("App\Entity\Agenda", $data);
-
-        // Vérification des erreurs après la persistance des données
-        if (!empty($errors['entity'])) {
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-            return $this->json(['code' => 200, 'message' => "Agenda crée avec succès"], Response::HTTP_OK);
-        }
-
-        // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-        return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Agenda"], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -135,7 +150,8 @@ class AgendaController extends AbstractController
     #[Route('/{id}', name: 'agenda_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
@@ -160,6 +176,10 @@ class AgendaController extends AbstractController
     
         // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
         return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Agenda"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $th) {
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Agenda" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
     
     /**
@@ -174,19 +194,24 @@ class AgendaController extends AbstractController
     #[Route('/{id}', name: 'agenda_delete', methods: ['DELETE'])]
     public function delete(Agenda $agenda, EntityManagerInterface $entityManager): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
 
-        // Suppression de l'entité Agenda passée en paramètre
-        $entityManager->remove($agenda);
-    
-        // Validation de la suppression dans la base de données
-        $entityManager->flush();
-    
-        // Retour d'une réponse JSON avec un message de succès
-        return $this->json(['code' => 200, 'message' => "Agenda supprimé avec succès"], Response::HTTP_OK);
+            // Suppression de l'entité Agenda passée en paramètre
+            $entityManager->remove($agenda);
+        
+            // Validation de la suppression dans la base de données
+            $entityManager->flush();
+        
+            // Retour d'une réponse JSON avec un message de succès
+            return $this->json(['code' => 200, 'message' => "Agenda supprimé avec succès"], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la suppression de l'Agenda" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
 }
