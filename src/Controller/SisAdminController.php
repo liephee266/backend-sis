@@ -48,19 +48,9 @@ class SisAdminController extends AbstractController
     #[Route('/', name: 'urgentist_index', methods: ['GET'])]
     public function index(Request $request): Response
     { 
-<<<<<<< HEAD
-         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
-        // 1. Récupérer tous les utilisateurs
-        $users = $this->entityManager->getRepository(User::class)->findAll();
-=======
         try {
             // 1. Récupérer tous les utilisateurs
             $users = $this->entityManager->getRepository(User::class)->findAll();
->>>>>>> 2a317866b628550948eadd99621dcb2b1d3ebda5
 
             // 2. Filtrer les utilisateurs avec le rôle ROLE_ADMIN_SIS
             $userIds = [];
@@ -91,28 +81,6 @@ class SisAdminController extends AbstractController
         } catch (\Throwable $th) {
             return new JsonResponse(["message" =>"Erreur interne du serveur" . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-<<<<<<< HEAD
-
-        // 3. Si aucun utilisateur correspondant
-        if (empty($userIds)) {
-            return new JsonResponse([
-                'data' => [],
-                'total' => 0,
-                'currentPage' => 1,
-                'maxPerPage' => 10
-            ], Response::HTTP_OK);
-        }
-
-        // 4. Appliquer le filtre sur la relation "user" dans SisAdmin
-        $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
-        // 5. Appeler ta méthode de pagination
-   
-        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
-
-        // 6. Retour de la réponse JSON
-        return new JsonResponse($response, Response::HTTP_OK);
-=======
->>>>>>> 2a317866b628550948eadd99621dcb2b1d3ebda5
     }
 
     /**
@@ -166,10 +134,10 @@ class SisAdminController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-                # code...
-                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-            }
+            // if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            //     # code...
+            //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            // }
     
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
@@ -189,6 +157,7 @@ class SisAdminController extends AbstractController
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
+                'image' => $data['image'],
             ];
             
             $errors = $this->genericEntityManager->persistUser($user_data, $data);

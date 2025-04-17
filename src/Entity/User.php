@@ -84,12 +84,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private ?string $tel = null;
 
-    #[ORM\Column(type: "boolean")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
-    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
-    private bool $gender;
-
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
@@ -134,6 +128,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
+
+    #[ORM\Column(length: 1)]
+    private ?string $gender = null;
 
 
     public function __construct()
@@ -287,16 +284,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTel(?string $tel): self
     {
         $this->tel = $tel;
-        return $this;
-    }
-    public function getGender(): bool
-    {
-        return $this->gender;
-    }
-
-    public function setGender(bool $gender): self
-    {
-        $this->gender = $gender;
         return $this;
     }
     
@@ -461,6 +448,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImage(?string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(string $gender): static
+    {
+        $this->gender = $gender;
 
         return $this;
     }
