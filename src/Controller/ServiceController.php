@@ -141,7 +141,7 @@ class ServiceController extends AbstractController
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Service"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du Service"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (\Throwable $th) {
             return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
