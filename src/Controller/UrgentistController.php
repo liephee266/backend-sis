@@ -130,6 +130,7 @@ class UrgentistController extends AbstractController
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
+                'image' => $data['image'],
             ];
             
             // Appel à la méthode persistEntityUser pour insérer les données du User dans la base

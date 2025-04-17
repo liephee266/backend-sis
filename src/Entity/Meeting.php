@@ -47,13 +47,16 @@ class Meeting
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     private ?State $state_id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $uuid = null;
+    #[ORM\Column(type: 'uuid', nullable: true)]
+    #[Groups(["data_select","meeting:read"])]
+    private ?String $uuid = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(["meeting:read"])]
     private ?\DateTimeInterface $created_at = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_MUTABLE,  nullable: true)]
+    #[Groups(["meeting:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
       public function __construct()

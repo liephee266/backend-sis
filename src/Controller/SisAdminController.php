@@ -45,7 +45,7 @@ class SisAdminController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-     #[Route('/', name: 'sisadmin_index', methods: ['GET'])]
+    #[Route('/', name: 'sisadmin_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
@@ -144,10 +144,10 @@ class SisAdminController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-                # code...
-                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-            }
+            // if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            //     # code...
+            //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            // }
     
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
@@ -167,6 +167,7 @@ class SisAdminController extends AbstractController
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
+                'image' => $data['image'],
             ];
             
             $errors = $this->genericEntityManager->persistUser($user_data, $data);
