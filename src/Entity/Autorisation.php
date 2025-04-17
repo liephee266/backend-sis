@@ -6,6 +6,7 @@ use App\Repository\AutorisationRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AutorisationRepository::class)]
 class Autorisation
@@ -13,10 +14,12 @@ class Autorisation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["data_select","autorisation:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'autorisations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["autorisation:read"])]
     private ?User $demander_id = null;
 
     #[ORM\Column(length: 255)]
@@ -33,6 +36,7 @@ class Autorisation
     private ?Status $status_id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["data_select","autorisation:read"])]
     private ?string $entity = null;
 
     #[ORM\Column]

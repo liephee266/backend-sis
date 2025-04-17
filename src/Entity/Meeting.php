@@ -14,7 +14,7 @@ class Meeting
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["meeting:read"])]
+    #[Groups(["data_select","meeting:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Doctor::class)]
@@ -35,7 +35,7 @@ class Meeting
     private string $lastName;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["meeting:read"])]
+    #[Groups(["data_select","meeting:read"])]
     private ?string $motif = null;
 
     #[ORM\ManyToOne(inversedBy: 'meeting_id')]

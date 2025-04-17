@@ -15,12 +15,12 @@ class Notification
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     #[Groups(['notification:read'])]
-    #[Groups(['notification:read'])]
+    #[Groups(["data_select",'notification:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
     #[Groups(['notification:read'])]
-    #[Groups(['notification:read'])]
+    #[Groups(["data_select",'notification:read'])]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]

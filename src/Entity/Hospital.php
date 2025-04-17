@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "hospital")]
@@ -16,12 +17,17 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "hospital:read"])]
+    private ?string $uuid = null;
+
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read","urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $name = null;
 
@@ -88,6 +94,7 @@ class Hospital
     private ?string $logo = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?bool $isArchived = null;
 
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
@@ -95,10 +102,19 @@ class Hospital
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?Status $status = null;
 
+    #[ORM\Column(type: "datetime")]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private $created_at;
+
+    #[ORM\Column(type: "datetime")]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private $updated_at;
+
     /**
      * @var Collection<int, Doctor>
      */
     #[ORM\ManyToMany(targetEntity: Doctor::class, mappedBy: 'hospital')]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
     private Collection $doctors;
 
     /**
@@ -107,14 +123,47 @@ class Hospital
     #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'hospital')]
     private Collection $agentHospitals;
 
+    #[ORM\Column]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private ?int $infirmiers = null;
+
+    #[ORM\Column]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private ?int $autres_personnel_de_santé = null;
+
+    #[ORM\ManyToOne(inversedBy: 'hospitals')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private ?TypeHopital $type_hospital = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private ?string $name_director = null;
+
+    /**
+     * @var Collection<int, Service>
+     */
+    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'hospital')]
+    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    private Collection $services;
+
     public function __construct()
     {
         $this->agentHospitals = new ArrayCollection();
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+        $this->services = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
     }
 
     public function getName(): ?string
@@ -306,6 +355,28 @@ class Hospital
         return $this;
     }
 
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): self
+    {
+        $this->created_at = $created_at;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+        return $this;
+    }
+
     /**
      * @return Collection<int, Doctor>
      */
@@ -359,6 +430,78 @@ class Hospital
                 $agentHospital->setHospital(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getInfirmiers(): ?int
+    {
+        return $this->infirmiers;
+    }
+
+    public function setInfirmiers(int $infirmiers): static
+    {
+        $this->infirmiers = $infirmiers;
+
+        return $this;
+    }
+
+    public function getAutresPersonnelDeSanté(): ?int
+    {
+        return $this->autres_personnel_de_santé;
+    }
+
+    public function setAutresPersonnelDeSanté(int $autres_personnel_de_santé): static
+    {
+        $this->autres_personnel_de_santé = $autres_personnel_de_santé;
+
+        return $this;
+    }
+
+    public function getTypeHospital(): ?TypeHopital
+    {
+        return $this->type_hospital;
+    }
+
+    public function setTypeHospital(?TypeHopital $type_hospital): static
+    {
+        $this->type_hospital = $type_hospital;
+
+        return $this;
+    }
+
+    public function getNameDirector(): ?string
+    {
+        return $this->name_director;
+    }
+
+    public function setNameDirector(string $name_director): static
+    {
+        $this->name_director = $name_director;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Service $service): static
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Service $service): static
+    {
+        $this->services->removeElement($service);
 
         return $this;
     }

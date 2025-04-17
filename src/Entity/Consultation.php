@@ -17,7 +17,7 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
@@ -36,7 +36,7 @@ class Consultation
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $description = null;
 
     #[ORM\Column(type: "text", nullable: true)]

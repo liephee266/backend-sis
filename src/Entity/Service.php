@@ -14,13 +14,13 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read"])]
+    #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read"])]
+    #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
     private string $name;
 
     /**
@@ -29,9 +29,16 @@ class Service
     #[ORM\OneToMany(targetEntity: Doctor::class, mappedBy: 'service')]
     private Collection $doctors;
 
+    /**
+     * @var Collection<int, Hospital>
+     */
+    #[ORM\ManyToMany(targetEntity: Hospital::class, mappedBy: 'services')]
+    private Collection $hospital;
+
     public function __construct()
     {
         $this->doctors = new ArrayCollection();
+        $this->hospital = new ArrayCollection();
     }
 
     // ✅ Getters & Setters
@@ -77,6 +84,33 @@ class Service
             if ($doctor->getService() === $this) {
                 $doctor->setService(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Hospital>
+     */
+    public function getHospital(): Collection
+    {
+        return $this->hospital;
+    }
+
+    public function addHospital(Hospital $hospital): static
+    {
+        if (!$this->hospital->contains($hospital)) {
+            $this->hospital->add($hospital);
+            $hospital->addService($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHospital(Hospital $hospital): static
+    {
+        if ($this->hospital->removeElement($hospital)) {
+            $hospital->removeService($this);
         }
 
         return $this;

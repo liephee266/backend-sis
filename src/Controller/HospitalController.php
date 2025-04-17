@@ -52,12 +52,11 @@ class HospitalController extends AbstractController
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
-         // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
-        if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
-            // On filtre par statut "validated" pour les utilisateurs normaux
-            $filtre = ['status' => 2];
-
-        }
+        //  // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
+        // if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
+        //     // On filtre par statut "validated" pour les utilisateurs normaux
+        //     $filtre = ['status' => 2];
+        // }
 
         // Récupération des utilisateurs avec pagination
         $response = $this->toolkit->getPagitionOption($request, 'Hospital', 'hospital:read', $filtre);
@@ -105,11 +104,11 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        }
+        // // // Vérification des autorisations de l'utilisateur connecté
+        // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        // }
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
 

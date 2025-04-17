@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\AgentHospital;
-use App\Entity\AgentHospitalHospital;
-use App\Entity\Hospital;
 use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
