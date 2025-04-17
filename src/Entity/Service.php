@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "service")]
@@ -34,6 +36,21 @@ class Service
      */
     #[ORM\ManyToMany(targetEntity: Hospital::class, mappedBy: 'services')]
     private Collection $hospital;
+
+    #[ORM\Column(type: 'uuid')]
+    #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
+    private ?Uuid $uuid = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
+    private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column]
+    #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
+    private ?\DateTimeImmutable $updated_at = null;
 
     public function __construct()
     {
@@ -112,6 +129,42 @@ class Service
         if ($this->hospital->removeElement($hospital)) {
             $hospital->removeService($this);
         }
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }

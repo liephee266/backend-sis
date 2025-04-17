@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DossierMedicaleRepository;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DossierMedicaleRepository::class)]
 class DossierMedicale
@@ -40,7 +42,20 @@ class DossierMedicale
     private ?array $antecedents_familiaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read")]
     private ?array $access = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups("dossier_medicale:read")]
+    private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups("dossier_medicale:read")]
+    private ?\DateTimeInterface $updated_at = null;
+
+    #[ORM\Column(type: 'uuid')]
+    #[Groups("dossier_medicale:read")]
+    private ?Uuid $uuid = null;
 
     public function getId(): ?int
     {
@@ -127,6 +142,42 @@ class DossierMedicale
     public function setAccess(?array $access): static
     {
         $this->access = $access;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
 
         return $this;
     }

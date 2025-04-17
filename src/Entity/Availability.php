@@ -22,10 +22,19 @@ class Availability
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Groups(["availability:read"])]
     private ?\DateTimeInterface $time_interval = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["availability:read"])]
     private ?\DateTimeInterface $date_interval = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["availability:read"])]
+    private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $updated_at = null;
 
     // ✅ Getters & Setters
 
@@ -61,6 +70,30 @@ class Availability
     public function setDateInterval(\DateTimeInterface $date_interval): static
     {
         $this->date_interval = $date_interval;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }

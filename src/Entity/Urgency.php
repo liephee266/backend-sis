@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "urgency")]
@@ -28,16 +29,23 @@ class Urgency
 
     #[ORM\ManyToOne(inversedBy: 'urgencies')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["data_select","urgency:read"])]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["data_select","urgency:read"])]
     private ?string $description = null;
 
     #[ORM\Column(type: "datetime")]
+    #[Groups(["data_select","urgency:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: "datetime")]
+    #[Groups(["data_select","urgency:read"])]
     private ?\DateTimeInterface $updated_at = null;
+
+    #[ORM\Column(type: 'uuid')]
+    private ?Uuid $uuid = null;
 
     public function __construct()
     {
@@ -117,6 +125,18 @@ class Urgency
     public function setUpdatedAt(\DateTimeInterface $updated_at): static
     {
         $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
 
         return $this;
     }

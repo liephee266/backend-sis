@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "examination")]
@@ -31,6 +32,18 @@ class Examination
     #[ORM\JoinColumn(name: "id_consultation", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
     #[Groups(["examination:read"])]
     private ?Consultation $consultation = null;
+
+    #[ORM\Column(type: 'uuid')]
+    #[Groups(["examination:read"])]
+    private ?Uuid $uuid = null;
+
+    #[ORM\Column]
+    #[Groups(["examination:read"])]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column]
+    #[Groups(["examination:read"])]
+    private ?\DateTimeImmutable $updated_at = null;
 
 
     // ✅ Getters & Setters
@@ -81,6 +94,42 @@ class Examination
     public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }

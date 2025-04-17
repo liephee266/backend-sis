@@ -2,10 +2,12 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "meeting")]
@@ -44,6 +46,17 @@ class Meeting
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     private ?State $state_id = null;
+
+    #[ORM\Column(type: 'uuid')]
+    private ?Uuid $uuid = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["meeting:read"])]
+    private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["meeting:read"])]
+    private ?\DateTimeInterface $updated_at = null;
 
     // ✅ Getters & Setters
 
@@ -129,6 +142,42 @@ class Meeting
     public function setStateId(?State $state_id): static
     {
         $this->state_id = $state_id;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }

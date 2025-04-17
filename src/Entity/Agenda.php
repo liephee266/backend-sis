@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "agenda")]
@@ -33,6 +34,18 @@ class Agenda
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $timeInterval = null;
+
+    #[ORM\Column(type: 'uuid')]
+    #[Groups(["agenda:read"])]
+    private ?Uuid $uuid = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["agenda:read"])]
+    private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column]
+    #[Groups(["agenda:read"])]
+    private ?\DateTimeImmutable $updated_at = null;
 
     // ✅ Getters & Setters
 
@@ -88,6 +101,42 @@ class Agenda
     public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }
