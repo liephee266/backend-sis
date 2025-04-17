@@ -3,11 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\AgentHospital;
-<<<<<<< HEAD
 use App\Entity\AgentHospitalHospital;
 use App\Entity\Hospital;
-=======
->>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
@@ -56,17 +53,14 @@ class AgentHopitalController extends AbstractController
     public function index(Request $request): Response
     {
 
-<<<<<<< HEAD
         if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
-=======
         // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL') && !$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
         //     # code...
         //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         // }
->>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
@@ -173,17 +167,10 @@ class AgentHopitalController extends AbstractController
     public function create(Request $request): Response
     {
 
-<<<<<<< HEAD
         if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
-=======
-        // if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-        //     # code...
-        //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        // }
->>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
 
         // Décodage du contenu JSON envoyé dans la requête
         $data = json_decode($request->getContent(), true);
@@ -231,11 +218,7 @@ class AgentHopitalController extends AbstractController
     public function update(Request $request,  $id): Response
     {
 
-<<<<<<< HEAD
         if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-=======
-        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
->>>>>>> a3043f8bac8eba4d1f5a86af52a54670d3b338ac
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
