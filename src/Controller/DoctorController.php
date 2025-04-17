@@ -56,7 +56,7 @@ class DoctorController extends AbstractController
         try {
             //code...
             if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
                 !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
             ) {
@@ -103,7 +103,6 @@ class DoctorController extends AbstractController
             //throw $th;
             return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 
 
@@ -121,7 +120,7 @@ class DoctorController extends AbstractController
         try {
             //code...
             if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
                 !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
             ) {
@@ -189,7 +188,7 @@ class DoctorController extends AbstractController
         try {
             // Vérification des autorisations
             if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
                 !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
             ) {
