@@ -45,56 +45,25 @@ class SisAdminController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'urgentist_index', methods: ['GET'])]
+     #[Route('/', name: 'sisadmin_index', methods: ['GET'])]
     public function index(Request $request): Response
-    { 
-<<<<<<< HEAD
-         // Vérification des autorisations de l'utilisateur connecté
+    {
+        // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // 1. Récupérer tous les utilisateurs
-        $users = $this->entityManager->getRepository(User::class)->findAll();
-=======
-        try {
-            // 1. Récupérer tous les utilisateurs
-            $users = $this->entityManager->getRepository(User::class)->findAll();
->>>>>>> 2a317866b628550948eadd99621dcb2b1d3ebda5
 
-            // 2. Filtrer les utilisateurs avec le rôle ROLE_ADMIN_SIS
-            $userIds = [];
-            foreach ($users as $user) {
-                if (in_array('ROLE_ADMIN_SIS', $user->getRoles())) {
-                    $userIds[] = $user->getId();
-                }
-            }
+        // 1. Récupérer tous les utilisateurs avec le rôle ROLE_ADMIN_SIS
+        $users = $this->entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_ADMIN_SIS%')
+            ->getQuery()
+            ->getResult();
 
-            // 3. Si aucun utilisateur correspondant
-            if (empty($userIds)) {
-                return new JsonResponse([
-                    'data' => [],
-                    'total' => 0,
-                    'currentPage' => 1,
-                    'maxPerPage' => 10
-                ], Response::HTTP_OK);
-            }
-
-            // 4. Appliquer le filtre sur la relation "user" dans SisAdmin
-            $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
-            // 5. Appeler ta méthode de pagination
-
-            $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', []);
-
-            // 6. Retour de la réponse JSON
-            return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return new JsonResponse(["message" =>"Erreur interne du serveur" . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-<<<<<<< HEAD
-
-        // 3. Si aucun utilisateur correspondant
-        if (empty($userIds)) {
+        // 2. Si aucun utilisateur correspondant
+        if (empty($users)) {
             return new JsonResponse([
                 'data' => [],
                 'total' => 0,
@@ -103,16 +72,20 @@ class SisAdminController extends AbstractController
             ], Response::HTTP_OK);
         }
 
+        // 3. Récupérer les identifiants des utilisateurs
+        $userIds = array_map(function($user) {
+            return $user->getId();
+        }, $users);
+
         // 4. Appliquer le filtre sur la relation "user" dans SisAdmin
-        $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
+        // Ici, on crée le filtre basé sur les IDs récupérés
+        $filtre = ['id' => $userIds];
+
         // 5. Appeler ta méthode de pagination
-   
         $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
 
         // 6. Retour de la réponse JSON
         return new JsonResponse($response, Response::HTTP_OK);
-=======
->>>>>>> 2a317866b628550948eadd99621dcb2b1d3ebda5
     }
 
     /**
@@ -127,6 +100,11 @@ class SisAdminController extends AbstractController
     public function show(Request $request, int $id): Response
     {
         try {
+             //  Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
             // 1. Récupérer l'utilisateur avec l'id passé en paramètre
             $user = $this->entityManager->getRepository(User::class)->find($id);
 
