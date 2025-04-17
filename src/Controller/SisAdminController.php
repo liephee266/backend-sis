@@ -48,6 +48,11 @@ class SisAdminController extends AbstractController
     #[Route('/', name: 'urgentist_index', methods: ['GET'])]
     public function index(Request $request): Response
     { 
+         // Vérification des autorisations de l'utilisateur connecté
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
         // 1. Récupérer tous les utilisateurs
         $users = $this->entityManager->getRepository(User::class)->findAll();
 
@@ -73,7 +78,7 @@ class SisAdminController extends AbstractController
         $filtre = ['roles' => 'ROLE_ADMIN_SIS']; // relation ManyToOne vers User
         // 5. Appeler ta méthode de pagination
    
-        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', []);
+        $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
 
         // 6. Retour de la réponse JSON
         return new JsonResponse($response, Response::HTTP_OK);
