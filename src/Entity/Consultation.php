@@ -95,12 +95,6 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
-    /**
-     * @var Collection<int, HistoriqueMedical>
-     */
-    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'consultation')]
-    private Collection $historiqueMedicals;
-
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
@@ -109,7 +103,6 @@ class Consultation
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -351,36 +344,6 @@ class Consultation
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, HistoriqueMedical>
-     */
-    public function getHistoriqueMedicals(): Collection
-    {
-        return $this->historiqueMedicals;
-    }
-
-    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
-            $this->historiqueMedicals->add($historiqueMedical);
-            $historiqueMedical->setConsultation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
-            // set the owning side to null (unless already changed)
-            if ($historiqueMedical->getConsultation() === $this) {
-                $historiqueMedical->setConsultation(null);
-            }
-        }
-
         return $this;
     }
 }

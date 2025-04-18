@@ -123,7 +123,6 @@ class DoctorController extends AbstractController
                 !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
                 !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-
             ) {
                 return new JsonResponse([
                     "message" => "Vous n'avez pas accès à cette ressource",
@@ -188,16 +187,16 @@ class DoctorController extends AbstractController
     {
         try {
             // // Vérification des autorisations
-            if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
-                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-            ) {
-                return new JsonResponse([
-                    "message" => "Vous n'avez pas accès à cette ressource",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
-            }
+            // if (
+            //     !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+            //     !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            //     !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            // ) {
+            //     return new JsonResponse([
+            //         "message" => "Vous n'avez pas accès à cette ressource",
+            //         "code" => 403
+            //     ], Response::HTTP_FORBIDDEN);
+            // }
 
             // Récupération et décodage des données
             $data = json_decode($request->getContent(), true);
@@ -216,7 +215,7 @@ class DoctorController extends AbstractController
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
-                    'nickname' => $data['nickname'],
+                    'username' => $data['username'],
                     'tel' => $data['tel'],
                     'birth' => new \DateTime($data['birth']),
                     'gender' => $data['gender'],
