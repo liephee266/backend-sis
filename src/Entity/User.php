@@ -246,20 +246,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->last_name = $last_name;
         return $this;
     }
-<<<<<<< HEAD
-=======
-
-    public function getNickname(): ?string
-    {
-        return $this->nickname;
-    }
-
-    public function setNickname(?string $nickname): self
-    {
-        $this->nickname = $nickname;
-        return $this;
-    }
->>>>>>> caabca9824aa314aeff0dc1a1d865129a1e6b3b8
     public function getAddress(): ?string
     {
         return $this->address;
