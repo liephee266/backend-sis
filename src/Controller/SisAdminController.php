@@ -49,7 +49,7 @@ class SisAdminController extends AbstractController
     public function index(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_DOCTOR')) {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès*refusé"], Response::HTTP_FORBIDDEN);
         }
