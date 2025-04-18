@@ -226,11 +226,11 @@ class PatientController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            // // Vérification des autorisations de l'utilisateur connecté
-            // if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
-            //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-            // }
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_ACCEUIL'))  {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             
@@ -244,11 +244,12 @@ class PatientController extends AbstractController
                 'roles' => ["ROLE_PATIENT"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'username' => $data['username'],
+                'nickname' => $data['nickname'],
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
+                'image' => $data['image'],
             ];
             $data['signaler_comme_decedé'] = false;
             
