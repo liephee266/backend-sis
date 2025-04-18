@@ -51,7 +51,7 @@ class MeetingController extends AbstractController
     }
 
     /**
-     * Liste des Meetin
+     * Liste des Meetings
      *
      * @param Request $request
      * @return Response
