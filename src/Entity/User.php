@@ -28,7 +28,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read"])]
     private ?string $uuid = null;
@@ -61,7 +61,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;
@@ -70,7 +70,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
-    private $username;
+    private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
@@ -83,6 +83,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
     private ?string $tel = null;
+
+    #[ORM\Column(type: "boolean")]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read"])]
+    private bool $gender;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
@@ -120,19 +126,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
     private Collection $autorisations;
 
-    /**
-     * @var Collection<int, AgentHospital>
-     */
-    #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'user')]
-    private Collection $agentHospitals;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image = null;
-
-    #[ORM\Column(length: 1)]
-    private ?string $gender = null;
-
-
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -141,7 +134,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
-        $this->agentHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -255,14 +247,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUsername(): ?string
+    public function getNickname(): ?string
     {
-        return $this->username;
+        return $this->nickname;
     }
 
-    public function setUsername(?string $username): self
+    public function setNickname(?string $nickname): self
     {
-        $this->username = $username;
+        $this->nickname = $nickname;
         return $this;
     }
     public function getAddress(): ?string
@@ -284,6 +276,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTel(?string $tel): self
     {
         $this->tel = $tel;
+        return $this;
+    }
+    public function getGender(): bool
+    {
+        return $this->gender;
+    }
+
+    public function setGender(bool $gender): self
+    {
+        $this->gender = $gender;
         return $this;
     }
     
@@ -409,59 +411,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, AgentHospital>
-     */
-    public function getAgentHospitals(): Collection
-    {
-        return $this->agentHospitals;
-    }
-
-    public function addAgentHospital(AgentHospital $agentHospital): static
-    {
-        if (!$this->agentHospitals->contains($agentHospital)) {
-            $this->agentHospitals->add($agentHospital);
-            $agentHospital->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAgentHospital(AgentHospital $agentHospital): static
-    {
-        if ($this->agentHospitals->removeElement($agentHospital)) {
-            // set the owning side to null (unless already changed)
-            if ($agentHospital->getUser() === $this) {
-                $agentHospital->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(?string $image): static
-    {
-        $this->image = $image;
-
-        return $this;
-    }
-
-    public function getGender(): ?string
-    {
-        return $this->gender;
-    }
-
-    public function setGender(string $gender): static
-    {
-        $this->gender = $gender;
-
-        return $this;
-    }
-
 }
