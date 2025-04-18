@@ -47,17 +47,17 @@ class Meeting
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     private ?State $state_id = null;
 
-    #[ORM\Column(type: 'uuid', nullable: true)]
-    #[Groups(["data_select","meeting:read"])]
-    private ?String $uuid = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(length: 255)]
+    private ?string $uuid = null;
+
+    #[ORM\Column(type: "datetime")]
     #[Groups(["meeting:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private  $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE,  nullable: true)]
     #[Groups(["meeting:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private  $updated_at;
 
       public function __construct()
     {
@@ -152,16 +152,14 @@ class Meeting
 
         return $this;
     }
-
     public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
-    public function setUuid(?string $uuid): static
+    public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 
@@ -170,10 +168,9 @@ class Meeting
         return $this->created_at;
     }
 
-    public function setCreatedAt(?\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
@@ -182,10 +179,9 @@ class Meeting
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 }
