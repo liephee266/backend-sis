@@ -66,15 +66,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;
 
-<<<<<<< HEAD
-=======
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
     private $nickname;
 
->>>>>>> caabca9824aa314aeff0dc1a1d865129a1e6b3b8
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
@@ -249,8 +246,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->last_name = $last_name;
         return $this;
     }
-<<<<<<< HEAD
-=======
+
 
     public function getNickname(): ?string
     {
@@ -262,7 +258,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->nickname = $nickname;
         return $this;
     }
->>>>>>> caabca9824aa314aeff0dc1a1d865129a1e6b3b8
+
     public function getAddress(): ?string
     {
         return $this->address;

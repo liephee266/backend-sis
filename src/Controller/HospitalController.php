@@ -49,7 +49,7 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        try {
+        // try {
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
@@ -64,9 +64,9 @@ class HospitalController extends AbstractController
 
             // Retour d'une réponse JSON avec les utilisateurs et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return new JsonResponse(['code'=>500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(['code'=>500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
         
     }
 
