@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\DossierMedicale;
+use App\Entity\HistoriqueMedical;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,12 +15,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Controleur pour la gestion des DossierMedicale
+ * Controleur pour la gestion des HistoriqueMedical
  * 
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
-#[Route('/api/v1/DossierMedicals')]
-class DossierMedicaleController extends AbstractController
+#[Route('/api/v1/historiqueMedicals')]
+class HistoriqueMedicalController extends AbstractController
 {
     private $toolkit;
     private $entityManager;
@@ -38,14 +38,14 @@ class DossierMedicaleController extends AbstractController
     }
 
     /**
-     * Liste des DossierMedicale
+     * Liste des HistoriqueMedical
      *
      * @param Request $request
      * @return Response
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'DossierMedicale_index', methods: ['GET'])]
+    #[Route('/', name: 'HistoriqueMedical_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
         try {
@@ -73,7 +73,7 @@ class DossierMedicaleController extends AbstractController
                 $filtre = ['patient' => $user];
                             
                 // Récupérer le dossier médical du patient connecté
-                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient' => $user]);
+                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedical')->findOneBy(['patient' => $user]);
 
                 if (!$dossierMedical) {
                     return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
@@ -89,8 +89,8 @@ class DossierMedicaleController extends AbstractController
            }
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
-            // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'DossierMedicale:read', $filtre);
+            // Récupération des HistoriqueMedicals avec pagination et filtre
+            $response = $this->toolkit->getPagitionOption($request, 'HistoriqueMedical', 'HistoriqueMedical:read', $filtre);
 
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
@@ -100,15 +100,15 @@ class DossierMedicaleController extends AbstractController
 
 
     /**
-     * Affichage d'un DossierMedicale par son ID
+     * Affichage d'un HistoriqueMedical par son ID
      *
-     * @param DossierMedicale $DossierMedicale
+     * @param HistoriqueMedical $HistoriqueMedical
      * @return Response
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-     #[Route('/{id}', name: 'DossierMedicale_show', methods: ['GET'])]
-    public function show(DossierMedicale $DossierMedicale, Request $request): Response
+     #[Route('/{id}', name: 'HistoriqueMedical_show', methods: ['GET'])]
+    public function show(HistoriqueMedical $historiqueMedical, Request $request): Response
     {
         try {
             // Récupération de l'utilisateur connecté
@@ -122,14 +122,14 @@ class DossierMedicaleController extends AbstractController
            
             // Si c'est un patient, on vérifie que l'historique lui appartient
             if ($isPatient) {
-                if ($DossierMedicale->getPatientId() !== $user) {
+                if ($historiqueMedical->getPatient() !== $user) {
                     return new JsonResponse(['code' => 403, 'message' => "Accès refusé à cet historique"], Response::HTTP_FORBIDDEN);
                 }
             } else {
                     // Vérifier s'il a une autorisation pour CE patient
                     $autorisation = $this->entityManager->getRepository('App\Entity\Autorisation')->findOneBy([
                         'user' => $user,
-                        'patient' => $DossierMedicale->getPatientId()
+                        'patient' => $historiqueMedical->getPatient()
                     ]);
 
                     if (!$autorisation) {
@@ -137,7 +137,7 @@ class DossierMedicaleController extends AbstractController
                     }
                 }
             // Sérialisation de l'historique
-            $historiqueSerialized = $this->serializer->serialize($DossierMedicale, 'json', ['groups' => 'DossierMedicale:read']);
+            $historiqueSerialized = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
             $responseData = [
                 "data" => json_decode($historiqueSerialized, true),
                 "code" => 200
@@ -155,14 +155,14 @@ class DossierMedicaleController extends AbstractController
 
 
     /**
-     * Création d'un nouvel DossierMedicale
+     * Création d'un nouvel HistoriqueMedical
      *
      * @param Request $request
      * @return Response
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'DossierMedicale_create', methods: ['POST'])]
+    #[Route('/', name: 'HistoriqueMedical_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try {
@@ -174,7 +174,7 @@ class DossierMedicaleController extends AbstractController
             $data = json_decode($request->getContent(), true);
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\DossierMedicale", $data);
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\HistoriqueMedical", $data);
 
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
@@ -191,7 +191,7 @@ class DossierMedicaleController extends AbstractController
     }
 
     /**
-     * Modification d'un DossierMedicale par son ID
+     * Modification d'un HistoriqueMedical par son ID
      *
      * @param Request $request
      * @param int $id
@@ -199,7 +199,7 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'DossierMedicale_update', methods: ['PUT'])]
+    #[Route('/{id}', name: 'HistoriqueMedical_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
         try {
@@ -211,19 +211,19 @@ class DossierMedicaleController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             // Vérification historique est pour ce patient
-            $DossierMedicale = $this->entityManager->getRepository('App\Entity\DossierMedicale')->find($id);
-            if (!$DossierMedicale) {
+            $historiqueMedical = $this->entityManager->getRepository('App\Entity\HistoriqueMedical')->find($id);
+            if (!$historiqueMedical) {
                 return new JsonResponse(['code' => 404, 'message' => "Historique médical introuvable"], Response::HTTP_NOT_FOUND);
             }
             // Vérification si l'utilisateur a le droit de modifier cet historique
-            if ($DossierMedicale->getPatient() !== $this->toolkit->getUser($request)) {
+            if ($historiqueMedical->getPatient() !== $this->toolkit->getUser($request)) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé à cet historique"], Response::HTTP_FORBIDDEN);
             }
             // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
             $data['id'] = $id;
         
-            // Appel à la méthode persistEntity pour mettre à jour l'entité DossierMedicale dans la base de données
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\DossierMedicale", $data, true);
+            // Appel à la méthode persistEntity pour mettre à jour l'entité HistoriqueMedical dans la base de données
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\HistoriqueMedical", $data, true);
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
@@ -240,16 +240,16 @@ class DossierMedicaleController extends AbstractController
     }
     
     /**
-     * Suppression d'un DossierMedicale par son ID
+     * Suppression d'un HistoriqueMedical par son ID
      * 
-     * @param DossierMedicale $DossierMedicale
+     * @param HistoriqueMedical $HistoriqueMedical
      * @param EntityManagerInterface $entityManager
      * @return Response
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'DossierMedicale_delete', methods: ['DELETE'])]
-    public function delete(DossierMedicale $DossierMedicale, EntityManagerInterface $entityManager, Request $request,$id): Response
+    #[Route('/{id}', name: 'HistoriqueMedical_delete', methods: ['DELETE'])]
+    public function delete(HistoriqueMedical $historiqueMedical, EntityManagerInterface $entityManager, Request $request,$id): Response
     {
         try {
              // Vérification des autorisations de l'utilisateur connecté
@@ -257,16 +257,16 @@ class DossierMedicaleController extends AbstractController
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
              // Vérification historique est pour ce patient
-            $DossierMedicale = $this->entityManager->getRepository('App\Entity\DossierMedicale')->find($id);
-            if (!$DossierMedicale) {
+            $historiqueMedical = $this->entityManager->getRepository('App\Entity\HistoriqueMedical')->find($id);
+            if (!$historiqueMedical) {
                 return new JsonResponse(['code' => 404, 'message' => "Historique médical introuvable"], Response::HTTP_NOT_FOUND);
             }
             // Vérification si l'utilisateur a le droit de modifier cet historique
-            if ($DossierMedicale->getPatient() !== $this->toolkit->getUser($request)) {
+            if ($historiqueMedical->getPatient() !== $this->toolkit->getUser($request)) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé à cet historique"], Response::HTTP_FORBIDDEN);
             }
-            // Suppression de l'entité DossierMedicale passée en paramètre
-            $entityManager->remove($DossierMedicale);
+            // Suppression de l'entité HistoriqueMedical passée en paramètre
+            $entityManager->remove($historiqueMedical);
         
             // Validation de la suppression dans la base de données
             $entityManager->flush();

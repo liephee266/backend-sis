@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DossierMedicaleRepository;
@@ -57,11 +59,18 @@ class DossierMedicale
     #[Groups("dossier_medicale:read")]
     private ?string $uuid = null;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'dossierMedical')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -185,6 +194,36 @@ class DossierMedicale
     public function setUuid(Uuid $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
+    }
+
+    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
+            $this->historiqueMedicals->add($historiqueMedical);
+            $historiqueMedical->setDossierMedical($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
+            // set the owning side to null (unless already changed)
+            if ($historiqueMedical->getDossierMedical() === $this) {
+                $historiqueMedical->setDossierMedical(null);
+            }
+        }
 
         return $this;
     }
