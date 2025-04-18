@@ -51,7 +51,7 @@ class SisAdminController extends AbstractController
         // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['code' => 403, 'message' => "Accès*refusé"], Response::HTTP_FORBIDDEN);
         }
 
         // 1. Récupérer tous les utilisateurs avec le rôle ROLE_ADMIN_SIS

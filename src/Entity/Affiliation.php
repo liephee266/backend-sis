@@ -39,6 +39,11 @@ class Affiliation
     private ?\DateTimeInterface $updated_at = null;
 
     // ✅ Getters & Setters
+       public function __construct()
+    {
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
 
     public function getId(): ?int
     {

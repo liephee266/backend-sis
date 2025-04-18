@@ -36,23 +36,24 @@ class Urgency
     #[Groups(["data_select","urgency:read"])]
     private ?string $description = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]
     private ?\DateTimeInterface $created_at = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(["data_select","urgency:read"])]
+    private ?string $uuid = null;
 
     public function __construct()
     {
+        $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
     }
-
     // ✅ Getters & Setters
 
     public function getId(): ?int
@@ -106,7 +107,8 @@ class Urgency
         return $this;
     }
 
-   public function getCreatedAt(): ?\DateTimeInterface
+   
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
@@ -128,7 +130,6 @@ class Urgency
 
         return $this;
     }
-
     public function getUuid(): ?Uuid
     {
         return $this->uuid;

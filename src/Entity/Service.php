@@ -37,25 +37,29 @@ class Service
     #[ORM\ManyToMany(targetEntity: Hospital::class, mappedBy: 'services')]
     private Collection $hospital;
 
-    #[ORM\Column(type: 'uuid')]
+    
+    #[ORM\Column(length: 255)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
     "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
-    private ?Uuid $uuid = null;
-
+    private ?string $uuid = null;
+    
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
     "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
     private ?\DateTimeInterface $created_at = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
     "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeInterface $updated_at = null;
 
     public function __construct()
     {
         $this->doctors = new ArrayCollection();
         $this->hospital = new ArrayCollection();
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     // ✅ Getters & Setters
@@ -145,28 +149,26 @@ class Service
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): static
     {
         $this->updated_at = $updated_at;
 
         return $this;
     }
-
 }

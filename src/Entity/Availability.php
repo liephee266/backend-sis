@@ -33,14 +33,18 @@ class Availability
     #[Groups(["availability:read"])]
     private ?\DateTimeInterface $created_at = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updated_at = null;
+ 
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["availability:read"])]
+    private ?\DateTimeInterface $updated_at = null;
 
     // ✅ Getters & Setters
 
     public function __construct()
     {
         $this->date_interval = new \DateTime();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
 
@@ -86,15 +90,15 @@ class Availability
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 

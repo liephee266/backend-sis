@@ -48,6 +48,8 @@ class ContentMessage
     public function __construct()
     {
         $this->messages = new ArrayCollection();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     // ✅ Getters & Setters
