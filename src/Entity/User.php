@@ -70,7 +70,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
-    private $nickname;
+    private $username;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
@@ -255,14 +255,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getNickname(): ?string
+    public function getUsername(): ?string
     {
-        return $this->nickname;
+        return $this->username;
     }
 
-    public function setNickname(?string $nickname): self
+    public function setUsername(?string $username): self
     {
-        $this->nickname = $nickname;
+        $this->username = $username;
         return $this;
     }
     public function getAddress(): ?string

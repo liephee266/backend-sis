@@ -215,7 +215,7 @@ class DoctorController extends AbstractController
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
-                    'nickname' => $data['nickname'],
+                    'username' => $data['username'],
                     'tel' => $data['tel'],
                     'birth' => new \DateTime($data['birth']),
                     'gender' => $data['gender'],
