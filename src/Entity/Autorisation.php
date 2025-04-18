@@ -53,6 +53,7 @@ class Autorisation
 
     #[ORM\Column(length: 255)]
     private ?string $type_demande = null;
+    
 
     public function __construct()
     {
@@ -193,5 +194,5 @@ class Autorisation
         $this->type_demande = $type_demande;
 
         return $this;
-    }
+    } 
 }

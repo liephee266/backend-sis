@@ -48,8 +48,9 @@ class Notification
     #[Groups(['notification:read'])]
     private $date_exp;
 
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(["notification:read"])]
+    private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $created_at = null;
@@ -57,10 +58,11 @@ class Notification
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $updated_at = null;
 
-    // ✅ Getters & Setters
-
-    public function __construct()
+       public function __construct()
     {
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
         $this->date_exp = new \DateTime();
     }
 
@@ -180,10 +182,9 @@ class Notification
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 

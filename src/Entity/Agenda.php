@@ -35,23 +35,26 @@ class Agenda
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $timeInterval = null;
 
-    #[ORM\Column(type: 'uuid')]
-    #[Groups(["agenda:read"])]
-    private ?Uuid $uuid = null;
-
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $created_at = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["agenda:read"])]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeInterface $updated_at = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["agenda:read"])]
+    private ?string $uuid = null;
 
     // ✅ Getters & Setters
 
     public function __construct()
     {
         $this->timeInterval = new \DateTimeImmutable();
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int
@@ -105,18 +108,6 @@ class Agenda
         return $this;
     }
 
-    public function getUuid(): ?Uuid
-    {
-        return $this->uuid;
-    }
-
-    public function setUuid(Uuid $uuid): static
-    {
-        $this->uuid = $uuid;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -129,14 +120,26 @@ class Agenda
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): static
     {
         $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getUuid(): ?Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): static
+    {
+        $this->uuid = $uuid;
 
         return $this;
     }

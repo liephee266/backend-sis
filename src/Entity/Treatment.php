@@ -38,9 +38,9 @@ class Treatment
     #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'treatment_id')]
     private Collection $dossierMedicales;
 
-    #[ORM\Column(type: 'uuid')]
+    #[ORM\Column(length: 255)]
     #[Groups(["treatment:read", "dossier_medicale:read"])]
-    private ?Uuid $uuid = null;
+    private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["treatment:read", "dossier_medicale:read"])]
@@ -53,6 +53,9 @@ class Treatment
     public function __construct()
     {
         $this->dossierMedicales = new ArrayCollection();
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     // ✅ Getters & Setters
@@ -144,10 +147,9 @@ class Treatment
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 

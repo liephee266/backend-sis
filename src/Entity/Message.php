@@ -41,8 +41,9 @@ class Message
     #[Groups(["message:read"])]
     private ?State $state = null;
 
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(["message:read"])]
+    private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["message:read"])]
@@ -51,6 +52,13 @@ class Message
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["message:read"])]
     private ?\DateTimeInterface $updated_at = null;
+
+       public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
 
     // ✅ Getters & Setters
 
@@ -130,15 +138,14 @@ class Message
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+   public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
@@ -147,10 +154,9 @@ class Message
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 }

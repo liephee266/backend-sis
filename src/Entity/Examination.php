@@ -33,18 +33,24 @@ class Examination
     #[Groups(["examination:read"])]
     private ?Consultation $consultation = null;
 
-    #[ORM\Column(type: 'uuid')]
+    #[ORM\Column(type: "datetime")]
     #[Groups(["examination:read"])]
-    private ?Uuid $uuid = null;
+    private $created_at;
 
-    #[ORM\Column]
+    #[ORM\Column(type: "datetime")]
     #[Groups(["examination:read"])]
-    private ?\DateTimeImmutable $created_at = null;
+    private $updated_at;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 255)]
     #[Groups(["examination:read"])]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?string $uuid = null;
 
+       public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
 
     // ✅ Getters & Setters
 
@@ -110,28 +116,25 @@ class Examination
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
-
 }

@@ -53,9 +53,16 @@ class DossierMedicale
     #[Groups("dossier_medicale:read")]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: 'uuid')]
+    #[ORM\Column(length: 255)]
     #[Groups("dossier_medicale:read")]
-    private ?Uuid $uuid = null;
+    private ?string $uuid = null;
+
+    public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
 
     public function getId(): ?int
     {
