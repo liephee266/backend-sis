@@ -59,7 +59,7 @@ class Meeting
     #[Groups(["meeting:read"])]
     private  $updated_at;
 
-      public function __construct()
+    public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();

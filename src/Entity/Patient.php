@@ -46,6 +46,34 @@ class Patient
     #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'patient_id')]
     private Collection $dossierMedicales;
 
+    #[ORM\Column]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?int $poids = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $groupe_sanguins = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $taille = null;
+
+    #[ORM\Column]
+
+    private ?bool $signaler_comme_decedé = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $nom_urgence = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $adresse_urgence = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $numero_urgence = null;
+
     public function __construct()
     {
         $this->meeting_id = new ArrayCollection();
@@ -169,6 +197,90 @@ class Patient
                 $dossierMedicale->setPatientId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPoids(): ?int
+    {
+        return $this->poids;
+    }
+
+    public function setPoids(int $poids): static
+    {
+        $this->poids = $poids;
+
+        return $this;
+    }
+
+    public function getGroupeSanguins(): ?string
+    {
+        return $this->groupe_sanguins;
+    }
+
+    public function setGroupeSanguins(string $groupe_sanguins): static
+    {
+        $this->groupe_sanguins = $groupe_sanguins;
+
+        return $this;
+    }
+
+    public function getTaille(): ?string
+    {
+        return $this->taille;
+    }
+
+    public function setTaille(string $taille): static
+    {
+        $this->taille = $taille;
+
+        return $this;
+    }
+
+    public function isSignalerCommeDecedé(): ?bool
+    {
+        return $this->signaler_comme_decedé;
+    }
+
+    public function setSignalerCommeDecedé(bool $signaler_comme_decedé): static
+    {
+        $this->signaler_comme_decedé = $signaler_comme_decedé;
+
+        return $this;
+    }
+
+    public function getNomUrgence(): ?string
+    {
+        return $this->nom_urgence;
+    }
+
+    public function setNomUrgence(string $nom_urgence): static
+    {
+        $this->nom_urgence = $nom_urgence;
+
+        return $this;
+    }
+
+    public function getAdresseUrgence(): ?string
+    {
+        return $this->adresse_urgence;
+    }
+
+    public function setAdresseUrgence(string $adresse_urgence): static
+    {
+        $this->adresse_urgence = $adresse_urgence;
+
+        return $this;
+    }
+
+    public function getNumeroUrgence(): ?string
+    {
+        return $this->numero_urgence;
+    }
+
+    public function setNumeroUrgence(string $numero_urgence): static
+    {
+        $this->numero_urgence = $numero_urgence;
 
         return $this;
     }
