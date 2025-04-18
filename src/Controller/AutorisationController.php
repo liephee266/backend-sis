@@ -194,7 +194,14 @@ class AutorisationController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
-                
+                //on recupère l'objet de l'autorisation et son id pour modifier son champ accès en ajoutant l'id du demander d'autorisation
+                $dossier_medicale = $this->entityManager->getRepository('App\Entity\\'.$errors['entity']->getEntity())
+                                ->find($errors['entity']->getEntityId());
+                $a = $dossier_medicale->getAcces() ?? [];
+                $a[] = $errors['entity']->getDemanderId();
+                $dossier_medicale->setAcces($a);
+                $this->entityManager->persist($dossier_medicale);
+                $this->entityManager->flush();
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
                 return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
             }
