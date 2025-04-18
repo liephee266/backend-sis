@@ -66,12 +66,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read"])]
     private $last_name;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
-    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read"])]
-    private $username;
-
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
@@ -252,17 +246,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(?string $last_name): self
     {
         $this->last_name = $last_name;
-        return $this;
-    }
-
-    public function getUsername(): ?string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(?string $username): self
-    {
-        $this->username = $username;
         return $this;
     }
     public function getAddress(): ?string
