@@ -125,7 +125,7 @@ class UrgentistController extends AbstractController
                 'roles' => ["ROLE_URGENTIST"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'username' => $data['username'],
+                'nickname' => $data['nickname'],
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],

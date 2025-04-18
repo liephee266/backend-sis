@@ -187,11 +187,12 @@ class AgentHopitalController extends AbstractController
                 'roles' => ["ROLE_AGENT_HOSPITAL"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'username' => $data['username'],
+                'nickname' => $data['nickname'],
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
+                'image' => $data['image'],
             ];
             
             $errors = $this->genericEntityManager->persistEntityUser("App\Entity\AgentHospital", $user_data, $data);
