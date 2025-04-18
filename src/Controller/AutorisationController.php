@@ -175,7 +175,7 @@ class AutorisationController extends AbstractController
         // Récupération de l'ID de l'autorisation
         $autorisation_type = $this->entityManager->getRepository(Autorisation::class)->findOneBy(['id' => $id])->getTypeDemande();
 
-        if ($autorisation_type === "Access") {
+        if ($autorisation_type === "AUTORISATION") {
             // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
             $data = json_decode($request->getContent(), true);
         
@@ -194,6 +194,7 @@ class AutorisationController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
+                
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
                 return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
             }

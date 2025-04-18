@@ -1,6 +1,8 @@
 <?php
 namespace App\Services;
 
+use DateTime;
+use Exception;
 use App\Entity\User;
 use Pagerfanta\Pagerfanta;
 use Doctrine\ORM\EntityManagerInterface;
@@ -405,6 +407,32 @@ class Toolkit
         //si l'objet n'existe pas, on retourne null
         return $ressource;
     }
+
+    /**
+     * Calcule le nombre de jours entre une date donnée et la date actuelle.
+     *
+     * @param string $dateStr   Date au format 'Y-m-d H:i:s', ex. '2025-04-11 15:05:48'
+     * @return int              Nombre de jours (positif ou négatif)
+     * @throws Exception        Si le format de date est invalide
+     */
+    function joursDepuisDate(string $dateStr): int
+    {
+        // Création de l'objet DateTime pour la date fournie
+        $dateFournie = DateTime::createFromFormat('Y-m-d H:i:s', $dateStr);
+        if (!$dateFournie) {
+            throw new Exception("Format de date invalide : attendu 'Y-m-d H:i:s'.");
+        }
+
+        // Création de l'objet DateTime pour la date actuelle
+        $dateActuelle = new DateTime('now');
+
+        // Calcul de la différence
+        $interval = $dateFournie->diff($dateActuelle);
+
+        // Retourne le nombre total de jours (peut être négatif si dateFournie > dateActuelle)
+        return $interval->invert ? -$interval->days : $interval->days;
+    }
+
 
 
     public function ExistRepository(array $data,string $entity_name,int $id)
