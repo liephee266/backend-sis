@@ -142,14 +142,14 @@ class Service
         return $this->uuid;
     }
 
-    public function setUuid(string $uuid): static
+    public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
 
         return $this;
     }
 
-     public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }

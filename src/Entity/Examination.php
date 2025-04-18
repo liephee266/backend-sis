@@ -104,12 +104,12 @@ class Examination
         return $this;
     }
 
-    public function getUuid(): ?Uuid
+    public function getUuid(): ?String
     {
         return $this->uuid;
     }
 
-    public function setUuid(Uuid $uuid): static
+    public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
 
