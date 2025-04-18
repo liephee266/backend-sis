@@ -59,7 +59,6 @@ class Patient
     private ?string $taille = null;
 
     #[ORM\Column]
-
     private ?bool $signaler_comme_decedé = null;
 
     #[ORM\Column(length: 255)]
