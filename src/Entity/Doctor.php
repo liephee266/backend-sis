@@ -83,9 +83,16 @@ class Doctor
     #[ORM\ManyToMany(targetEntity: Hospital::class, inversedBy: 'doctors')]
     private Collection $hospital;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'medecinTraitant')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->hospital = new ArrayCollection();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -260,6 +267,36 @@ class Doctor
     public function removeHospital(Hospital $hospital): static
     {
         $this->hospital->removeElement($hospital);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
+    }
+
+    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
+            $this->historiqueMedicals->add($historiqueMedical);
+            $historiqueMedical->setMedecinTraitant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
+            // set the owning side to null (unless already changed)
+            if ($historiqueMedical->getMedecinTraitant() === $this) {
+                $historiqueMedical->setMedecinTraitant(null);
+            }
+        }
 
         return $this;
     }

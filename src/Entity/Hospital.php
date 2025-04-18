@@ -147,6 +147,12 @@ class Hospital
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private Collection $services;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'hospital')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->agentHospitals = new ArrayCollection();
@@ -154,6 +160,7 @@ class Hospital
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->services = new ArrayCollection();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -502,6 +509,36 @@ class Hospital
     public function removeService(Service $service): static
     {
         $this->services->removeElement($service);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
+    }
+
+    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
+            $this->historiqueMedicals->add($historiqueMedical);
+            $historiqueMedical->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
+            // set the owning side to null (unless already changed)
+            if ($historiqueMedical->getHospital() === $this) {
+                $historiqueMedical->setHospital(null);
+            }
+        }
 
         return $this;
     }

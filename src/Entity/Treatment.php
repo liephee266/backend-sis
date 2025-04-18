@@ -50,12 +50,19 @@ class Treatment
     #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'treatment')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->dossierMedicales = new ArrayCollection();
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     // ✅ Getters & Setters
@@ -164,4 +171,13 @@ class Treatment
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
+    }
+
 }
