@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\DisponibiliteRepository;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DisponibiliteRepository;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DisponibiliteRepository::class)]
 class Disponibilite
@@ -15,7 +17,7 @@ class Disponibilite
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
-    private ?Doctor $Medecin = null;
+    private ?Doctor $Doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_j = null;
@@ -35,19 +37,29 @@ class Disponibilite
     #[ORM\Column(length: 255)]
     private ?string $uuid = null;
 
+    #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    private ?Hospital $hospital = null;
+
+    public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
+    }
+    
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getMedecin(): ?Doctor
+    public function getDoctor(): ?Doctor
     {
-        return $this->Medecin;
+        return $this->Doctor;
     }
 
-    public function setMedecin(?Doctor $Medecin): static
+    public function setDoctor(?Doctor $Doctor): static
     {
-        $this->Medecin = $Medecin;
+        $this->Doctor = $Doctor;
 
         return $this;
     }
@@ -120,6 +132,18 @@ class Disponibilite
     public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): static
+    {
+        $this->hospital = $hospital;
 
         return $this;
     }

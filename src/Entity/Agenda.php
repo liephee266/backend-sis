@@ -26,15 +26,10 @@ class Agenda
     #[Groups(["agenda:read"])]
     private ?Hospital $hospital = null;
 
-    #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["agenda:read"])]
-    private ?string $listOfDays = null;
-
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $timeInterval = null;
 
-    // ✅ Getters & Setters
 
     public function __construct()
     {
@@ -44,17 +39,6 @@ class Agenda
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getListOfDays(): ?string
-    {
-        return $this->listOfDays;
-    }
-
-    public function setListOfDays(string $listOfDays): self
-    {
-        $this->listOfDays = $listOfDays;
-        return $this;
     }
 
     public function getTimeInterval(): ?\DateTimeInterface
