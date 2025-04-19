@@ -17,7 +17,7 @@ class Disponibilite
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
-    private ?Doctor $Doctor = null;
+    private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_j = null;
@@ -46,7 +46,7 @@ class Disponibilite
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
     }
-    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -54,12 +54,12 @@ class Disponibilite
 
     public function getDoctor(): ?Doctor
     {
-        return $this->Doctor;
+        return $this->doctor;
     }
 
-    public function setDoctor(?Doctor $Doctor): static
+    public function setDoctor(?Doctor $doctor): static
     {
-        $this->Doctor = $Doctor;
+        $this->doctor = $doctor;
 
         return $this;
     }

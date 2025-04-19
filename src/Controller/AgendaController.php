@@ -55,10 +55,12 @@ class AgendaController extends AbstractController
         
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
             # code...
+
             $filtre = [
-                'id_hospital' => $id_hospital,
-                'id_doctor' => $id_doctor,
+                'hospital' => $id_hospital,
+                'doctor' => $id_doctor,
             ];
+            // dd($filtre);
             $response = $this->entityManager->getRepository(Disponibilite::class)->findBy($filtre);
             dd($response);
             $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
