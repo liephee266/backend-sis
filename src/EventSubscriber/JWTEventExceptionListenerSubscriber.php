@@ -2,8 +2,9 @@
 
 namespace App\EventSubscriber;
 
-use App\Services\Toolkit;
 use App\Entity\User;
+use App\Entity\Doctor;
+use App\Services\Toolkit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -48,6 +49,16 @@ public function onSecurityAuthenticationSuccess(AuthenticationSuccessEvent $even
     $data_user = $this->serializer->serialize($trueUser, 'json', ['groups' => 'user:read']);
     $data_user = json_decode($data_user, true);
     $data['user'] = $data_user;
+    if (in_array('ROLE_DOCTOR', $trueUser->getRoles())) {
+        // Si l'utilisateur est un médecin, récupérer les informations de l'administration associée
+        $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $trueUser->getId()]);
+        $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
+        $data_doctor = json_decode($data_doctor, true);
+        unset($data_doctor['user']);
+        unset($data_doctor['id']);
+        $data['user'] = array_merge($data['user'], $data_doctor);
+        # code...
+    }
     
     $data['user']['role'] = $user->getRoles();
     unset($data['user']['roles']);

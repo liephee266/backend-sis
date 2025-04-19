@@ -283,7 +283,7 @@ class Doctor
     {
         if (!$this->disponibilites->contains($disponibilite)) {
             $this->disponibilites->add($disponibilite);
-            $disponibilite->setMedecin($this);
+            $disponibilite->setDoctor($this);
         }
 
         return $this;
@@ -293,8 +293,8 @@ class Doctor
     {
         if ($this->disponibilites->removeElement($disponibilite)) {
             // set the owning side to null (unless already changed)
-            if ($disponibilite->getMedecin() === $this) {
-                $disponibilite->setMedecin(null);
+            if ($disponibilite->getDoctor() === $this) {
+                $disponibilite->setDoctor(null);
             }
         }
 

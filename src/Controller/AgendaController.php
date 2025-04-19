@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Agenda;
+use App\Entity\Disponibilite;
 use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
@@ -58,6 +59,8 @@ class AgendaController extends AbstractController
                 'id_hospital' => $id_hospital,
                 'id_doctor' => $id_doctor,
             ];
+            $response = $this->entityManager->getRepository(Disponibilite::class)->findBy($filtre);
+            dd($response);
             $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
             
             //Récupération des Agendas avec pagination
@@ -73,7 +76,7 @@ class AgendaController extends AbstractController
         // Vérification des autorisations de l'utilisateur connecté
 
         // Retour d'une réponse JSON avec les Agendas et un statut HTTP 200 (OK)
-        return new JsonResponse($response, Response::HTTP_OK);
+        return new JsonResponse([], Response::HTTP_OK);
     }
 
     /**
