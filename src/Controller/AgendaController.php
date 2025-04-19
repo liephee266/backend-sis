@@ -60,12 +60,12 @@ class AgendaController extends AbstractController
             ];
             $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
             
-            // Récupération des Agendas avec pagination
+            //Récupération des Agendas avec pagination
             //$response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
 
         }elseif ($this->security->isGranted('ROLE_PATIENT')) {
             // Si l'utilisateur est un patient, on récupère son ID
-            # code...
+            
         }else {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
