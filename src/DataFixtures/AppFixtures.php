@@ -11,10 +11,6 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        // $product = new Product();
-        // $manager->persist($product);
-        //insertion des States
-
         $states = [
             'PENDING'=>'Pending',
             'VALIDATED'=>'Validated',
@@ -60,7 +56,7 @@ class AppFixtures extends Fixture
         $admin->setBirth(new \DateTime('2000-01-01'));
         $admin->setGender('M');
         $manager->persist($admin);
-        
+
         $manager->flush();
     }
 }
