@@ -62,8 +62,12 @@ class AgendaController extends AbstractController
             ];
             // dd($filtre);
             $response = $this->entityManager->getRepository(Disponibilite::class)->findBy($filtre);
+            $disponibilite_day = [];
+            foreach ($response as $key => $value) {
+                // $t
+            }
             dd($response);
-            $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
+            // $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
             
             //Récupération des Agendas avec pagination
             //$response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
