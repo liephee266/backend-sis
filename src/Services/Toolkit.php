@@ -79,10 +79,14 @@ class Toolkit
         }
         // Sérialisation des données
         $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-        $allData[strtolower($value)] = $data;
+        
         if ($value == 'TypeHopital') {
             # code...
             $value = 'typeHopital';
+            $allData[$value] = $data;
+        }else {
+            # code...
+            $allData[strtolower($value)] = $data;
         }
         // $allData[$value] = $data;
     }
