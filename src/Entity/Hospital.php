@@ -18,7 +18,7 @@ class Hospital
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read","HistoriqueMedical:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -519,28 +519,6 @@ class Hospital
     public function getHistoriqueMedicals(): Collection
     {
         return $this->historiqueMedicals;
-    }
-
-    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
-            $this->historiqueMedicals->add($historiqueMedical);
-            $historiqueMedical->setHospital($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
-            // set the owning side to null (unless already changed)
-            if ($historiqueMedical->getHospital() === $this) {
-                $historiqueMedical->setHospital(null);
-            }
-        }
-
-        return $this;
     }
 
 }

@@ -14,47 +14,47 @@ class DossierMedicale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups(["data_select","dossier_medicale:read"])]
+    #[Groups(["data_select","DossierMedicale:read","consultation:read"])]
     private ?Consultation $consultation_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?Treatment $treatment_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read","urgency:read")]
+    #[Groups("DossierMedicale:read","urgency:read")]
     private ?Patient $patient_id = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read","urgency:read")]
+    #[Groups("DossierMedicale:read","urgency:read")]
     private ?array $antecedents_medicaux = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?array $medications_actuelles = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?array $antecedents_familiaux = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[ORM\Column(type: 'json',nullable: true)]
+    #[Groups("DossierMedicale:read")]
     private ?array $access = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?string $uuid = null;
 
     public function __construct()
@@ -177,15 +177,15 @@ class DossierMedicale
         return $this;
     }
 
-    public function getUuid(): ?Uuid
+  
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
-    public function setUuid(Uuid $uuid): static
+    public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 }

@@ -19,50 +19,50 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
     #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?Patient $patient = null;
 
     #[ORM\ManyToOne(targetEntity: Doctor::class)]
     #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read"])]
     private ?Doctor $doctor = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $description = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $prescription = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $diagnostic = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $recommendation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?string $comment = null;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
 
     /**
@@ -101,6 +101,12 @@ class Consultation
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'consultation')]
     private Collection $historiqueMedicals;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'historiqueMedicalGeneral')]
+    private Collection $historiqueMedicalsGeneral;
+
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
@@ -110,6 +116,7 @@ class Consultation
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->historiqueMedicals = new ArrayCollection();
+        $this->historiqueMedicalsGeneral = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -362,25 +369,34 @@ class Consultation
         return $this->historiqueMedicals;
     }
 
-    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicalsGeneral(): Collection
     {
-        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
-            $this->historiqueMedicals->add($historiqueMedical);
-            $historiqueMedical->setConsultation($this);
+        return $this->historiqueMedicalsGeneral;
+    }
+
+    public function addHistoriqueMedicalsGeneral(HistoriqueMedical $historiqueMedicalsGeneral): static
+    {
+        if (!$this->historiqueMedicalsGeneral->contains($historiqueMedicalsGeneral)) {
+            $this->historiqueMedicalsGeneral->add($historiqueMedicalsGeneral);
+            $historiqueMedicalsGeneral->setHistoriqueMedicalGeneral($this);
         }
 
         return $this;
     }
 
-    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    public function removeHistoriqueMedicalsGeneral(HistoriqueMedical $historiqueMedicalsGeneral): static
     {
-        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
+        if ($this->historiqueMedicalsGeneral->removeElement($historiqueMedicalsGeneral)) {
             // set the owning side to null (unless already changed)
-            if ($historiqueMedical->getConsultation() === $this) {
-                $historiqueMedical->setConsultation(null);
+            if ($historiqueMedicalsGeneral->getHistoriqueMedicalGeneral() === $this) {
+                $historiqueMedicalsGeneral->setHistoriqueMedicalGeneral(null);
             }
         }
 
         return $this;
     }
+
 }

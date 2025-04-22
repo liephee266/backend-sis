@@ -17,7 +17,7 @@ class Doctor
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read","HistoriqueMedical:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -277,27 +277,5 @@ class Doctor
     public function getHistoriqueMedicals(): Collection
     {
         return $this->historiqueMedicals;
-    }
-
-    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
-            $this->historiqueMedicals->add($historiqueMedical);
-            $historiqueMedical->setMedecinTraitant($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
-            // set the owning side to null (unless already changed)
-            if ($historiqueMedical->getMedecinTraitant() === $this) {
-                $historiqueMedical->setMedecinTraitant(null);
-            }
-        }
-
-        return $this;
     }
 }

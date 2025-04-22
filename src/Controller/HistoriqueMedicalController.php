@@ -48,7 +48,7 @@ class HistoriqueMedicalController extends AbstractController
     #[Route('/', name: 'HistoriqueMedical_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        try {
+       try {
             // Vérification des autorisations de l'utilisateur connecté
             if (!$this->security->isGranted('ROLE_ADMIN_SIS')
                 && !$this->security->isGranted('ROLE_SUPER_ADMIN')
@@ -57,48 +57,18 @@ class HistoriqueMedicalController extends AbstractController
                 && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            // Initialisation du filtre
+            // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
-            // Récupération de l'utilisateur connecté
-            $user = $this->toolkit->getUser($request);
-
-            // Si c'est un patient, on filtre uniquement ses historiques
-            if ($this->security->isGranted('ROLE_PATIENT')) {
-                if (!$user) {
-                    return new JsonResponse(['code' => 401, 'message' => "Utilisateur non connecté"], Response::HTTP_UNAUTHORIZED);
-                }
-
-               // Vérification si l'utilisateur est un patient
-                $filtre = ['patient' => $user];
-                            
-                // Récupérer le dossier médical du patient connecté
-                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedical')->findOneBy(['patient' => $user]);
-
-                if (!$dossierMedical) {
-                    return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
-                }
-            }
-             else {
-            // si c'est pas un ptient on vérifie les autorisations
-            $autorisations = $this->entityManager->getRepository('App\Entity\Autorisation')->findBy(['user' => $user]);
-                // Vérification si l'utilisateur a des autorisations
-                if (!$autorisations) {
-                    return new JsonResponse(['code' => 403, 'message' => "Aucune autorisation trouvée"], Response::HTTP_FORBIDDEN);
-                }
-           }
-            // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
-
-            // Récupération des HistoriqueMedicals avec pagination et filtre
+            // Récupération des HistoriqueMedical avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'HistoriqueMedical', 'HistoriqueMedical:read', $filtre);
 
+            // Retour d'une réponse JSON avec les HistoriqueMedical et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
-                return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des Historique Medicals : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des HistoriqueMedical" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
-
-
     /**
      * Affichage d'un HistoriqueMedical par son ID
      *
@@ -110,46 +80,22 @@ class HistoriqueMedicalController extends AbstractController
      #[Route('/{id}', name: 'HistoriqueMedical_show', methods: ['GET'])]
     public function show(HistoriqueMedical $historiqueMedical, Request $request): Response
     {
-        try {
-            // Récupération de l'utilisateur connecté
-            $user = $this->toolkit->getUser($request);
-
-            if (!$user) {
-                return new JsonResponse(['code' => 401, 'message' => "Utilisateur non connecté"], Response::HTTP_UNAUTHORIZED);
+         try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_SUPER_ADMIN')
+                && !$this->security->isGranted('ROLE_DOCTOR')
+                && !$this->security->isGranted('ROLE_PATIENT')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-
-            $isPatient = $this->security->isGranted('ROLE_PATIENT');
-           
-            // Si c'est un patient, on vérifie que l'historique lui appartient
-            if ($isPatient) {
-                if ($historiqueMedical->getPatient() !== $user) {
-                    return new JsonResponse(['code' => 403, 'message' => "Accès refusé à cet historique"], Response::HTTP_FORBIDDEN);
-                }
-            } else {
-                    // Vérifier s'il a une autorisation pour CE patient
-                    $autorisation = $this->entityManager->getRepository('App\Entity\Autorisation')->findOneBy([
-                        'user' => $user,
-                        'patient' => $historiqueMedical->getPatient()
-                    ]);
-
-                    if (!$autorisation) {
-                        return new JsonResponse(['code' => 403, 'message' => "Vous n'avez pas l'autorisation de consulter cet historique médical"], Response::HTTP_FORBIDDEN);
-                    }
-                }
-            // Sérialisation de l'historique
-            $historiqueSerialized = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
-            $responseData = [
-                "data" => json_decode($historiqueSerialized, true),
-                "code" => 200
-            ];
-
-            return new JsonResponse($responseData, Response::HTTP_OK);
-
+            // Sérialisation de l'entité Availability en JSON avec le groupe de sérialisation 'Availability:read'
+            $historiqueMedical = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
+        
+            // Retour de la réponse JSON avec les données de l'Availability et un code HTTP 200
+            return new JsonResponse(["data" => json_decode($historiqueMedical, true), "code" => 200], Response::HTTP_OK);
         } catch (\Throwable $th) {
-            return $this->json([
-                'code' => 500,
-                'message' => "Erreur lors de la recherche de l'Historique Medical : " . $th->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche de l'Availability" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

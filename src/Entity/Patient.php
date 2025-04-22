@@ -15,17 +15,17 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read",])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read",])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read"])]
     private ?User $tutor = null;
 
     /**
@@ -186,27 +186,5 @@ class Patient
     public function getHistoriqueMedicals(): Collection
     {
         return $this->historiqueMedicals;
-    }
-
-    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if (!$this->historiqueMedicals->contains($historiqueMedical)) {
-            $this->historiqueMedicals->add($historiqueMedical);
-            $historiqueMedical->setPatient($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
-    {
-        if ($this->historiqueMedicals->removeElement($historiqueMedical)) {
-            // set the owning side to null (unless already changed)
-            if ($historiqueMedical->getPatient() === $this) {
-                $historiqueMedical->setPatient(null);
-            }
-        }
-
-        return $this;
     }
 }

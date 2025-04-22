@@ -68,28 +68,38 @@ class DossierMedicaleController extends AbstractController
                 if (!$user) {
                     return new JsonResponse(['code' => 401, 'message' => "Utilisateur non connecté"], Response::HTTP_UNAUTHORIZED);
                 }
+    
+               // Récupérer le patient lié à cet utilisateur
+                $patient = $this->entityManager
+                    ->getRepository('App\Entity\Patient')
+                    ->findOneBy(['user' => $user]);
 
-               // Vérification si l'utilisateur est un patient
-                $filtre = ['patient' => $user];
-              
+                if (!$patient) {
+                    return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
+                }
+
                 // Récupérer le dossier médical du patient connecté
-                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $user]);
+                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
                 if (!$dossierMedical) {
                     return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
                 }
             }
              else {
-            // si c'est pas un ptient on vérifie les autorisations
-            $autorisations = $this->entityManager->getRepository('App\Entity\Autorisation')->findBy(['user' => $user]);
-                // Vérification si l'utilisateur a des autorisations
-                if (!$autorisations) {
-                    return new JsonResponse(['code' => 403, 'message' => "Aucune autorisation trouvée"], Response::HTTP_FORBIDDEN);
+            // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
+                $dossiers = $this->entityManager
+                ->getRepository(DossierMedicale::class)
+                ->findAll();
+
+                $dossiersAccessibles = array_filter($dossiers, function ($dossier) use ($user) {
+                    return in_array($user->getId(), $dossier->getAccess() ?? []);
+                });
+
                 }
-           }
+           
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'DossierMedicale:read', $filtre);
+            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'DossierMedicale:read', $filtre, $dossiersAccessibles);
 
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
@@ -106,11 +116,18 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-     #[Route('/{id}', name: 'DossierMedicale_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'DossierMedicale_show', methods: ['GET'])]
     public function show(DossierMedicale $DossierMedicale, Request $request): Response
     {
         try {
-            // Récupération de l'utilisateur connecté
+             // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
+                && !$this->security->isGranted('ROLE_SUPER_ADMIN')
+                && !$this->security->isGranted('ROLE_DOCTOR')
+                && !$this->security->isGranted('ROLE_PATIENT')
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
             $user = $this->toolkit->getUser($request);
 
             if (!$user) {
@@ -118,41 +135,42 @@ class DossierMedicaleController extends AbstractController
             }
 
             $isPatient = $this->security->isGranted('ROLE_PATIENT');
-           dd($isPatient);
-            // Si c'est un patient, on vérifie que l'historique lui appartient
+
             if ($isPatient) {
-                if ($DossierMedicale->getPatientId() !== $user) {
-                    return new JsonResponse(['code' => 403, 'message' => "Accès refusé à cet historique"], Response::HTTP_FORBIDDEN);
+                $patient = $this->entityManager
+                    ->getRepository('App\Entity\Patient')
+                    ->findOneBy(['user' => $user]);
+
+                if (!$patient) {
+                    return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
+                }
+
+                if ($DossierMedicale->getPatientId() !== $patient) {
+                    return new JsonResponse(['code' => 403, 'message' => "Accès refusé à ce dossier médical"], Response::HTTP_FORBIDDEN);
                 }
             } else {
-                    // Vérifier s'il a une autorisation pour CE patient
-                    $autorisation = $this->entityManager->getRepository('App\Entity\Autorisation')->findOneBy([
-                        'user' => $user,
-                        'patient' => $DossierMedicale->getPatientId()
-                    ]);
+                // Vérifie que l'utilisateur connecté a bien accès à ce dossier
+                $accessList = $DossierMedicale->getAccess() ?? [];
+              // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
+                 
+            if (!in_array($user->getId(), $accessList)) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Vous n'avez pas accès à ce dossier médical",
+                    'access' => $accessList,
+                    'user_id' => $user->getId()
+                ],Response::HTTP_FORBIDDEN);
+               }
+            }
+            $historiqueSerialized = $this->serializer->serialize($DossierMedicale,'json',['groups' => 'DossierMedicale:read']);
 
-                    if (!$autorisation) {
-                        return new JsonResponse(['code' => 403, 'message' => "Vous n'avez pas l'autorisation de consulter cet historique médical"], Response::HTTP_FORBIDDEN);
-                    }
-                }
-            // Sérialisation de l'historique
-            $historiqueSerialized = $this->serializer->serialize($DossierMedicale, 'json', ['groups' => 'DossierMedicale:read']);
-            $responseData = [
-                "data" => json_decode($historiqueSerialized, true),
-                "code" => 200
-            ];
-
-            return new JsonResponse($responseData, Response::HTTP_OK);
+            return new JsonResponse(["data" => json_decode($historiqueSerialized, true),"code" => 200], Response::HTTP_OK);
 
         } catch (\Throwable $th) {
-            return $this->json([
-                'code' => 500,
-                'message' => "Erreur lors de la recherche de l'Historique Medical : " . $th->getMessage()
+            return $this->json(['code' => 500,'message' => "Erreur lors de la consultation du dossier médical : " . $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-
     /**
      * Création d'un nouvel DossierMedicale
      *
