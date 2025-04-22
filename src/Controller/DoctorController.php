@@ -186,17 +186,17 @@ class DoctorController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            // Vérification des autorisations
-            if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
-                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-            ) {
-                return new JsonResponse([
-                    "message" => "Vous n'avez pas accès à cette ressource",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
-            }
+            // // Vérification des autorisations
+            // if (
+            //     !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+            //     !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+            //     !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            // ) {
+            //     return new JsonResponse([
+            //         "message" => "Vous n'avez pas accès à cette ressource",
+            //         "code" => 403
+            //     ], Response::HTTP_FORBIDDEN);
+            // }
 
             // Récupération et décodage des données
             $data = json_decode($request->getContent(), true);
