@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Titre de l'e-mail{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>Notre Application</h1>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Notre Application</p>
+    </footer>
+</body>
+</html>

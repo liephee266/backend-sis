@@ -1,32 +1,27 @@
 <?php
-// src/Service/MailerService.php
+
 namespace App\Services;
 
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 class MailerService
 {
     public function __construct(
         private readonly MailerInterface $mailer,
-        private readonly string          $fromAddress
+        private readonly string $fromAddress
     ) {}
 
-    /**
-     * Envoie un e-mail simple.
-     *
-     * @param string $to      Destinataire
-     * @param string $subject Objet du mail
-     * @param string $body    Contenu HTML ou texte
-     */
-    public function sendEmail(string $to, string $subject, string $body): void
+    public function sendWelcomeEmail(string $to, string $name): void
     {
-        $email = (new Email())
+        $email = (new TemplatedEmail())
             ->from($this->fromAddress)
             ->to($to)
-            ->subject($subject)
-            ->html($body)
-        ;
+            ->subject('Bienvenue sur notre plateforme')
+            ->htmlTemplate('email/welcome.html.twig')
+            ->context([
+                'name' => $name,
+            ]);
 
         $this->mailer->send($email);
     }
