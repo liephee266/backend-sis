@@ -47,8 +47,10 @@ class Meeting
 
     /**
      * @var Collection<int, Disponibilite>
+     * 
      */
     #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'meeting')]
+    #[Groups(["meeting:read"])]
     private Collection $disponibilites;
 
     public function __construct()
@@ -158,7 +160,7 @@ class Meeting
             $this->disponibilites->add($disponibilite);
             $disponibilite->setMeeting($this);
         }
-
+        $disponibilite->setMeeting($this);
         return $this;
     }
 

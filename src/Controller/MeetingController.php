@@ -172,6 +172,12 @@ class MeetingController extends AbstractController
 
         // Vérification des erreurs après la persistance des données
         if (!empty($errors['entity'])) {
+            if (key_exists("disponibilites", $data)) {
+                // Si l'entité a été correctement enregistrée, on traite les disponibilités
+                $this->entityManager->getRepository("App\Entity\Disponibilite")->find($data["disponibilites"])->setMeeting($errors['entity']);
+                $this->entityManager->flush();
+                # code...
+            }
             // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
             return $this->json(['code' => 200, 'message' => "Meeting crée avec succès"], Response::HTTP_OK);
         }

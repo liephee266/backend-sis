@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use DateTime;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DisponibiliteRepository;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DisponibiliteRepository::class)]
 class Disponibilite
@@ -20,12 +21,15 @@ class Disponibilite
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $date_j = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $heure_debut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $heure_fin = null;
 
     #[ORM\Column]

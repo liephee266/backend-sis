@@ -4,8 +4,9 @@ namespace App\Services;
 use App\Entity\User;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -35,6 +36,8 @@ class GenericEntityManager
      * @param string $entityClass Nom complet de l'entité (e.g., App\Entity\User)
      * @param array $data Données à mapper sur l'entité
      * @return array Liste des erreurs ou un tableau vide si succès
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
      */
     public function persistEntity(string $entityClass, array $data, bool $update = false): array
     {
@@ -43,13 +46,16 @@ class GenericEntityManager
         $entity = "";
         if ($update==false) {
             $entity = new $entityClass();
-        }else {
+        } else {
             $entity = $this->entityManager->getRepository($entityClass)->find($data['id']);
         }
         unset($data['id']);
+        
         // Récupère les métadonnées de l'entité
         $metadata = $this->entityManager->getClassMetadata($entityClass);
+        
         foreach ($data as $field => $value) {
+            
             // Vérifie si le champ est mappé dans l'entité
             if ($metadata->hasField($field)) {
                 if ($field == "password" and $entity instanceof User) {
@@ -60,8 +66,9 @@ class GenericEntityManager
                 $this->propertyAccessor->setValue($entity, $field, $value);
             }
             // Gestion des associations (relations Doctrine)
-            if ($metadata->hasAssociation($field)) {
+            elseif ($metadata->hasAssociation($field)) {
                 $associationMetadata = $metadata->getAssociationMapping($field);
+                // dump($associationMetadata['type']);
                 // Si l'association est une relation "to-one"
                 if ($associationMetadata['type'] & ClassMetadata::TO_ONE) {
                     $relatedEntity = $this->entityManager
@@ -71,8 +78,52 @@ class GenericEntityManager
                         $this->propertyAccessor->setValue($entity, $field, $relatedEntity);
                     }
                 }
+                // Si l'association est une relation "many-to-many"
+                elseif ($associationMetadata['type'] & ClassMetadata::MANY_TO_MANY) {
+                    // On s'assure que la valeur est un tableau
+                    $ids = is_array($value) ? $value : [$value];
+                    
+                    // Récupère la collection existante (pour les updates)
+                    $collection = $this->propertyAccessor->getValue($entity, $field);
+                    
+                    $collection = new ArrayCollection();
+                    
+                    // Ajoute chaque entité associée
+                    foreach ($ids as $id) {
+                        $relatedEntity = $this->entityManager
+                            ->getRepository($associationMetadata['targetEntity'])
+                            ->find(is_array($id) ? $id['id'] : $id);
+                        
+                        if ($relatedEntity) {
+                            $collection->add($relatedEntity);
+                        }
+                    }
+                    
+                    $this->propertyAccessor->setValue($entity, $field, $collection);
+                }
+                // Si l'association est une relation "one-to-many"
+                elseif ($associationMetadata['type'] & ClassMetadata::ONE_TO_MANY) {
+                    // On s'assure que la valeur est un tableau
+                    $ids = is_array($value) ? $value : [$value];
+                    
+                    // Récupère la collection existante (pour les updates)
+                    $collection = $this->propertyAccessor->getValue($entity, $field);
+                    
+                    // Ajoute chaque entité associée
+                    foreach ($ids as $id) {
+                        $relatedEntity = $this->entityManager
+                            ->getRepository($associationMetadata['targetEntity'])
+                            ->find(is_array($id) ? $id['id'] : $id);
+                        if ($relatedEntity) {
+                            $collection->add($relatedEntity);
+                        }
+                    }
+                    
+                    $this->propertyAccessor->setValue($entity, $field, $collection);
+                }
             }
         }
+        
         // Valide l'entité
         $errors = $this->validator->validate($entity);
         if (count($errors) > 0) {
@@ -82,9 +133,12 @@ class GenericEntityManager
             }
             return $errorMessages; // Retourne les erreurs
         }
+        
         // Persiste l'entité
+        // dd($entity);
         $this->entityManager->persist($entity);
         $this->entityManager->flush();
+        // dd('ok');
         return ["entity" => $entity]; // Aucune erreur
     }
     
@@ -131,7 +185,6 @@ class GenericEntityManager
         // Début de la transaction
         $this->entityManager->beginTransaction();
 
-
         $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
             
         if (!empty($errors_user['errors'])) {
@@ -168,7 +221,6 @@ class GenericEntityManager
      */
     public function persistUser(array $user_data, $data)
     {
-
         // Validation des données requises
         if (!isset($data['email']) || !isset($data['password'])) {
             return new JsonResponse(
@@ -176,10 +228,8 @@ class GenericEntityManager
                 Response::HTTP_BAD_REQUEST
             );
         }
-
          // Début de la transaction
         $this->entityManager->beginTransaction();
-
 
         $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
             
