@@ -136,10 +136,6 @@ class Hospital
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private ?TypeHopital $type_hospital = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['hospital:read', "hospitaladmin:read"])]
-    private ?string $name_director = null;
-
     /**
      * @var Collection<int, Service>
      */
@@ -466,18 +462,6 @@ class Hospital
     public function setTypeHospital(?TypeHopital $type_hospital): static
     {
         $this->type_hospital = $type_hospital;
-
-        return $this;
-    }
-
-    public function getNameDirector(): ?string
-    {
-        return $this->name_director;
-    }
-
-    public function setNameDirector(string $name_director): static
-    {
-        $this->name_director = $name_director;
 
         return $this;
     }

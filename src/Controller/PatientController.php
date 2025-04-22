@@ -244,12 +244,12 @@ class PatientController extends AbstractController
                 'roles' => ["ROLE_PATIENT"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'nickname' => $data['nickname'],
+                'nickname' => $data['nickname']?? null,
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
                 'address' => $data['address'],
-                'image' => $data['image'],
+                'image' => $data['image']?? null,
             ];
             $data['signaler_comme_decedé'] = false;
             

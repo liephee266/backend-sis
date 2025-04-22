@@ -201,6 +201,8 @@ class DoctorController extends AbstractController
             // Récupération et décodage des données
             $data = json_decode($request->getContent(), true);
 
+            $data["password"] = $data["password"] ?? 123456789;
+
             if (!$data) {
                 return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
             }
@@ -211,7 +213,7 @@ class DoctorController extends AbstractController
                 // Création du User
                 $user_data = [
                     'email' => $data['email'],
-                    'password' => $data['password']??"123456",
+                    'password' => $data['password'],
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
@@ -227,7 +229,7 @@ class DoctorController extends AbstractController
 
                 $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
 
-                dd($errors);
+                // Vérification si l'entité a été créée sans erreur
                 if (!empty($errors['entity'])) {
                     $this->entityManager->commit();
                     return $this->json(['code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
