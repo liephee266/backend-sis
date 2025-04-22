@@ -103,6 +103,10 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $diagnostic_preliminaire = null;
 
+    #[ORM\Column(nullable: true)]
+
+    private ?array $antecedents_medicaux = null;
+
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
@@ -376,6 +380,18 @@ class Consultation
     public function setDiagnosticPreliminaire(string $diagnostic_preliminaire): static
     {
         $this->diagnostic_preliminaire = $diagnostic_preliminaire;
+
+        return $this;
+    }
+
+    public function getAntecedentsMedicaux(): ?array
+    {
+        return $this->antecedents_medicaux;
+    }
+
+    public function setAntecedentsMedicaux(?array $antecedents_medicaux): static
+    {
+        $this->antecedents_medicaux = $antecedents_medicaux;
 
         return $this;
     }
