@@ -372,10 +372,9 @@ class AppController extends AbstractController
     public function send(MailerService $mailer, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $mailer->sendEmail(
-            $data['email'],
-            'Votre demande de contact',
-            '<p>Merci de nous avoir contactés !</p>'
+        $mailer->sendWelcomeEmail(
+            'lieloumloum@gmail.com',
+            'Orphée Lié',
         );
 
         return $this->json(['status' => 'email_sent']);
