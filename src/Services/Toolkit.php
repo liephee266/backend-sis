@@ -470,8 +470,8 @@ class Toolkit
                     $a[$key_a][] = [
                         'id' => $disponibilitie->getId(),
                         'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
-                        'heure_debut' => $disponibilitie->getHeureDebut()->format('H:i:s'),
-                        'heure_fin' => $disponibilitie->getHeureFin()->format('H:i:s'),
+                        'heure_debut' => $disponibilitie->getHeureDebut(),
+                        'heure_fin' => $disponibilitie->getHeureFin(),
                     ];
                 }
             }

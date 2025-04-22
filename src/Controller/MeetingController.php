@@ -153,7 +153,7 @@ class MeetingController extends AbstractController
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // // Vérification des autorisations de l'utilisateur connecté
+        // Vérification des autorisations de l'utilisateur connecté
         // if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
         //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
         //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
@@ -198,37 +198,25 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
-        // // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
-        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        // }
-
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
-
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
         $data['id'] = $id;
-
         // Conversion de la date en objet DateTime
         $data["date"] = new \DateTime($data["date"]);
-    
         if ($data["state_id"] == 3) {
             $data_update = [
                 "state_id" => $data["state_id"],
                 "date" => $data["date"],
                 "id" => $data["id"],
             ];
-        
             // Appel à la méthode persistEntity pour mettre à jour l'entité Meeting dans la base de données
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data_update, true);
-        
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
                 return $this->json(['code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
             }
-        
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }else {
@@ -236,21 +224,16 @@ class MeetingController extends AbstractController
                 "state_id" => $data["state_id"],
                 "id" => $data["id"],
             ];
-        
             // Appel à la méthode persistEntity pour mettre à jour l'entité Meeting dans la base de données
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data_update, true);
-        
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
                 return $this->json(['code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
             }
-        
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        
     }
     
     /**

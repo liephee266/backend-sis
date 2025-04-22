@@ -83,21 +83,20 @@ class Disponibilite
         return $this;
     }
 
-    public function getHeureDebut(): ?\DateTimeInterface
+    public function getHeureDebut()
     {
-        return $this->heure_debut;
+        return $this->heure_debut->format('H:i:s');
     }
 
     public function setHeureDebut(\DateTimeInterface $heure_debut): static
     {
         $this->heure_debut = $heure_debut;
-
         return $this;
     }
 
-    public function getHeureFin(): ?\DateTimeInterface
+    public function getHeureFin()
     {
-        return $this->heure_fin;
+        return $this->heure_fin->format('H:i:s');
     }
 
     public function setHeureFin(\DateTimeInterface $heure_fin): static
