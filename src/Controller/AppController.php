@@ -115,12 +115,12 @@ class AppController extends AbstractController
     private function getSearchConfiguration(): array
     {
         return [
-            'driving_license' => [
+            'Entity1' => [
                 'class' => 'App\Entity\Entity1',
                 'searchFields' => ['first_name', 'last_name', 'cashier_short_code'],
                 'serializationGroup' => 'driving_license:read'
             ],
-            'registration_card' => [
+            'Entity2' => [
                 'class' => 'App\Entity\Entity2',
                 'searchFields' => ['owner_first_name', 'owner_last_name', 'cashier_short_code'],
                 'serializationGroup' => 'registration_card:read'

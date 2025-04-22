@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Agenda;
+use App\Entity\Disponibilite;
 use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
@@ -47,27 +48,41 @@ class AgendaController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'agenda_index', methods: ['GET'])]
-    public function index(Request $request): Response
+    #[Route('/{id_hospital}/{id_doctor}/', name: 'agenda_index', methods: ['GET'])]
+    public function index(Request $request,$id_hospital = null, $id_doctor = null): Response
     {
-        try {
-            // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+         // Vérification des autorisations de l'utilisateur connecté
+        
+        if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
+            # code...
+
+            $filtre = [
+                'hospital' => $id_hospital,
+                'doctor' => $id_doctor,
+            ];
+            // dd($filtre);
+            $response = $this->entityManager->getRepository(Disponibilite::class)->findBy($filtre);
+            $disponibilite_day = [];
+            foreach ($response as $key => $value) {
+                // $t
+            }
+            dd($response);
+            // $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
+            
+            //Récupération des Agendas avec pagination
+            //$response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
+
+        }elseif ($this->security->isGranted('ROLE_PATIENT')) {
+            // Si l'utilisateur est un patient, on récupère son ID
+            
+        }else {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
         // Vérification des autorisations de l'utilisateur connecté
-        $filtre = [];
-
-        // Récupération des Agendas avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
 
         // Retour d'une réponse JSON avec les Agendas et un statut HTTP 200 (OK)
-        return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des agendas" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        
+        return new JsonResponse([], Response::HTTP_OK);
     }
 
     /**

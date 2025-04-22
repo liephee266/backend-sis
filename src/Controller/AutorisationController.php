@@ -179,12 +179,12 @@ class AutorisationController extends AbstractController
             // Récupération de l'ID de l'autorisation
             $autorisation_type = $this->entityManager->getRepository(Autorisation::class)->findOneBy(['id' => $id])->getTypeDemande();
 
-            if ($autorisation_type === "Access") {
-                // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
-                $data = json_decode($request->getContent(), true);
-            
-                // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
-                $data['id'] = $id;
+        if ($autorisation_type === "AUTORISATION") {
+            // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
+            $data = json_decode($request->getContent(), true);
+        
+            // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
+            $data['id'] = $id;
 
                 $autorisation_data = [
                     'date_limit' =>$data['date_limit'],
@@ -193,19 +193,27 @@ class AutorisationController extends AbstractController
                     'id' => $data['id'],
                 ];
 
-                // Appel à la méthode persistEntity pour mettre à jour l'entité Autorisation dans la base de données
-                $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $autorisation_data, true);
-            
-                // Vérification si l'entité a été mise à jour sans erreur
-                if (!empty($errors['entity'])) {
-                    // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
-                    return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
-                }
-            
-                // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-                return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Autorisation"], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }else{
-                $data = json_decode($request->getContent(), true);
+            // Appel à la méthode persistEntity pour mettre à jour l'entité Autorisation dans la base de données
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\Autorisation", $autorisation_data, true);
+        
+            // Vérification si l'entité a été mise à jour sans erreur
+            if (!empty($errors['entity'])) {
+                //on recupère l'objet de l'autorisation et son id pour modifier son champ accès en ajoutant l'id du demander d'autorisation
+                $dossier_medicale = $this->entityManager->getRepository('App\Entity\\'.$errors['entity']->getEntity())
+                                ->find($errors['entity']->getEntityId());
+                $a = $dossier_medicale->getAcces() ?? [];
+                $a[] = $errors['entity']->getDemanderId();
+                $dossier_medicale->setAcces($a);
+                $this->entityManager->persist($dossier_medicale);
+                $this->entityManager->flush();
+                // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
+                return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
+            }
+        
+            // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Autorisation"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }else{
+            $data = json_decode($request->getContent(), true);
 
                 if ($data['status_id'] === 2) {
                     // Mise à jour de l'autorisation
