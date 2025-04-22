@@ -211,7 +211,7 @@ class DoctorController extends AbstractController
                 // Création du User
                 $user_data = [
                     'email' => $data['email'],
-                    'password' => $data['password'],
+                    'password' => $data['password']??"123456",
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
@@ -227,6 +227,7 @@ class DoctorController extends AbstractController
 
                 $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
 
+                dd($errors);
                 if (!empty($errors['entity'])) {
                     $this->entityManager->commit();
                     return $this->json(['code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
