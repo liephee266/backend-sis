@@ -56,7 +56,6 @@ class AgendaController extends AbstractController
         $year = date('Y');
         $monts_and_year = ["months"=> [$month, $month = 12 ? 1 : $month +1],"year"=>$year];
         // Vérification des autorisations de l'utilisateur connecté
-        
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
                 $a = $this->toolkit->getAgenda($monts_and_year,  ['id_doctor'=> $id_doctor,'id_hospital'=>$id_hospital] );
             return new JsonResponse(["data"=> $a, "code" => 200], Response::HTTP_OK);

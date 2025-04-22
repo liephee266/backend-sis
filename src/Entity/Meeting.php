@@ -45,6 +45,17 @@ class Meeting
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     private ?State $state_id = null;
 
+    /**
+     * @var Collection<int, Disponibilite>
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'meeting')]
+    private Collection $disponibilites;
+
+    public function __construct()
+    {
+        $this->disponibilites = new ArrayCollection();
+    }
+
     // ✅ Getters & Setters
 
     public function getId(): ?int
@@ -129,6 +140,36 @@ class Meeting
     public function setStateId(?State $state_id): static
     {
         $this->state_id = $state_id;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setMeeting($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getMeeting() === $this) {
+                $disponibilite->setMeeting(null);
+            }
+        }
 
         return $this;
     }

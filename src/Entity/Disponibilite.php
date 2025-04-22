@@ -40,6 +40,9 @@ class Disponibilite
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
     private ?Hospital $hospital = null;
 
+    #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    private ?Meeting $meeting = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -144,6 +147,18 @@ class Disponibilite
     public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getMeeting(): ?Meeting
+    {
+        return $this->meeting;
+    }
+
+    public function setMeeting(?Meeting $meeting): static
+    {
+        $this->meeting = $meeting;
 
         return $this;
     }
