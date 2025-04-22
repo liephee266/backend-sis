@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use App\Services\MailerService;
 
 /**
  * Controleur principal de l'application
@@ -365,5 +366,18 @@ class AppController extends AbstractController
             ['message' => $entity_name.' suspendu(e) avec succès'], 
             Response::HTTP_OK
         );
+    }
+
+    #[Route('/contact/send', name: 'contact_send', methods: ['POST'])]
+    public function send(MailerService $mailer, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $mailer->sendEmail(
+            $data['email'],
+            'Votre demande de contact',
+            '<p>Merci de nous avoir contactés !</p>'
+        );
+
+        return $this->json(['status' => 'email_sent']);
     }
 }
