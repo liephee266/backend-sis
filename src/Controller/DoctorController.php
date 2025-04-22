@@ -215,12 +215,12 @@ class DoctorController extends AbstractController
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
-                    'nickname' => $data['nickname'],
+                    'nickname' => $data['nickname']?? null,
                     'tel' => $data['tel'],
                     'birth' => new \DateTime($data['birth']),
                     'gender' => $data['gender'],
-                    'address' => $data['address'],
-                    'image' => $data['image'],
+                    'address' => $data['address']?? null,
+                    'image' => $data['image']?? null,
                 ];
 
                 $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
