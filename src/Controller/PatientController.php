@@ -233,6 +233,8 @@ class PatientController extends AbstractController
             }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
+
+            $data["password"] = $data["password"] ?? 123456789;
             
             // Début de la transaction
             $this->entityManager->beginTransaction();
@@ -248,7 +250,7 @@ class PatientController extends AbstractController
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
-                'address' => $data['address'],
+                'address' => $data['address']?? null,
                 'image' => $data['image']?? null,
             ];
             $data['signaler_comme_decedé'] = false;

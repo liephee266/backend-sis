@@ -176,6 +176,8 @@ class AgentHopitalController extends AbstractController
     
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
+
+            $data["password"] = $data["password"] ?? 123456789;
             
             // Début de la transaction
             $this->entityManager->beginTransaction();
@@ -187,12 +189,12 @@ class AgentHopitalController extends AbstractController
                 'roles' => ["ROLE_AGENT_HOSPITAL"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'nickname' => $data['nickname'],
+                'nickname' => $data['nickname']?? null,
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
-                'address' => $data['address'],
-                'image' => $data['image'],
+                'address' => $data['address']?? null,
+                'image' => $data['image']?? null,
             ];
             
             $errors = $this->genericEntityManager->persistEntityUser("App\Entity\AgentHospital", $user_data, $data);
