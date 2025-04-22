@@ -129,7 +129,7 @@ class Hospital
 
     #[ORM\Column]
     #[Groups(['hospital:read', "hospitaladmin:read"])]
-    private ?int $autres_personnel_de_santé = null;
+    private ?int $autres_personnel_de_sante = null;
 
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
     #[ORM\JoinColumn(nullable: false)]
@@ -446,14 +446,14 @@ class Hospital
         return $this;
     }
 
-    public function getAutresPersonnelDeSanté(): ?int
+    public function getAutresPersonnelDeSante(): ?int
     {
-        return $this->autres_personnel_de_santé;
+        return $this->autres_personnel_de_sante;
     }
 
-    public function setAutresPersonnelDeSanté(int $autres_personnel_de_santé): static
+    public function setAutresPersonnelDeSante(int $autres_personnel_de_sante): static
     {
-        $this->autres_personnel_de_santé = $autres_personnel_de_santé;
+        $this->autres_personnel_de_sante = $autres_personnel_de_sante;
 
         return $this;
     }
