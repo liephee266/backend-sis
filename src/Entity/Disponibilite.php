@@ -33,18 +33,23 @@ class Disponibilite
     private ?\DateTimeInterface $heure_fin = null;
 
     #[ORM\Column]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?string $uuid = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?Meeting $meeting = null;
 
     public function __construct()
