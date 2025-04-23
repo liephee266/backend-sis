@@ -376,7 +376,6 @@ class AppController extends AbstractController
             'lieloumloum@gmail.com',
             'Orphée Lié',
         );
-
         return $this->json(['status' => 'email_sent']);
     }
 }
