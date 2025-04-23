@@ -46,7 +46,7 @@ class Service
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
     "examination:read", "affiliation:read", "availability:read", "hospital:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",

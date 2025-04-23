@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -32,7 +33,7 @@ class Affiliation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["affiliation:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["affiliation:read"])]
@@ -41,8 +42,8 @@ class Affiliation
     // ✅ Getters & Setters
     public function __construct()
     {
-        $this->created_at = new \DateTime();
-        $this->updated_at = new \DateTime();
+        $this->created_at = new \DateTimeImmutable('now');
+        $this->updated_at = new \DateTimeImmutable('now');
     }
 
     public function getId(): ?int

@@ -44,7 +44,7 @@ class Treatment
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["treatment:read", "dossier_medicale:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["treatment:read", "dossier_medicale:read"])]

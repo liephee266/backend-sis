@@ -34,7 +34,7 @@ class Disponibilite
 
     #[ORM\Column]
     #[Groups(["disponibilite:read","meeting:read"])]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $created_at;
 
     #[ORM\Column]
     #[Groups(["disponibilite:read","meeting:read"])]
@@ -55,8 +55,8 @@ class Disponibilite
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
-        $this->created_at = new \DateTimeImmutable();
-        $this->updated_at = new \DateTimeImmutable();
+        $this->created_at = new \DateTimeImmutable('now');
+        $this->updated_at = new \DateTimeImmutable('now');
     }
 
     public function getId(): ?int

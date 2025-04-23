@@ -81,7 +81,7 @@ class Consultation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
@@ -113,8 +113,8 @@ class Consultation
         $this->treatments = new ArrayCollection();
         $this->dossierMedicales = new ArrayCollection();
         $this->uuid = Uuid::v7()->toString();
-        $this->created_at = new \DateTime();
-        $this->updated_at = new \DateTime();
+        $this->created_at = new \DateTimeImmutable('now');
+        $this->updated_at = new \DateTimeImmutable('now');
     }
 
     public function getId(): ?int

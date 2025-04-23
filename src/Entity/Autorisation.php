@@ -43,7 +43,7 @@ class Autorisation
     private ?int $entity_id = null;
 
     #[ORM\Column(type: "datetime")]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: "datetime")]
     private $updated_at;

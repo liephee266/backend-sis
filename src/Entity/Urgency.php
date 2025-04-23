@@ -38,7 +38,7 @@ class Urgency
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]

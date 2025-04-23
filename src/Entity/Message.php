@@ -47,7 +47,7 @@ class Message
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["message:read"])]
-    private ?\DateTimeInterface $created_at = null;
+    private ?\DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["message:read"])]
