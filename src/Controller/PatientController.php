@@ -260,7 +260,7 @@ class PatientController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                return $this->json(['code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -301,7 +301,7 @@ class PatientController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['code' => 200, 'message' => "Patient modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Patient modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

@@ -187,7 +187,7 @@ class MeetingController extends AbstractController
                 # code...
             }
             // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-            return $this->json(['code' => 200, 'message' => "Meeting crée avec succès"], Response::HTTP_OK);
+            return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Meeting crée avec succès"], Response::HTTP_OK);
         }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -223,7 +223,7 @@ class MeetingController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
             }
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -237,7 +237,7 @@ class MeetingController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Meeting modifié avec succès"], Response::HTTP_OK);
             }
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);

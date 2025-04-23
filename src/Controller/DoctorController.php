@@ -229,7 +229,7 @@ class DoctorController extends AbstractController
 
                 if (!empty($errors['entity'])) {
                     $this->entityManager->commit();
-                    return $this->json(['code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
+                    return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
                 }
 
                 // Erreur dans la persistance
@@ -312,7 +312,7 @@ class DoctorController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
-                return $this->json(['code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
             }
     
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);

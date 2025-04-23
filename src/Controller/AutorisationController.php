@@ -146,7 +146,7 @@ class AutorisationController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['code' => 200, 'message' => "Autorisation soumis avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation soumis avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -207,7 +207,7 @@ class AutorisationController extends AbstractController
                 $this->entityManager->persist($dossier_medicale);
                 $this->entityManager->flush();
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
-                return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
@@ -254,7 +254,7 @@ class AutorisationController extends AbstractController
                     $this->entityManager->persist($hospital); // ou $doctor selon la relation
                     $this->entityManager->flush();
 
-                    return $this->json(['code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
+                    return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
                 }else {
                     // Mise à jour de l'autorisation
                     $autorisation_affiliation = [
@@ -268,7 +268,7 @@ class AutorisationController extends AbstractController
                     // Vérification si l'entité a été mise à jour sans erreur
                     if (!empty($errors['entity'])) {
                         // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
-                        return $this->json(['code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
+                        return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
                     }
                 
                     // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
