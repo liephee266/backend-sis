@@ -14,7 +14,7 @@ class DossierMedicale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("DossierMedicale:read")]
+    #[Groups("DossierMedicale:read","patient:read","patient:read:restricted")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]

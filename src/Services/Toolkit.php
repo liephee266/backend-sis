@@ -1,6 +1,8 @@
 <?php
 namespace App\Services;
 
+use App\Entity\DossierMedicale;
+use App\Entity\Patient;
 use App\Entity\User;
 use Pagerfanta\Pagerfanta;
 use Doctrine\ORM\EntityManagerInterface;
@@ -414,4 +416,45 @@ class Toolkit
 
         return $repository_entity;
     }
+    /** 
+     * Détermine le groupe de sérialisation à utiliser pour afficher les informations du patient,
+     * en fonction des droits d'accès de l'utilisateur connecté.
+     *
+     * Si l'utilisateur a un accès explicite au dossier médical (via le champ "access"),
+     * le groupe complet 'patient:read' est retourné.
+     * Sinon, un groupe restreint 'patient:read:restricted' est appliqué.
+     *
+     * @param User $user L'utilisateur connecté
+     * @param Patient $patient Le patient concerné
+     * @param DossierMedicale $dossierMedicale Le dossier médical du patient
+     *
+     * @return string Le groupe de sérialisation à utiliser ('patient:read' ou 'patient:read:restricted')
+     * @author Daryon Rocknes <daryonrocknes@icloud.com.com>
+     */
+    public function getPatientSerializationGroup(User $user, DossierMedicale $dossierMedicale): string
+    {
+        // Liste des utilisateurs ayant un accès au dossier médical
+        $accessList = $dossierMedicale->getAccess();
+
+        // ID de l'utilisateur connecté
+        $userId = $user->getId();
+
+        // Vérifie si l'utilisateur est présent dans la liste d'accès
+        foreach ($accessList as $accessUser) {
+            // Cas où la liste contient des objets User
+            if ($accessUser instanceof User && $accessUser->getId() === $userId) {
+                return 'patient:read';
+            }
+
+            // Cas où la liste contient des IDs simples (entiers)
+            if (is_int($accessUser) && $accessUser === $userId) {
+                return 'patient:read';
+            }
+        }
+
+        // Si l'utilisateur n'a pas d'accès, on retourne le groupe restreint
+        return 'patient:read:restricted';
+    }
+
+    
 }

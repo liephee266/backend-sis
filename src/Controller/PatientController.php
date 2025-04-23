@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Consultation;
 use App\Entity\Doctor;
+use App\Entity\DossierMedicale;
 use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
 use App\Services\Toolkit;
@@ -53,7 +54,7 @@ class PatientController extends AbstractController
     #[Route('/', name: 'patient_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        try {
+        // try {
             // Vérification des autorisations
             if (
                 !$this->security->isGranted('ROLE_DOCTOR') &&
@@ -78,7 +79,7 @@ class PatientController extends AbstractController
                 // Récupérer les patients associés au médecin via consultations
                 $consultations = $this->entityManager->getRepository(Consultation::class)
                     ->createQueryBuilder('c')
-                    ->join('c.patient', 'p')
+                    ->innerJoin('c.patient', 'p')
                     ->where('c.doctor = :doctor')
                     ->setParameter('doctor', $doctor)
                     ->getQuery()
@@ -98,7 +99,6 @@ class PatientController extends AbstractController
             elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
                     ->findOneBy(['user' => $user]);
-
                 if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
                     return new JsonResponse([
                         'code' => 403,
@@ -131,9 +131,9 @@ class PatientController extends AbstractController
             }
 
             return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
     /**
      * Affichage d'un Patient par son ID
@@ -144,7 +144,7 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
-    public function show(Patient $patient, Request $request): Response
+    public function show(Patient $patient, Request $request, DossierMedicale $dossierMedicale): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
@@ -160,31 +160,21 @@ class PatientController extends AbstractController
 
             $user = $this->toolkit->getUser($request);
 
-            // Vérification si l'utilisateur est un admin de l'hôpital
-            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-                // Récupérer l'HospitalAdmin de l'utilisateur connecté
-                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
-                    ->findOneBy(['user' => $user]);
-
-                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
-                    return new JsonResponse([
-                        'code' => 403,
-                        'message' => "Aucun hôpital trouvé pour cet admin."
-                    ], Response::HTTP_FORBIDDEN);
+            // Vérification si l'utilisateur est un médecin
+            if ($this->security->isGranted('ROLE_DOCTOR')) {
+                // Récupérer le médecin de l'utilisateur connecté
+                $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+                if (!$doctor) {
+                    return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
                 }
-
-                $adminHospital = $hospitalAdmin->getHospital();
-
-                // Récupérer les consultations de l'hôpital de l'admin
+                // Récupérer les consultations du médecin
                 $consultations = $this->entityManager->getRepository(Consultation::class)
                     ->createQueryBuilder('c')
-                    ->join('c.patient', 'p')
-                    ->where('c.hospital = :hospital')
-                    ->setParameter('hospital', $adminHospital)
+                    ->where('c.doctor = :doctor')
+                    ->setParameter('doctor', $doctor)
                     ->getQuery()
                     ->getResult();
-
-                // Vérifier si une consultation pour ce patient existe dans cet hôpital
+                // Vérifier si une consultation pour ce patient existe
                 $patientFound = false;
                 foreach ($consultations as $consultation) {
                     if ($consultation->getPatient()->getId() === $patient->getId()) {
@@ -192,7 +182,37 @@ class PatientController extends AbstractController
                         break;
                     }
                 }
-
+                if (!$patientFound) {
+                    return new JsonResponse([
+                        'code' => 403,
+                        'message' => "Ce patient n'a pas de consultation avec vous."
+                    ], Response::HTTP_FORBIDDEN);
+                }
+            } elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                // Récupérer l'admin hospitalier de l'utilisateur connecté
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                    ->findOneBy(['user' => $user]);
+                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                    return new JsonResponse([
+                        'code' => 403,
+                        'message' => "Aucun hôpital trouvé pour cet admin."
+                    ], Response::HTTP_FORBIDDEN);
+                }
+                // Récupérer les consultations liées à cet hôpital
+                $consultations = $this->entityManager->getRepository(Consultation::class)
+                    ->createQueryBuilder('c')
+                    ->where('c.hospital = :hospital')
+                    ->setParameter('hospital', $hospitalAdmin->getHospital()->getId())
+                    ->getQuery()
+                    ->getResult();
+                // Vérifier si une consultation pour ce patient existe
+                $patientFound = false;
+                foreach ($consultations as $consultation) {
+                    if ($consultation->getPatient()->getId() === $patient->getId()) {
+                        $patientFound = true;
+                        break;
+                    }
+                }
                 if (!$patientFound) {
                     return new JsonResponse([
                         'code' => 403,
@@ -200,14 +220,17 @@ class PatientController extends AbstractController
                     ], Response::HTTP_FORBIDDEN);
                 }
             }
+            $patient = $dossierMedicale->getPatientId(); // ✅ Récupération du patient à partir du dossier
 
-            // Sérialisation du patient avec le groupe de sérialisation 'patient:read'
-            $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
+            $serializationGroup = $this->toolkit->getPatientSerializationGroup($user, $dossierMedicale);
+    
+            $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => $serializationGroup]);
 
             return new JsonResponse([
                 'data' => json_decode($patientJson, true),
                 'code' => 200
             ], Response::HTTP_OK);
+        // } catch (\Throwable $th) {
         } catch (\Throwable $th) {
             return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

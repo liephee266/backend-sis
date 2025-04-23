@@ -13,11 +13,11 @@ class HistoriqueMedical
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("HistoriqueMedical:read")]
+    #[Groups("HistoriqueMedical:read","patient:read","patient:read:restricted")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'historiqueMedicalsGeneral')]
-    #[Groups("HistoriqueMedical:read")]
+    #[ORM\ManyToOne(inversedBy: 'historiqueMedicalsGeneral,')]
+    #[Groups("HistoriqueMedical:read","patient:read","patient:read:restricted")]
     private ?Consultation $historiqueMedicalGeneral = null;
 
     public function getId(): ?int

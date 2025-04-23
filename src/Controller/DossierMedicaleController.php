@@ -151,7 +151,6 @@ class DossierMedicaleController extends AbstractController
             } else {
                 // Vérifie que l'utilisateur connecté a bien accès à ce dossier
                 $accessList = $DossierMedicale->getAccess() ?? [];
-              // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
                  
             if (!in_array($user->getId(), $accessList)) {
                 return new JsonResponse([
