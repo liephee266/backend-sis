@@ -73,11 +73,10 @@ class DisponibiliteController extends AbstractController
         try {
             // Sérialisation de l'entité disponibilite en JSON avec le groupe de sérialisation 'disponibilite:read'
             $disponibilite = $this->serializer->serialize($disponibilite, 'json', ['groups' => 'disponibilite:read']);
-        
             // Retour de la réponse JSON avec les données de la disponibilité et un code HTTP 200
             return new JsonResponse(["data" => json_decode($disponibilite, true), "code" => 200], Response::HTTP_OK);
         } catch (\Throwable $th) {
-            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(["message" => 'Erreur interne du serveur: ' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -92,15 +91,14 @@ class DisponibiliteController extends AbstractController
     #[Route('/', name: 'disponibilite_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        try {
+        // try {
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
 
-            $data['date_j'] = new \DateTimeInterface();
+            $data['date_j'] = $data['date_du_jour'] ?? new \DateTime();
 
-            $data['heure_debut'] = new \DateTimeInterface();
-
-            $data['heure_fin'] = new \DateTimeInterface();
+            $data['heure_debut'] = $data['heure_debut'] ?? $data['date_j']->format('Y-m-d H:i:s');
+            $data['heure_fin'] = $data['heure_fin'] ?? (clone $data['date_j'])->modify('+1 hour')->format('Y-m-d H:i:s');
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Disponibilite", $data);
@@ -113,9 +111,9 @@ class DisponibiliteController extends AbstractController
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la création de la disponibilité"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $th) {
-            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     /**

@@ -36,7 +36,7 @@ class Availability
  
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["availability:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     // ✅ Getters & Setters
 

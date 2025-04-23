@@ -36,7 +36,7 @@ class Affiliation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["affiliation:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     // ✅ Getters & Setters
     public function __construct()

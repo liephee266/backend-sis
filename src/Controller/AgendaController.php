@@ -89,10 +89,8 @@ class AgendaController extends AbstractController
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-
             // Sérialisation de l'entité Agenda en JSON avec le groupe de sérialisation 'Agenda:read'
             $agenda = $this->serializer->serialize($agenda, 'json', ['groups' => 'agenda:read']);
-        
             // Retour de la réponse JSON avec les données de l'Agenda et un code HTTP 200
             return new JsonResponse(["data" => json_decode($agenda, true), "code" => 200], Response::HTTP_OK);
         } catch (\Throwable $th) {

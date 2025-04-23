@@ -51,7 +51,7 @@ class Message
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["message:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
        public function __construct()
     {

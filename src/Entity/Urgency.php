@@ -42,7 +42,7 @@ class Urgency
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     #[ORM\Column(length: 255)]
     #[Groups(["data_select","urgency:read"])]

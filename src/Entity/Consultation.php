@@ -85,7 +85,7 @@ class Consultation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     #[ORM\Column(length: 255)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]

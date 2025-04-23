@@ -48,7 +48,7 @@ class Treatment
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["treatment:read", "dossier_medicale:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     public function __construct()
     {

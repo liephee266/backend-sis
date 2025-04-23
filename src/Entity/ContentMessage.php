@@ -43,7 +43,7 @@ class ContentMessage
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["contentmessage:read", "message:read"])]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     public function __construct()
     {

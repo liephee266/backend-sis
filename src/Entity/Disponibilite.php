@@ -38,7 +38,7 @@ class Disponibilite
 
     #[ORM\Column]
     #[Groups(["disponibilite:read","meeting:read"])]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeImmutable $updated_at;
 
     #[ORM\Column(length: 255)]
     #[Groups(["disponibilite:read","meeting:read"])]

@@ -51,7 +51,7 @@ class DossierMedicale
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups("dossier_medicale:read")]
-    private ?\DateTimeInterface $updated_at = null;
+    private ?\DateTimeInterface $updated_at;
 
     #[ORM\Column(length: 255)]
     #[Groups("dossier_medicale:read")]
