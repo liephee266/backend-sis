@@ -192,9 +192,6 @@ class MeetingController extends AbstractController
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' =>'Erreur interne du serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**

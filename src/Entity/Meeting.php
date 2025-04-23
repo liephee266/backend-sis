@@ -55,25 +55,6 @@ class Meeting
     #[Groups(["meeting:read"])]
     private Collection $disponibilites;
 
-    public function __construct()
-    {
-        $this->disponibilites = new ArrayCollection();
-    }
-
-    /**
-     * @var Collection<int, Disponibilite>
-     * 
-     */
-    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'meeting')]
-    #[Groups(["meeting:read"])]
-    private Collection $disponibilites;
-
-    public function __construct()
-    {
-        $this->disponibilites = new ArrayCollection();
-    }
-
-
     #[ORM\Column(length: 255)]
     private ?string $uuid = null;
 
@@ -90,6 +71,7 @@ class Meeting
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->disponibilites = new ArrayCollection();
     }
     // ✅ Getters & Setters
 

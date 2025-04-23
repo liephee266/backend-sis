@@ -7,7 +7,7 @@ parameters:
     app.environment: dev
     app.debug: true
 services:
-    App\Service\MailerService:
+    App\Services\MailerService:
         arguments:
             $fromAddress: '%env(MAILER_FROM)%'
     App\Service\Toolkit: ~
