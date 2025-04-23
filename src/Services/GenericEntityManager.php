@@ -56,6 +56,7 @@ class GenericEntityManager
         $metadata = $this->entityManager->getClassMetadata($entityClass);
         
         foreach ($data as $field => $value) {
+            
             // Vérifie si le champ est mappé dans l'entité
             if ($metadata->hasField($field)) {
                 if ($field == "password" and $entity instanceof User) {
@@ -68,7 +69,7 @@ class GenericEntityManager
             // Gestion des associations (relations Doctrine)
             elseif ($metadata->hasAssociation($field)) {
                 $associationMetadata = $metadata->getAssociationMapping($field);
-                
+                // dump($associationMetadata['type']);
                 // Si l'association est une relation "to-one"
                 if ($associationMetadata['type'] & ClassMetadata::TO_ONE) {
                     $relatedEntity = $this->entityManager
@@ -101,6 +102,26 @@ class GenericEntityManager
                     
                     $this->propertyAccessor->setValue($entity, $field, $collection);
                 }
+                // Si l'association est une relation "one-to-many"
+                elseif ($associationMetadata['type'] & ClassMetadata::ONE_TO_MANY) {
+                    // On s'assure que la valeur est un tableau
+                    $ids = is_array($value) ? $value : [$value];
+                    
+                    // Récupère la collection existante (pour les updates)
+                    $collection = $this->propertyAccessor->getValue($entity, $field);
+                    
+                    // Ajoute chaque entité associée
+                    foreach ($ids as $id) {
+                        $relatedEntity = $this->entityManager
+                            ->getRepository($associationMetadata['targetEntity'])
+                            ->find(is_array($id) ? $id['id'] : $id);
+                        if ($relatedEntity) {
+                            $collection->add($relatedEntity);
+                        }
+                    }
+                    
+                    $this->propertyAccessor->setValue($entity, $field, $collection);
+                }
             }
         }
         
@@ -115,6 +136,7 @@ class GenericEntityManager
         }
         
         // Persiste l'entité
+        // dd($entity);
         $this->entityManager->persist($entity);
         $this->entityManager->flush();
         
@@ -164,7 +186,6 @@ class GenericEntityManager
         // Début de la transaction
         $this->entityManager->beginTransaction();
 
-
         $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
             
         if (!empty($errors_user['errors'])) {
@@ -201,7 +222,6 @@ class GenericEntityManager
      */
     public function persistUser(array $user_data, $data)
     {
-
         // Validation des données requises
         if (!isset($data['email']) || !isset($data['password'])) {
             return new JsonResponse(
@@ -209,10 +229,8 @@ class GenericEntityManager
                 Response::HTTP_BAD_REQUEST
             );
         }
-
          // Début de la transaction
         $this->entityManager->beginTransaction();
-
 
         $errors_user = $this->persistEntity("App\Entity\User", $user_data); 
             

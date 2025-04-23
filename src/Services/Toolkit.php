@@ -3,8 +3,12 @@ namespace App\Services;
 
 use DateTime;
 use Exception;
+use DatePeriod;
+use DateInterval;
 use App\Entity\User;
+use DateTimeImmutable;
 use Pagerfanta\Pagerfanta;
+use App\Entity\Disponibilite;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,7 +85,7 @@ class Toolkit
         }
         // Sérialisation des données
         $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-        $allData[strtolower($value)] = $data;
+        $allData[strtolower($value)] = $data; 
     }
     // Retourner les données transformées
     return $this->transformArray($allData);
@@ -442,4 +446,69 @@ class Toolkit
 
         return $repository_entity;
     }
+
+    /**
+     * @param array $months
+     * @param array $disponibilities
+     * @return object|null
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    public function getAgenda(array $months, array $filtre)
+    {
+        $a = null;
+        $n = [];
+        foreach ($months['months'] as $key => $month) {
+            $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
+            foreach ($a as $key_a => $value) {
+                $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
+                    'date_j' => new DateTime($key_a),
+                    'doctor' => $filtre['id_doctor'],
+                    'hospital' => $filtre['id_hospital']
+                ]);
+                foreach ($disponibilities as $key_d => $disponibilitie) {
+                    $a[$key_a][] = [
+                        'id' => $disponibilitie->getId(),
+                        'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
+                        'heure_debut' => $disponibilitie->getHeureDebut(),
+                        'heure_fin' => $disponibilitie->getHeureFin(),
+                    ];
+                }
+            }
+            $n[$month] = $a;
+        }
+        return $n;
+    }
+
+    /**
+     * Retourne un tableau associatif des jours du mois,
+     * sous la forme ['YYYY-MM-DD' => []].
+     *
+     * @param int $year  Année (ex. 2025)
+     * @param int $month Mois (1–12)
+     * @return array<string, array>
+     * 
+     * @author Orphée Lié <lieloumloum@gmail.com>
+     */
+    function getDaysOfMonthAssoc(int $year, int $month): array
+    {
+        // 1) Premier jour du mois en DateTimeImmutable
+        $start = new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+        // 2) Premier jour du mois suivant
+        $end   = $start->modify('first day of next month');
+        // 3) Intervalle d'un jour
+        $interval = new DateInterval('P1D');
+        // 4) Création du DatePeriod
+        $period = new DatePeriod($start, $interval, $end);
+        // 5) Construction du tableau associatif
+        $daysAssoc = [];
+        foreach ($period as $date) {
+            // clé : date formatée 'YYYY-MM-DD'
+            $key = $date->format('Y-m-d');
+            // valeur : tableau vide
+            $daysAssoc[$key] = [];
+        }
+        return $daysAssoc;
+    }
 }
+

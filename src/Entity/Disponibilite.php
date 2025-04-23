@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use DateTime;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DisponibiliteRepository;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DisponibiliteRepository::class)]
 class Disponibilite
@@ -20,12 +21,15 @@ class Disponibilite
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $date_j = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $heure_debut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?\DateTimeInterface $heure_fin = null;
 
     #[ORM\Column]
@@ -39,6 +43,9 @@ class Disponibilite
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
     private ?Hospital $hospital = null;
+
+    #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    private ?Meeting $meeting = null;
 
     public function __construct()
     {
@@ -76,21 +83,20 @@ class Disponibilite
         return $this;
     }
 
-    public function getHeureDebut(): ?\DateTimeInterface
+    public function getHeureDebut()
     {
-        return $this->heure_debut;
+        return $this->heure_debut->format('H:i:s');
     }
 
     public function setHeureDebut(\DateTimeInterface $heure_debut): static
     {
         $this->heure_debut = $heure_debut;
-
         return $this;
     }
 
-    public function getHeureFin(): ?\DateTimeInterface
+    public function getHeureFin()
     {
-        return $this->heure_fin;
+        return $this->heure_fin->format('H:i:s');
     }
 
     public function setHeureFin(\DateTimeInterface $heure_fin): static
@@ -144,6 +150,18 @@ class Disponibilite
     public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getMeeting(): ?Meeting
+    {
+        return $this->meeting;
+    }
+
+    public function setMeeting(?Meeting $meeting): static
+    {
+        $this->meeting = $meeting;
 
         return $this;
     }

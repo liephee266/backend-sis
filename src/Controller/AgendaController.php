@@ -48,30 +48,17 @@ class AgendaController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id_hospital}/{id_doctor}/', name: 'agenda_index', methods: ['GET'])]
-    public function index(Request $request,$id_hospital = null, $id_doctor = null): Response
+    #[Route('/{id_hospital}/{id_doctor}/{month?}', name: 'agenda_index', methods: ['GET'])]
+    public function index(Request $request, $id_hospital , $id_doctor, $month = null): Response
     {
-         // Vérification des autorisations de l'utilisateur connecté
-        
+        // Assign default value to $month if it is null
+        $month = $month ?? date('n');
+        $year = date('Y');
+        $monts_and_year = ["months"=> [$month, $month = 12 ? 1 : $month +1],"year"=>$year];
+        // Vérification des autorisations de l'utilisateur connecté
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
-            # code...
-
-            $filtre = [
-                'hospital' => $id_hospital,
-                'doctor' => $id_doctor,
-            ];
-            // dd($filtre);
-            $response = $this->entityManager->getRepository(Disponibilite::class)->findBy($filtre);
-            $disponibilite_day = [];
-            foreach ($response as $key => $value) {
-                // $t
-            }
-            dd($response);
-            // $response = $this->entityManager->getRepository(Agenda::class)->findBy($filtre);
-            
-            //Récupération des Agendas avec pagination
-            //$response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
-
+                $a = $this->toolkit->getAgenda($monts_and_year,  ['id_doctor'=> $id_doctor,'id_hospital'=>$id_hospital] );
+            return new JsonResponse(["data"=> $a, "code" => 200], Response::HTTP_OK);
         }elseif ($this->security->isGranted('ROLE_PATIENT')) {
             // Si l'utilisateur est un patient, on récupère son ID
             
