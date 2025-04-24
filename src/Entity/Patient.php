@@ -15,18 +15,19 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read:restricte"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read:restricte","patient:read:restricted"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read:restricted"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","patient:read:restricted"])]
     private ?User $tutor = null;
+    
 
     /**
      * @var Collection<int, Meeting>
@@ -44,6 +45,7 @@ class Patient
      * @var Collection<int, DossierMedicale>
      */
     #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'patient_id')]
+    #[Groups(["patient:read"])]
     private Collection $dossierMedicales;
 
     /**

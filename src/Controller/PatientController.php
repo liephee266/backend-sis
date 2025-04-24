@@ -89,10 +89,12 @@ class PatientController extends AbstractController
                 foreach ($consultations as $consultation) {
                     $patients[] = $consultation->getPatient();
                 }
+                $patientIds = array_map(fn($p) => $p->getId(), $patients);
 
-                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
-                    'patient' => $patients
-                ]);
+
+                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read',[
+                    'id' => $patientIds
+                ]); 
             }
 
             // Si utilisateur est un admin hospitalier
@@ -221,14 +223,16 @@ class PatientController extends AbstractController
                 }
             }
             $patient = $dossierMedicale->getPatientId(); // ✅ Récupération du patient à partir du dossier
-
             $serializationGroup = $this->toolkit->getPatientSerializationGroup($user, $dossierMedicale);
-    
+
+            // $patient= $dossierMedicale->getAntecedentsMedicaux();
+            // dd($patient);
+        
             $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => $serializationGroup]);
 
             return new JsonResponse([
                 'data' => json_decode($patientJson, true),
-                'code' => 200
+                'code' => 200,
             ], Response::HTTP_OK);
         // } catch (\Throwable $th) {
         } catch (\Throwable $th) {
