@@ -81,6 +81,7 @@ class Doctor
      * @var Collection<int, Hospital>
      */
     #[ORM\ManyToMany(targetEntity: Hospital::class, inversedBy: 'doctors')]
+    #[Groups("doctor:read")]
     private Collection $hospital;
 
     public function __construct()

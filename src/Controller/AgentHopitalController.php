@@ -174,12 +174,15 @@ class AgentHopitalController extends AbstractController
                 return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
 
-            
-    
+            $user = $this->toolkit->getUser($request);
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
+
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
 
             $data["password"] = $data["password"] ?? 123456789;
+
+            $data['hospital'] = $hospitalAdmin;
             
             // Début de la transaction
             $this->entityManager->beginTransaction();
@@ -205,7 +208,9 @@ class AgentHopitalController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Agent hopital crée avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'user:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "Agent hopital crée avec succès"], Response::HTTP_OK);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur

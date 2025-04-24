@@ -188,14 +188,11 @@ class DoctorController extends AbstractController
         try {
             // Vérification des autorisations
             if (
-                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL') &&
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+                !$this->security->isGranted('ROLE_SUPER_ADMIN')
             ) {
-                return new JsonResponse([
-                    "message" => "Vous n'avez pas accès à cette ressource",
-                    "code" => 403
-                ], Response::HTTP_FORBIDDEN);
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
 
             // Récupération et décodage des données
@@ -203,46 +200,77 @@ class DoctorController extends AbstractController
 
             $data["password"] = $data["password"] ?? 123456789;
 
-            if (!$data) {
-                return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
-            }
+            $data["serviceStartingDate"] = new \DateTime($data['serviceStartingDate']);
 
-            // Démarrer la transaction
-            $this->entityManager->beginTransaction();
+            // Création du User
+            $user_data = [
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'roles' => ["ROLE_DOCTOR"],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'nickname' => $data['nickname']?? null,
+                'tel' => $data['tel'],
+                'birth' => new \DateTime($data['birth']),
+                'gender' => $data['gender'],
+                'address' => $data['address']?? null,
+                'image' => $data['image']?? null,
+            ];
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
 
-                // Création du User
-                $user_data = [
-                    'email' => $data['email'],
-                    'password' => $data['password'],
-                    'roles' => ["ROLE_DOCTOR"],
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name'],
-                    'nickname' => $data['nickname']?? null,
-                    'tel' => $data['tel'],
-                    'birth' => new \DateTime($data['birth']),
-                    'gender' => $data['gender'],
-                    'address' => $data['address']?? null,
-                    'image' => $data['image']?? null,
-                ];
+                $data["hospital"] = $hospitalAdmin;
 
-                $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
-
-                $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
-
-                // Vérification si l'entité a été créée sans erreur
-                if (!empty($errors['entity'])) {
-                    $this->entityManager->commit();
-                    $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
-                    $response = json_decode($response, true);
-                    return new JsonResponse([
-                        'data' => $response,
-                        'code' => 201,
-                        'message' => "Médecin créé avec succès"
-                    ], Response::HTTP_CREATED);
+                if (!$data) {
+                    return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
                 }
 
-                // Erreur dans la persistance
-                return $this->json(['code' => 500, 'message' => "Erreur lors de la création du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
+                // Démarrer la transaction
+                $this->entityManager->beginTransaction();
+
+                    $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
+
+                    // Vérification si l'entité a été créée sans erreur
+                    if (!empty($errors['entity'])) {
+                        $this->entityManager->commit();
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
+                        $response = json_decode($response, true);
+                        return new JsonResponse([
+                            'data' => $response,
+                            'code' => 201,
+                            'message' => "Médecin créé avec succès"
+                        ], Response::HTTP_CREATED);
+                    }
+
+                    // Erreur dans la persistance
+                    return $this->json(['code' => 500, 'message' => "Erreur lors de la création du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            }else {
+                if (!$data) {
+                    return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
+                }
+
+                // Démarrer la transaction
+                $this->entityManager->beginTransaction();
+
+                    $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $user_data, $data);
+
+                    // Vérification si l'entité a été créée sans erreur
+                    if (!empty($errors['entity'])) {
+                        $this->entityManager->commit();
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
+                        $response = json_decode($response, true);
+                        return new JsonResponse([
+                            'data' => $response,
+                            'code' => 201,
+                            'message' => "Médecin créé avec succès"
+                        ], Response::HTTP_CREATED);
+                    }
+
+                    // Erreur dans la persistance
+                    return $this->json(['code' => 500, 'message' => "Erreur lors de la création du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
         } catch (\Exception $e) {
             $this->entityManager->rollback();
