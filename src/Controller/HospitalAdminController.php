@@ -109,10 +109,10 @@ class HospitalAdminController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-                # code...
-                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-            }
+            // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            //     # code...
+            //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            // }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
     
@@ -140,7 +140,10 @@ class HospitalAdminController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Admin hopital crée avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'hospitaladmin:read']);
+                $response = json_decode($response, true);
+                // Retour d'une réponse JSON avec les données de l'HospitalAdmin et un code HTTP 201 (Créé)
+                return new JsonResponse(['data' => $response, 'code' => 201, 'message' => "Admin hopital créé avec succès"], Response::HTTP_CREATED);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -180,7 +183,9 @@ class HospitalAdminController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "HospitalAdmin modifié avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'hospitaladmin:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "HospitalAdmin modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

@@ -173,6 +173,8 @@ class AgentHopitalController extends AbstractController
                 # code...
                 return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
+
+            
     
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);

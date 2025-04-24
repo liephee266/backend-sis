@@ -176,7 +176,9 @@ class SisAdminController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "SisAdmin crée avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'user:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "SisAdmin crée avec succès"], Response::HTTP_OK);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -213,7 +215,9 @@ class SisAdminController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "SisAdmin modifié avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'user:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "SisAdmin modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

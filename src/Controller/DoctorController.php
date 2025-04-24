@@ -232,7 +232,13 @@ class DoctorController extends AbstractController
                 // Vérification si l'entité a été créée sans erreur
                 if (!empty($errors['entity'])) {
                     $this->entityManager->commit();
-                    return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
+                    $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
+                    $response = json_decode($response, true);
+                    return new JsonResponse([
+                        'data' => $response,
+                        'code' => 201,
+                        'message' => "Médecin créé avec succès"
+                    ], Response::HTTP_CREATED);
                 }
 
                 // Erreur dans la persistance
@@ -315,7 +321,9 @@ class DoctorController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
+                $response = json_decode($response, true);
+                return new JsonResponse(['data' => $response,'code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
             }
     
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
