@@ -182,7 +182,7 @@ class DoctorController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-        #[Route('/', name: 'doctor_create', methods: ['POST'])]
+    #[Route('/', name: 'doctor_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try {
@@ -216,6 +216,7 @@ class DoctorController extends AbstractController
                 'address' => $data['address']?? null,
                 'image' => $data['image']?? null,
             ];
+
             if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 $user = $this->toolkit->getUser($request);
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
@@ -236,17 +237,13 @@ class DoctorController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse([
-                            'data' => $response,
-                            'code' => 201,
-                            'message' => "Médecin créé avec succès"
-                        ], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response, 'code' => 201,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
                     }
 
                     // Erreur dans la persistance
                     return $this->json(['code' => 500, 'message' => "Erreur lors de la création du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
-
             }else {
+
                 if (!$data) {
                     return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
                 }
@@ -261,17 +258,12 @@ class DoctorController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse([
-                            'data' => $response,
-                            'code' => 201,
-                            'message' => "Médecin créé avec succès"
-                        ], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response,'code' => 201,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
                     }
 
                     // Erreur dans la persistance
                     return $this->json(['code' => 500, 'message' => "Erreur lors de la création du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
         } catch (\Exception $e) {
             $this->entityManager->rollback();
             return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
