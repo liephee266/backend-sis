@@ -18,7 +18,7 @@ class Hospital
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read","HistoriqueMedical:read", "patient:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -143,6 +143,18 @@ class Hospital
     #[Groups(['hospital:read', "hospitaladmin:read"])]
     private Collection $services;
 
+    /**
+     * @var Collection<int, Disponibilite>
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'hospital')]
+    private Collection $disponibilites;
+
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'hospital')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->agentHospitals = new ArrayCollection();
@@ -150,6 +162,8 @@ class Hospital
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->services = new ArrayCollection();
+        $this->disponibilites = new ArrayCollection();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -488,6 +502,44 @@ class Hospital
         $this->services->removeElement($service);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getHospital() === $this) {
+                $disponibilite->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
     }
 
 }

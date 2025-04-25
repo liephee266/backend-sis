@@ -19,50 +19,42 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Patient::class)]
     #[ORM\JoinColumn(name: "id_patient", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read"])]
     private ?Patient $patient = null;
 
     #[ORM\ManyToOne(targetEntity: Doctor::class)]
     #[ORM\JoinColumn(name: "id_doctor", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read", "patient:read"])]
     private ?Doctor $doctor = null;
 
     #[ORM\ManyToOne(targetEntity: Hospital::class)]
     #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?string $description = null;
+    private ?string $raison_visite = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?string $prescription = null;
+    private ?string $recommandation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?string $diagnostic = null;
-
-    #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?string $recommendation = null;
-
-    #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?string $comment = null;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?\DateTimeInterface $dateSymptoms = null;
 
     /**
@@ -95,6 +87,26 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $intensité_symptome = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?\DateTimeInterface $prochaine_consultation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $test_supplementaire = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $diagnostic_preliminaire = null;
+
+    #[ORM\Column(nullable: true)]
+
+    private ?array $antecedents_medicaux = null;
+
     public function __construct()
     {
         $this->examinations = new ArrayCollection();
@@ -103,6 +115,7 @@ class Consultation
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+
     }
 
     public function getId(): ?int
@@ -110,14 +123,14 @@ class Consultation
         return $this->id;
     }
 
-    public function getDescription(): ?string
+    public function getRaisonVisite(): ?string
     {
-        return $this->description;
+        return $this->raison_visite;
     }
 
-    public function setDescription(?string $description): self
+    public function setRaisonVisite(?string $raison_visite): self
     {
-        $this->description = $description;
+        $this->raison_visite = $raison_visite;
         return $this;
     }
 
@@ -132,36 +145,14 @@ class Consultation
         return $this;
     }
 
-    public function getPrescription(): ?string
+    public function getRecommandation(): ?string
     {
-        return $this->prescription;
+        return $this->recommandation;
     }
 
-    public function setPrescription(?string $prescription): self
+    public function setRecommandation(?string $recommandation): self
     {
-        $this->prescription = $prescription;
-        return $this;
-    }
-
-    public function getDiagnostic(): ?string
-    {
-        return $this->diagnostic;
-    }
-
-    public function setDiagnostic(?string $diagnostic): self
-    {
-        $this->diagnostic = $diagnostic;
-        return $this;
-    }
-
-    public function getRecommendation(): ?string
-    {
-        return $this->recommendation;
-    }
-
-    public function setRecommendation(?string $recommendation): self
-    {
-        $this->recommendation = $recommendation;
+        $this->recommandation = $recommandation;
         return $this;
     }
 
@@ -321,11 +312,10 @@ class Consultation
     public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 
-     public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
@@ -344,6 +334,66 @@ class Consultation
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getIntensitéSymptome(): ?string
+    {
+        return $this->intensité_symptome;
+    }
+
+    public function setIntensitéSymptome(string $intensité_symptome): static
+    {
+        $this->intensité_symptome = $intensité_symptome;
+
+        return $this;
+    }
+
+    public function getProchaineConsultation(): ?\DateTimeInterface
+    {
+        return $this->prochaine_consultation;
+    }
+
+    public function setProchaineConsultation(?\DateTimeInterface $prochaine_consultation): static
+    {
+        $this->prochaine_consultation = $prochaine_consultation;
+
+        return $this;
+    }
+
+    public function getTestSupplementaire(): ?string
+    {
+        return $this->test_supplementaire;
+    }
+
+    public function setTestSupplementaire(?string $test_supplementaire): static
+    {
+        $this->test_supplementaire = $test_supplementaire;
+
+        return $this;
+    }
+
+    public function getDiagnosticPreliminaire(): ?string
+    {
+        return $this->diagnostic_preliminaire;
+    }
+
+    public function setDiagnosticPreliminaire(string $diagnostic_preliminaire): static
+    {
+        $this->diagnostic_preliminaire = $diagnostic_preliminaire;
+
+        return $this;
+    }
+
+    public function getAntecedentsMedicaux(): ?array
+    {
+        return $this->antecedents_medicaux;
+    }
+
+    public function setAntecedentsMedicaux(?array $antecedents_medicaux): static
+    {
+        $this->antecedents_medicaux = $antecedents_medicaux;
+
         return $this;
     }
 }

@@ -16,16 +16,16 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Consultation::class)]
     #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
     private ?Consultation $consultation = null;
 
     #[ORM\Column]
@@ -39,16 +39,22 @@ class Treatment
     private Collection $dossierMedicales;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["treatment:read", "dossier_medicale:read"])]
+    #[Groups(["treatment:read", "DossierMedicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
+
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'treatment')]
+    private Collection $historiqueMedicals;
 
     public function __construct()
     {
@@ -56,6 +62,7 @@ class Treatment
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     // ✅ Getters & Setters
@@ -138,7 +145,6 @@ class Treatment
     public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 
@@ -164,4 +170,13 @@ class Treatment
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
+    }
+
 }

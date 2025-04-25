@@ -206,6 +206,10 @@ class ConsultationController extends AbstractController
             }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
+
+            $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
+
+            $data["prochaine_consultation"] = new \DateTime($data["prochaine_consultation"]);
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);

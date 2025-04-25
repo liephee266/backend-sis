@@ -138,6 +138,7 @@ class Service
     }
 
     public function getUuid(): ?string
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
@@ -145,7 +146,6 @@ class Service
     public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 

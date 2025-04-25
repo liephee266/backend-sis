@@ -14,47 +14,47 @@ class DossierMedicale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read","patient:read")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups(["data_select","dossier_medicale:read"])]
+    #[Groups(["data_select","DossierMedicale:read","consultation:read","patient:read"])]
     private ?Consultation $consultation_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read","patient:read","urgency:read")]
     private ?Treatment $treatment_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("dossier_medicale:read","urgency:read")]
+    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?Patient $patient_id = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read","urgency:read")]
-    private ?array $antecedents_medicaux = null;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?array $medications_actuelles = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?array $antecedents_familiaux = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read")]
+    #[ORM\Column(type: 'json',nullable: true)]
+    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?array $access = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read","urgency:read")]
+    private ?array $habitude_vie = null;
+
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read","patient:read")]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read")]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("dossier_medicale:read")]
+    #[Groups("DossierMedicale:read","patient:read")]
     private ?string $uuid = null;
 
     public function __construct()
@@ -105,14 +105,14 @@ class DossierMedicale
         return $this;
     }
 
-    public function getAntecedentsMedicaux(): ?array
+    public function getHabitudeVie(): ?array
     {
-        return $this->antecedents_medicaux;
+        return $this->habitude_vie;
     }
 
-    public function setAntecedentsMedicaux(?array $antecedents_medicaux): static
+    public function setHabitudeVie(?array $habitude_vie): static
     {
-        $this->antecedents_medicaux = $antecedents_medicaux;
+        $this->habitude_vie = $habitude_vie;
 
         return $this;
     }
@@ -185,7 +185,6 @@ class DossierMedicale
     public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 }

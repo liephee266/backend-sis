@@ -17,7 +17,7 @@ class Doctor
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -84,9 +84,23 @@ class Doctor
     #[Groups("doctor:read")]
     private Collection $hospital;
 
+    /**
+     * @var Collection<int, Disponibilite>
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'Medecin')]
+    private Collection $disponibilites;
+
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'medecinTraitant')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->hospital = new ArrayCollection();
+        $this->historiqueMedicals = new ArrayCollection();
+        $this->disponibilites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -263,5 +277,43 @@ class Doctor
         $this->hospital->removeElement($hospital);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getDoctor() === $this) {
+                $disponibilite->setDoctor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
     }
 }

@@ -181,12 +181,12 @@ class AutorisationController extends AbstractController
             // Récupération de l'ID de l'autorisation
             $autorisation_type = $this->entityManager->getRepository(Autorisation::class)->findOneBy(['id' => $id])->getTypeDemande();
 
-            if ($autorisation_type === "Access") {
-                // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
-                $data = json_decode($request->getContent(), true);
-            
-                // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
-                $data['id'] = $id;
+        if ($autorisation_type === "AUTORISATION") {
+            // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
+            $data = json_decode($request->getContent(), true);
+        
+            // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
+            $data['id'] = $id;
 
                 $autorisation_data = [
                     'date_limit' =>$data['date_limit'],
@@ -250,7 +250,7 @@ class AutorisationController extends AbstractController
                     $this->entityManager->persist($hospital); // ou $doctor selon la relation
                     $this->entityManager->flush();
 
-                    return $this->json(['code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
+                    return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
                 }else {
                     // Mise à jour de l'autorisation
                     $autorisation_affiliation = [

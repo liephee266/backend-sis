@@ -15,18 +15,19 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read:restricted"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","patient:read:restricted"])]
     private ?User $tutor = null;
+    
 
     /**
      * @var Collection<int, Meeting>
@@ -44,6 +45,7 @@ class Patient
      * @var Collection<int, DossierMedicale>
      */
     #[ORM\OneToMany(targetEntity: DossierMedicale::class, mappedBy: 'patient_id')]
+    #[Groups(["patient:read"])]
     private Collection $dossierMedicales;
 
     #[ORM\Column]
@@ -73,11 +75,18 @@ class Patient
     #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?string $numero_urgence = null;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'patient')]
+    private Collection $historiqueMedicals;
+
     public function __construct()
     {
         $this->meeting_id = new ArrayCollection();
         $this->consultations = new ArrayCollection();
         $this->dossierMedicales = new ArrayCollection();
+        $this->historiqueMedicals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -282,5 +291,13 @@ class Patient
         $this->numero_urgence = $numero_urgence;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedicals(): Collection
+    {
+        return $this->historiqueMedicals;
     }
 }
