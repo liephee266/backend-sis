@@ -31,10 +31,6 @@ class DossierMedicale
 
     #[ORM\Column(type: 'json', nullable: true)]
     #[Groups("DossierMedicale:read","urgency:read","patient:read")]
-    private ?array $antecedents_medicaux = null;
-
-    #[ORM\Column(type: 'json', nullable: true)]
-    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?array $medications_actuelles = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
@@ -44,6 +40,10 @@ class DossierMedicale
     #[ORM\Column(type: 'json',nullable: true)]
     #[Groups("DossierMedicale:read","urgency:read","patient:read")]
     private ?array $access = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups("dossier_medicale:read","urgency:read")]
+    private ?array $habitude_vie = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups("DossierMedicale:read","patient:read")]

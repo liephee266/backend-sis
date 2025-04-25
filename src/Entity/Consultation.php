@@ -115,8 +115,7 @@ class Consultation
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->historiqueMedicals = new ArrayCollection();
-        $this->historiqueMedicalsGeneral = new ArrayCollection();
+
     }
 
     public function getId(): ?int

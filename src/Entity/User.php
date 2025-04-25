@@ -87,12 +87,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", "dossier_medicale:read","patient:read:restricted"])]
     private ?string $tel = null;
 
-    #[ORM\Column(type: "boolean")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
-    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
-    private bool $gender;
-
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",

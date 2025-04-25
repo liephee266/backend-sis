@@ -244,7 +244,7 @@ class DossierMedicaleController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$dossier_medicale de succès
-                return $this->json(['code' => 200, 'message' => "DossierMedicale modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "DossierMedicale modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
