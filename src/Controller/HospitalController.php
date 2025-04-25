@@ -129,9 +129,9 @@ class HospitalController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             // Récupérer le statut "en_attente"
-            $status = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'pending']);
+            $status = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'Pending']);
             if (!$status) {
-                return $this->json(['code' => 500, 'message' => "Statut 'pending' introuvable"], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return $this->json(['code' => 500, 'message' => "Statut 'Pending' introuvable"], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
             // Ajouter le statut à la data avant persistance
