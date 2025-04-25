@@ -60,7 +60,10 @@ class DoctorController extends AbstractController
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
                 !$this->security->isGranted('ROLE_ADMIN_HOSPITAL') &&
                 !$this->security->isGranted('ROLE_DOCTOR') &&
-                !$this->security->isGranted('ROLE_PATIENT'))
+                !$this->security->isGranted('ROLE_PATIENT') &&
+                !$this->security->isGranted('ROLE_SUPER_ADMIN')
+               )
+        
              {
                 return new JsonResponse([
                     "message" => "Vous n'avez pas accès à cette ressource",
@@ -151,12 +154,12 @@ class DoctorController extends AbstractController
                 $hospital = $hospitalAdmin->getHospital();
     
                 // Vérifier que le docteur appartient bien à cet hôpital
-                $doctorHospital = $this->entityManager->getRepository(Hospital::class)
+                $hospital = $this->entityManager->getRepository(Hospital::class)
                     ->findOneBy([
                         'doctor' => $doctor,
                     ]);
     
-                if (!$doctorHospital) {
+                if (!$hospital) {
                     return new JsonResponse([
                         "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
                         "code" => 403

@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Consultation;
 use App\Entity\HistoriqueMedical;
+use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,11 +52,7 @@ class HistoriqueMedicalController extends AbstractController
     {
        try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
-                && !$this->security->isGranted('ROLE_SUPER_ADMIN')
-                && !$this->security->isGranted('ROLE_DOCTOR')
-                && !$this->security->isGranted('ROLE_PATIENT')
-                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            if (!$this->security->isGranted('')) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
@@ -78,19 +76,28 @@ class HistoriqueMedicalController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
      #[Route('/{id}', name: 'HistoriqueMedical_show', methods: ['GET'])]
-    public function show(HistoriqueMedical $historiqueMedical, Request $request): Response
+    public function show(HistoriqueMedical $historiqueMedical, Request $request, Consultation $consultation): Response
     {
          try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
-                && !$this->security->isGranted('ROLE_SUPER_ADMIN')
-                && !$this->security->isGranted('ROLE_DOCTOR')
-                && !$this->security->isGranted('ROLE_PATIENT')
-                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            if (!$this->security->isGranted('ROLE_PATIENT')) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
+             // Récupération de l'utilisateur connecté
+            $user = $this->toolkit->getUser($request);
+              
+            // Récupérer le patient lié à l'utilisateur connecté
+            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);                    
+            
+            // On vérifie si le patient est bien associé à cette consultatio
+            if ($historiqueMedical=$consultation->getPatient()->getId() !== $patient->getId());  {
+                    // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cet histrique."], Response::HTTP_FORBIDDEN);
+            }
+            
             // Sérialisation de l'entité Availability en JSON avec le groupe de sérialisation 'Availability:read'
             $historiqueMedical = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
+            
         
             // Retour de la réponse JSON avec les données de l'Availability et un code HTTP 200
             return new JsonResponse(["data" => json_decode($historiqueMedical, true), "code" => 200], Response::HTTP_OK);

@@ -49,24 +49,27 @@ class HospitalController extends AbstractController
     #[Route('/', name: 'hospital_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // try {
+        try {
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
             // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
-            if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
+            if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
                 // On filtre par statut "validated" pour les utilisateurs normaux
                 $filtre = ['status' => 2];
+
+                return $this->json(['code' => 403, 'message' => "hopital non trouvé"], Response::HTTP_FORBIDDEN);
             }
+
 
             // Récupération des utilisateurs avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Hospital', 'hospital:read', $filtre);
 
             // Retour d'une réponse JSON avec les utilisateurs et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        //     return new JsonResponse(['code'=>500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code'=>500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
         
     }
 
@@ -91,12 +94,13 @@ class HospitalController extends AbstractController
             if (!$this->isGranted('ROLE_SUPER_ADMIN') && $hospital->getStatus()->getName() !== 'validated') {
                 return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
             }
-
+    
             // Sérialisation de l'entité Hospital en JSON avec le groupe de sérialisation 'hospital:read'
             $hospitalData = $this->serializer->serialize($hospital, 'json', ['groups' => 'hospital:read']);
 
             // Retour de la réponse JSON avec les données de l'hôpital et un code HTTP 200
             return new JsonResponse(["data" => json_decode($hospitalData, true), "code" => 200], Response::HTTP_OK);
+            
         } catch (\Throwable $th) {
             return new JsonResponse(['code'=>500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

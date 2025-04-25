@@ -12,15 +12,15 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $states = [
-            'PENDING'=>'Pending',
-            'VALIDATED'=>'Validated',
+            'PENDING'=>'pending',
+            'VALIDATED'=>'validated',
             'REFUSED'=>'Refused',
             'CANCELED'=>'Canceled',
             'IN_PROGRESS'=>'In Progress',
             'COMPLETED'=>'Completed',
         ];
         foreach ($states as $key => $stateName) {
-            $state = new State();
+            $state = new Status();
             $state->setName($stateName);
             $state->setTechName($key);
             $manager->persist($state);
@@ -37,9 +37,9 @@ class AppFixtures extends Fixture
             'CONFIRME'=>'Confirmé',
         ];
         foreach ($statuses as $key => $statusName) {
-            $status = new Status();
+            $status = new State();
             $status->setName($statusName);
-            // $status->setTechName($key);
+            $status->setTechName($key);
             $manager->persist($status);
         }
 
