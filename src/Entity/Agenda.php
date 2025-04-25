@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "agenda")]
@@ -30,10 +31,26 @@ class Agenda
     #[Groups(["agenda:read"])]
     private ?\DateTimeInterface $timeInterval = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["agenda:read"])]
+    private ?string $uuid = null;   
+
+    #[ORM\Column(type: "datetime")]
+    #[Groups(["agenda:read"])]
+    private $updated_at;
+
+    
+    #[ORM\Column(type: "datetime")]
+    #[Groups(["agenda:read"])]
+    private $created_at;
+
 
     public function __construct()
     {
         $this->timeInterval = new \DateTimeImmutable();
+        $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int
@@ -100,15 +117,14 @@ class Agenda
         return $this;
     }
 
-    public function getUuid(): ?String
+       public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
-    public function setUuid(String $uuid): static
+    public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 }
