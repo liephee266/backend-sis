@@ -206,6 +206,10 @@ class ConsultationController extends AbstractController
             }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
+
+            $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
+
+            $data["prochaine_consultation"] = new \DateTime($data["prochaine_consultation"]);
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);
@@ -213,7 +217,7 @@ class ConsultationController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctemenm:ù enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['code' => 200, 'message' => "Consultation crée avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Consultation crée avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -271,7 +275,7 @@ class ConsultationController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['code' => 200, 'message' => "Consultation modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Consultation modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

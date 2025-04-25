@@ -84,6 +84,12 @@ class Doctor
     private Collection $hospital;
 
     /**
+     * @var Collection<int, Disponibilite>
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'Medecin')]
+    private Collection $disponibilites;
+
+    /**
      * @var Collection<int, HistoriqueMedical>
      */
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'medecinTraitant')]
@@ -93,6 +99,7 @@ class Doctor
     {
         $this->hospital = new ArrayCollection();
         $this->historiqueMedicals = new ArrayCollection();
+        $this->disponibilites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -267,6 +274,36 @@ class Doctor
     public function removeHospital(Hospital $hospital): static
     {
         $this->hospital->removeElement($hospital);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getDoctor() === $this) {
+                $disponibilite->setDoctor(null);
+            }
+        }
 
         return $this;
     }

@@ -57,25 +57,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
+    "availability:read", "dossier_medicale:read","patient:read:restricted", "hospital:read"])]
     private $first_name;
+
+    #[ORM\Column(type: "string", nullable: true)]
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
+    "availability:read", "dossier_medicale:read", "hospital:read"])]
+    private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
-    private $last_name;
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
+    "availability:read", "hospital:read"])]
+    private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read","patient:read:restricted"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read","patient:read:restricted", "hospital:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", "dossier_medicale:read","patient:read:restricted"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "boolean")]
@@ -87,19 +96,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read","patient:read:restricted"])]
+    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read","patient:read:restricted"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
+    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", "dossier_medicale:read","patient:read:restricted"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read", "dossier_medicale:read","patient:read:restricted"])]
+    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", "dossier_medicale:read","patient:read:restricted"])]
     private $updated_at;
 
     /**
@@ -119,6 +128,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
     private Collection $autorisations;
+
+    /**
+     * @var Collection<int, AgentHospital>
+     */
+    #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'user')]
+    private Collection $agentHospitals;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read"])]
+    private ?string $image = null;
+
+    #[ORM\Column(length: 1)]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read"])]
+    private ?string $gender = null;
+
 
     public function __construct()
     {
@@ -176,10 +204,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return $this->roles;
     }
 
     /**
@@ -238,6 +264,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(?string $last_name): self
     {
         $this->last_name = $last_name;
+        return $this;
+    }
+
+    public function getNickname(): ?string
+    {
+        return $this->nickname;
+    }
+
+    public function setNickname(?string $nickname): self
+    {
+        $this->nickname = $nickname;
         return $this;
     }
     public function getAddress(): ?string

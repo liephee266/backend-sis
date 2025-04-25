@@ -33,6 +33,9 @@ class State
     #[ORM\OneToMany(targetEntity: Meeting::class, mappedBy: 'state_id')]
     private Collection $meetings;
 
+    #[ORM\Column(length: 255)]
+    private ?string $tech_name = null;
+
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
@@ -113,6 +116,18 @@ class State
                 $meeting->setStateId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTechName(): ?string
+    {
+        return $this->tech_name;
+    }
+
+    public function setTechName(string $tech_name): static
+    {
+        $this->tech_name = $tech_name;
 
         return $this;
     }

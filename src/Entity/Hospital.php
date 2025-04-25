@@ -148,6 +148,12 @@ class Hospital
     private Collection $services;
 
     /**
+     * @var Collection<int, Disponibilite>
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'hospital')]
+    private Collection $disponibilites;
+
+    /**
      * @var Collection<int, HistoriqueMedical>
      */
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'hospital')]
@@ -160,6 +166,7 @@ class Hospital
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->services = new ArrayCollection();
+        $this->disponibilites = new ArrayCollection();
         $this->historiqueMedicals = new ArrayCollection();
     }
 
@@ -509,6 +516,36 @@ class Hospital
     public function removeService(Service $service): static
     {
         $this->services->removeElement($service);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getHospital() === $this) {
+                $disponibilite->setHospital(null);
+            }
+        }
 
         return $this;
     }

@@ -201,6 +201,18 @@ class DoctorController extends AbstractController
                     "code" => 403
                 ], Response::HTTP_FORBIDDEN);
             }
+
+            // Vérification des autorisations
+            if (
+                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+            ) {
+                return new JsonResponse([
+                    "message" => "Vous n'avez pas accès à cette ressource",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
             // Récupération et décodage des données
             $data = json_decode($request->getContent(), true);
 
@@ -218,7 +230,7 @@ class DoctorController extends AbstractController
                     'roles' => ["ROLE_DOCTOR"],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
-                    'username' => $data['username'],
+                    'nickname' => $data['nickname'],
                     'tel' => $data['tel'],
                     'birth' => new \DateTime($data['birth']),
                     'gender' => $data['gender'],
@@ -232,7 +244,7 @@ class DoctorController extends AbstractController
 
                 if (!empty($errors['entity'])) {
                     $this->entityManager->commit();
-                    return $this->json(['code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
+                    return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin créé avec succès"], Response::HTTP_OK);
                 }
 
                 // Erreur dans la persistance
@@ -315,7 +327,7 @@ class DoctorController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
-                return $this->json(['code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
             }
     
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);

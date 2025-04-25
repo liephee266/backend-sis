@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Agenda;
+use App\Entity\Disponibilite;
 use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
@@ -47,27 +48,28 @@ class AgendaController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'agenda_index', methods: ['GET'])]
-    public function index(Request $request): Response
+    #[Route('/{id_hospital}/{id_doctor}/{month?}', name: 'agenda_index', methods: ['GET'])]
+    public function index(Request $request, $id_hospital , $id_doctor, $month = null): Response
     {
-        try {
-            // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR')) {
+        // Assign default value to $month if it is null
+        $month = $month ?? date('n');
+        $year = date('Y');
+        $monts_and_year = ["months"=> [$month, $month = 12 ? 1 : $month +1],"year"=>$year];
+        // Vérification des autorisations de l'utilisateur connecté
+        if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
+                $a = $this->toolkit->getAgenda($monts_and_year,  ['id_doctor'=> $id_doctor,'id_hospital'=>$id_hospital] );
+            return new JsonResponse(["data"=> $a, "code" => 200], Response::HTTP_OK);
+        }elseif ($this->security->isGranted('ROLE_PATIENT')) {
+            // Si l'utilisateur est un patient, on récupère son ID
+            
+        }else {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
         // Vérification des autorisations de l'utilisateur connecté
-        $filtre = [];
-
-        // Récupération des Agendas avec pagination
-        $response = $this->toolkit->getPagitionOption($request, 'Agenda', 'agenda:read', $filtre);
 
         // Retour d'une réponse JSON avec les Agendas et un statut HTTP 200 (OK)
-        return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des agendas" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        
+        return new JsonResponse([], Response::HTTP_OK);
     }
 
     /**
@@ -127,7 +129,7 @@ class AgendaController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['code' => 200, 'message' => "Agenda crée avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Agenda crée avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -171,7 +173,7 @@ class AgendaController extends AbstractController
         // Vérification si l'entité a été mise à jour sans erreur
         if (!empty($errors['entity'])) {
             // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-            return $this->json(['code' => 200, 'message' => "Agenda modifié avec succès"], Response::HTTP_OK);
+            return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Agenda modifié avec succès"], Response::HTTP_OK);
         }
     
         // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

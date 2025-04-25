@@ -33,6 +33,9 @@ class Status
     #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'status_id')]
     private Collection $autorisations;
 
+    #[ORM\Column(length: 255)]
+    private ?string $tech_name = null;
+
     public function __construct()
     {
         $this->hospitals = new ArrayCollection();
@@ -113,6 +116,18 @@ class Status
                 $autorisation->setStatusId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTechName(): ?string
+    {
+        return $this->tech_name;
+    }
+
+    public function setTechName(string $tech_name): static
+    {
+        $this->tech_name = $tech_name;
 
         return $this;
     }

@@ -47,6 +47,13 @@ class Meeting
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     private ?State $state_id = null;
 
+    /**
+     * @var Collection<int, Disponibilite>
+     * 
+     */
+    #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'meeting')]
+    #[Groups(["meeting:read"])]
+    private Collection $disponibilites;
 
     #[ORM\Column(length: 255)]
     private ?string $uuid = null;
@@ -59,11 +66,12 @@ class Meeting
     #[Groups(["meeting:read"])]
     private  $updated_at;
 
-      public function __construct()
+    public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->disponibilites = new ArrayCollection();
     }
     // ✅ Getters & Setters
 
@@ -152,6 +160,37 @@ class Meeting
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Disponibilite>
+     */
+    public function getDisponibilites(): Collection
+    {
+        return $this->disponibilites;
+    }
+
+    public function addDisponibilite(Disponibilite $disponibilite): static
+    {
+        if (!$this->disponibilites->contains($disponibilite)) {
+            $this->disponibilites->add($disponibilite);
+            $disponibilite->setMeeting($this);
+        }
+        $disponibilite->setMeeting($this);
+        return $this;
+    }
+
+    public function removeDisponibilite(Disponibilite $disponibilite): static
+    {
+        if ($this->disponibilites->removeElement($disponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilite->getMeeting() === $this) {
+                $disponibilite->setMeeting(null);
+            }
+        }
+
+        return $this;
+    }
+    
     public function getUuid(): ?string
     {
         return $this->uuid;

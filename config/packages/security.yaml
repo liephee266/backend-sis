@@ -26,7 +26,8 @@ security:
             jwt: ~
     role_hierarchy:
         ROLE_SUPER_ADMIN:   [ROLE_ADMIN_SIS:, ROLE_ADMIN_HOPITAL]  # Super Admin hérite de tous les droits
-
+        ROLE_DOCTOR:     [ROLE_USER]  # Docteur hérite de ROLE_USER
+        ROLE_PATIENT:  [ROLE_USER]  # Patient hérite de ROLE_USER
     access_control:
         - { path: ^/api/v1/connexion, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/urgencys, roles: PUBLIC_ACCESS }

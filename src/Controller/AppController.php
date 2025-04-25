@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use App\Services\MailerService;
 
 /**
  * Controleur principal de l'application
@@ -115,12 +116,12 @@ class AppController extends AbstractController
     private function getSearchConfiguration(): array
     {
         return [
-            'driving_license' => [
+            'Entity1' => [
                 'class' => 'App\Entity\Entity1',
                 'searchFields' => ['first_name', 'last_name', 'cashier_short_code'],
                 'serializationGroup' => 'driving_license:read'
             ],
-            'registration_card' => [
+            'Entity2' => [
                 'class' => 'App\Entity\Entity2',
                 'searchFields' => ['owner_first_name', 'owner_last_name', 'cashier_short_code'],
                 'serializationGroup' => 'registration_card:read'
@@ -365,5 +366,16 @@ class AppController extends AbstractController
             ['message' => $entity_name.' suspendu(e) avec succès'], 
             Response::HTTP_OK
         );
+    }
+
+    #[Route('/contact/send', name: 'contact_send', methods: ['POST'])]
+    public function send(MailerService $mailer, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $mailer->sendWelcomeEmail(
+            'lieloumloum@gmail.com',
+            'Orphée Lié',
+        );
+        return $this->json(['status' => 'email_sent']);
     }
 }

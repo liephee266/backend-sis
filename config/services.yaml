@@ -7,6 +7,9 @@ parameters:
     app.environment: dev
     app.debug: true
 services:
+    App\Services\MailerService:
+        arguments:
+            $fromAddress: '%env(MAILER_FROM)%'
     App\Service\Toolkit: ~
     # App\Service\CardPressoMicroService: ~
     App\Service\GenericEntityManager: ~

@@ -195,7 +195,7 @@ class DossierMedicaleController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['code' => 200, 'message' => "Historique Medical crée avec succès"], Response::HTTP_OK);
+                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "DossierMedicale crée avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -243,8 +243,8 @@ class DossierMedicaleController extends AbstractController
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
-                // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['code' => 200, 'message' => "Historique Medical modifié avec succès"], Response::HTTP_OK);
+                // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$dossier_medicale de succès
+                return $this->json(['code' => 200, 'message' => "DossierMedicale modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

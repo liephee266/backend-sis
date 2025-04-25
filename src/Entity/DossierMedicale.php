@@ -105,14 +105,14 @@ class DossierMedicale
         return $this;
     }
 
-    public function getAntecedentsMedicaux(): ?array
+    public function getHabitudeVie(): ?array
     {
-        return $this->antecedents_medicaux;
+        return $this->habitude_vie;
     }
 
-    public function setAntecedentsMedicaux(?array $antecedents_medicaux): static
+    public function setHabitudeVie(?array $habitude_vie): static
     {
-        $this->antecedents_medicaux = $antecedents_medicaux;
+        $this->habitude_vie = $habitude_vie;
 
         return $this;
     }

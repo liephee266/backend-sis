@@ -38,24 +38,16 @@ class Consultation
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
-    private ?string $description = null;
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $raison_visite = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
-    private ?string $prescription = null;
-
-    #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
-    private ?string $diagnostic = null;
-
-    #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
-    private ?string $recommendation = null;
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $recommandation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
@@ -95,17 +87,25 @@ class Consultation
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
-    /**
-     * @var Collection<int, HistoriqueMedical>
-     */
-    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'consultation')]
-    private Collection $historiqueMedicals;
+    #[ORM\Column(length: 255)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $intensité_symptome = null;
 
-    /**
-     * @var Collection<int, HistoriqueMedical>
-     */
-    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'historiqueMedicalGeneral')]
-    private Collection $historiqueMedicalsGeneral;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?\DateTimeInterface $prochaine_consultation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $test_supplementaire = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    private ?string $diagnostic_preliminaire = null;
+
+    #[ORM\Column(nullable: true)]
+
+    private ?array $antecedents_medicaux = null;
 
     public function __construct()
     {
@@ -124,14 +124,14 @@ class Consultation
         return $this->id;
     }
 
-    public function getDescription(): ?string
+    public function getRaisonVisite(): ?string
     {
-        return $this->description;
+        return $this->raison_visite;
     }
 
-    public function setDescription(?string $description): self
+    public function setRaisonVisite(?string $raison_visite): self
     {
-        $this->description = $description;
+        $this->raison_visite = $raison_visite;
         return $this;
     }
 
@@ -146,36 +146,14 @@ class Consultation
         return $this;
     }
 
-    public function getPrescription(): ?string
+    public function getRecommandation(): ?string
     {
-        return $this->prescription;
+        return $this->recommandation;
     }
 
-    public function setPrescription(?string $prescription): self
+    public function setRecommandation(?string $recommandation): self
     {
-        $this->prescription = $prescription;
-        return $this;
-    }
-
-    public function getDiagnostic(): ?string
-    {
-        return $this->diagnostic;
-    }
-
-    public function setDiagnostic(?string $diagnostic): self
-    {
-        $this->diagnostic = $diagnostic;
-        return $this;
-    }
-
-    public function getRecommendation(): ?string
-    {
-        return $this->recommendation;
-    }
-
-    public function setRecommendation(?string $recommendation): self
-    {
-        $this->recommendation = $recommendation;
+        $this->recommandation = $recommandation;
         return $this;
     }
 
@@ -327,19 +305,18 @@ class Consultation
         return $this;
     }
 
-    public function getUuid(): ?Uuid
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
-    public function setUuid(Uuid $uuid): static
+    public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
-
         return $this;
     }
 
-     public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
@@ -361,42 +338,63 @@ class Consultation
         return $this;
     }
 
-    /**
-     * @return Collection<int, HistoriqueMedical>
-     */
-    public function getHistoriqueMedicals(): Collection
+    public function getIntensitéSymptome(): ?string
     {
-        return $this->historiqueMedicals;
+        return $this->intensité_symptome;
     }
 
-    /**
-     * @return Collection<int, HistoriqueMedical>
-     */
-    public function getHistoriqueMedicalsGeneral(): Collection
+    public function setIntensitéSymptome(string $intensité_symptome): static
     {
-        return $this->historiqueMedicalsGeneral;
-    }
-
-    public function addHistoriqueMedicalsGeneral(HistoriqueMedical $historiqueMedicalsGeneral): static
-    {
-        if (!$this->historiqueMedicalsGeneral->contains($historiqueMedicalsGeneral)) {
-            $this->historiqueMedicalsGeneral->add($historiqueMedicalsGeneral);
-            $historiqueMedicalsGeneral->setHistoriqueMedicalGeneral($this);
-        }
+        $this->intensité_symptome = $intensité_symptome;
 
         return $this;
     }
 
-    public function removeHistoriqueMedicalsGeneral(HistoriqueMedical $historiqueMedicalsGeneral): static
+    public function getProchaineConsultation(): ?\DateTimeInterface
     {
-        if ($this->historiqueMedicalsGeneral->removeElement($historiqueMedicalsGeneral)) {
-            // set the owning side to null (unless already changed)
-            if ($historiqueMedicalsGeneral->getHistoriqueMedicalGeneral() === $this) {
-                $historiqueMedicalsGeneral->setHistoriqueMedicalGeneral(null);
-            }
-        }
+        return $this->prochaine_consultation;
+    }
+
+    public function setProchaineConsultation(?\DateTimeInterface $prochaine_consultation): static
+    {
+        $this->prochaine_consultation = $prochaine_consultation;
 
         return $this;
     }
 
+    public function getTestSupplementaire(): ?string
+    {
+        return $this->test_supplementaire;
+    }
+
+    public function setTestSupplementaire(?string $test_supplementaire): static
+    {
+        $this->test_supplementaire = $test_supplementaire;
+
+        return $this;
+    }
+
+    public function getDiagnosticPreliminaire(): ?string
+    {
+        return $this->diagnostic_preliminaire;
+    }
+
+    public function setDiagnosticPreliminaire(string $diagnostic_preliminaire): static
+    {
+        $this->diagnostic_preliminaire = $diagnostic_preliminaire;
+
+        return $this;
+    }
+
+    public function getAntecedentsMedicaux(): ?array
+    {
+        return $this->antecedents_medicaux;
+    }
+
+    public function setAntecedentsMedicaux(?array $antecedents_medicaux): static
+    {
+        $this->antecedents_medicaux = $antecedents_medicaux;
+
+        return $this;
+    }
 }
