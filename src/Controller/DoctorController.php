@@ -180,7 +180,7 @@ class DoctorController extends AbstractController
      * @param Request $request
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel MIYALOU <michelmiyalou0@gmail.com>
      */
     #[Route('/', name: 'doctor_create', methods: ['POST'])]
     public function create(Request $request): Response
@@ -277,7 +277,7 @@ class DoctorController extends AbstractController
      * @param int $id
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel MIYALOU, Daryon Rockness <michelmiyalou0@gmail.com>
      */
     #[Route('/{id}', name: 'doctor_update', methods: ['PUT'])]
     public function update(Request $request, $id): Response
