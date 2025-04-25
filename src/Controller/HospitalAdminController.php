@@ -109,10 +109,10 @@ class HospitalAdminController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            // if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            //     # code...
-            //     return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-            // }
+            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+                # code...
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            }
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
     

@@ -20,7 +20,7 @@ class AppFixtures extends Fixture
             'COMPLETED'=>'Completed',
         ];
         foreach ($states as $key => $stateName) {
-            $state = new State();
+            $state = new Status();
             $state->setName($stateName);
             $state->setTechName($key);
             $manager->persist($state);
@@ -37,25 +37,25 @@ class AppFixtures extends Fixture
             'CONFIRME'=>'Confirmé',
         ];
         foreach ($statuses as $key => $statusName) {
-            $status = new Status();
+            $status = new State();
             $status->setName($statusName);
-            // $status->setTechName($key);
+            $status->setTechName($key);
             $manager->persist($status);
         }
 
-        //création du super admin
-        $admin = new \App\Entity\User();
-        $admin->setEmail('admin@sis.com');
-        $admin->setPassword('admin');
-        $admin->setRoles(['ROLE_SUPER_ADMIN']);
-        $admin->setFirstName('Admin');
-        $admin->setLastName('Admin');
-        $admin->setNickname('admin@001');
-        $admin->setTel('1234567890');
-        $admin->setAddress('123 Admin St, Admin City, Admin Country');
-        $admin->setBirth(new \DateTime('2000-01-01'));
-        $admin->setGender('M');
-        $manager->persist($admin);
+        // //création du super admin
+        // $admin = new \App\Entity\User();
+        // $admin->setEmail('admin@sis.com');
+        // $admin->setPassword('admin');
+        // $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        // $admin->setFirstName('Admin');
+        // $admin->setLastName('Admin');
+        // $admin->setNickname('admin@001');
+        // $admin->setTel('1234567890');
+        // $admin->setAddress('123 Admin St, Admin City, Admin Country');
+        // $admin->setBirth(new \DateTime('2000-01-01'));
+        // $admin->setGender('M');
+        // $manager->persist($admin);
 
         $manager->flush();
     }
