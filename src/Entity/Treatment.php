@@ -16,16 +16,16 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["treatment:read", "DossierMedicale:read","patient:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read", "patient:read"])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Consultation::class)]
     #[ORM\JoinColumn(name: "consultation_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read", "patient:read"])]
     private ?Consultation $consultation = null;
 
     #[ORM\Column]
@@ -39,15 +39,15 @@ class Treatment
     private Collection $dossierMedicales;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["treatment:read", "DossierMedicale:read", "patient:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read", "patient:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["treatment:read", "DossierMedicale:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["treatment:read", "DossierMedicale:read"])]
+    #[Groups(["treatment:read", "dossier_medicale:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
     /**

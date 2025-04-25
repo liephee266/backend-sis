@@ -18,43 +18,43 @@ class DossierMedicale
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups(["data_select","DossierMedicale:read","consultation:read","patient:read"])]
+    #[Groups(["data_select","dossier_medicale:read","consultation:read","patient:read"])]
     private ?Consultation $consultation_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("DossierMedicale:read","patient:read","urgency:read")]
+    #[Groups("dossier_medicale:read","patient:read","urgency:read")]
     private ?Treatment $treatment_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
-    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
+    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?Patient $patient_id = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
+    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?array $medications_actuelles = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
+    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?array $antecedents_familiaux = null;
 
     #[ORM\Column(type: 'json',nullable: true)]
-    #[Groups("DossierMedicale:read","urgency:read","patient:read")]
+    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?array $access = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("dossier_medicale:read","urgency:read")]
+    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?array $habitude_vie = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("DossierMedicale:read","patient:read")]
+    #[Groups("dossier_medicale:read","patient:read")]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("DossierMedicale:read")]
+    #[Groups("dossier_medicale:read")]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("DossierMedicale:read","patient:read")]
+    #[Groups("dossier_medicale:read","patient:read")]
     private ?string $uuid = null;
 
     public function __construct()

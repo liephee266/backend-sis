@@ -23,16 +23,20 @@ class Autorisation
     private ?User $demander_id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["autorisation:read"])]
     private ?string $demander_role = null;
 
     #[ORM\ManyToOne(inversedBy: 'autorisations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["autorisation:read"])]
     private ?User $validator_id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["autorisation:read"])]
     private ?string $validator_role = null;
 
     #[ORM\ManyToOne(inversedBy: 'autorisations')]
+    #[Groups(["autorisation:read"])]
     private ?Status $status_id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -40,18 +44,23 @@ class Autorisation
     private ?string $entity = null;
 
     #[ORM\Column]
+    #[Groups(["autorisation:read"])]
     private ?int $entity_id = null;
 
     #[ORM\Column(type: "datetime")]
+    #[Groups(["autorisation:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: "datetime")]
+    #[Groups(["autorisation:read"])]
     private $updated_at;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["autorisation:read"])]
     private ?int $date_limit = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["autorisation:read"])]
     private ?string $type_demande = null;
     
 

@@ -19,7 +19,7 @@ use Symfony\Bundle\SecurityBundle\Security;
  * 
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
-#[Route('/api/v1/dossierMedicals')]
+#[Route('/api/v1/dossier_medicale')]
 class DossierMedicaleController extends AbstractController
 {
     private $toolkit;
@@ -84,7 +84,7 @@ class DossierMedicaleController extends AbstractController
                     return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
                 }
             }
-             else {
+            else {
             // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
                 $dossiers = $this->entityManager
                 ->getRepository(DossierMedicale::class)
@@ -95,7 +95,7 @@ class DossierMedicaleController extends AbstractController
                 });
 
                 }
-           
+
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
@@ -151,7 +151,7 @@ class DossierMedicaleController extends AbstractController
             } else {
                 // Vérifie que l'utilisateur connecté a bien accès à ce dossier
                 $accessList = $DossierMedicale->getAccess() ?? [];
-                 
+
             if (!in_array($user->getId(), $accessList)) {
                 return new JsonResponse([
                     'code' => 403,
@@ -159,7 +159,7 @@ class DossierMedicaleController extends AbstractController
                     'access' => $accessList,
                     'user_id' => $user->getId()
                 ],Response::HTTP_FORBIDDEN);
-               }
+            }
             }
             $historiqueSerialized = $this->serializer->serialize($DossierMedicale,'json',['groups' => 'DossierMedicale:read']);
 

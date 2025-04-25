@@ -18,38 +18,45 @@ class Hospital
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read","HistoriqueMedical:read", "patient:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read",
+    "doctor:read","HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "hospital:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read",
+    "hospital:read", "doctor:read", "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $address = null;
     
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -90,7 +97,8 @@ class Hospital
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read"])]
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
+    "HistoriqueMedical:read", "patient:read", "user:read"])]
     private ?string $logo = null;
 
     #[ORM\Column(nullable: true)]
@@ -133,14 +141,14 @@ class Hospital
 
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "user:read"])]
     private ?TypeHopital $type_hospital = null;
 
     /**
      * @var Collection<int, Service>
      */
     #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'hospital')]
-    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "user:read"])]
     private Collection $services;
 
     /**

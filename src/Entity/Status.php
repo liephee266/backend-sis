@@ -14,11 +14,11 @@ class Status
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["data_select",'status:read','hospital:read'])]
+    #[Groups(["data_select",'status:read','hospital:read', 'autorisation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["data_select",'status:read','hospital:read'])]
+    #[Groups(["data_select",'status:read','hospital:read', 'autorisation:read'])]
     private ?string $name = null;
 
     /**

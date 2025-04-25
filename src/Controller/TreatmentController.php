@@ -6,6 +6,7 @@ use App\Entity\Treatment;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,17 +26,20 @@ class TreatmentController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager,
+                                SerializerInterface $serializer, Toolkit $toolkit, Security $security)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
-     * Liste des Treatment
+     * Liste des Treatments
      *
      * @param Request $request
      * @return Response
@@ -82,7 +86,7 @@ class TreatmentController extends AbstractController
     }
 
     /**
-     * Création d'un nouvel Treatment
+     * Création d'un nouveau Treatment
      *
      * @param Request $request
      * @return Response
@@ -93,6 +97,10 @@ class TreatmentController extends AbstractController
     public function create(Request $request): Response
     {
         try {
+            if (!$this->security->isGranted('ROLE_DOCTOR')) {
+                return $this->json(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             

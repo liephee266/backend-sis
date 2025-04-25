@@ -53,6 +53,11 @@ class AutorisationController extends AbstractController
     #[Route('/', name: 'autorisation_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
+
         // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
         $filtre = [];
 
@@ -74,6 +79,10 @@ class AutorisationController extends AbstractController
     #[Route('/{id}', name: 'autorisation_show', methods: ['GET'])]
     public function show(Autorisation $autorisation): Response
     {
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+
+            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+        }
         // Sérialisation de l'entité Autorisation en JSON avec le groupe de sérialisation 'Autorisation:read'
         $autorisation = $this->serializer->serialize($autorisation, 'json', ['groups' => 'autorisation:read']);
     
@@ -94,7 +103,8 @@ class AutorisationController extends AbstractController
     {
         try {
             if (!$this->security->isGranted('ROLE_ADMIN_SIS')
-                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+                && !$this->security->isGranted('ROLE_DOCTOR')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
@@ -136,7 +146,7 @@ class AutorisationController extends AbstractController
             $data['entity'] = $entity_name;
 
             // Ajouter le statut à la data avant persistance
-            $data['status_id'] = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'pending'])->getId(); 
+            $data['status_id'] = $this->entityManager->getRepository(Status::class)->findOneBy(['name' => 'Pending'])->getId(); 
 
             $data['validator_role'] = $this->entityManager->getRepository(User::class)->findOneBy(['id' => $data['validator_id']])->getRoles()[0];
 
@@ -172,8 +182,8 @@ class AutorisationController extends AbstractController
     public function update(Request $request,  $id): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
-                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            if (!$this->security->isGranted('ROLE_SUPER_ADMIN')
+                && !$this->security->isGranted('ROLE_PATIENT')) {
             # code...
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
