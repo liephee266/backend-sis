@@ -54,7 +54,7 @@ class PatientController extends AbstractController
     #[Route('/', name: 'patient_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // try {
+        try {
             // Vérification des autorisations
             if (
                 !$this->security->isGranted('ROLE_DOCTOR') &&
@@ -133,9 +133,9 @@ class PatientController extends AbstractController
             }
 
             return new JsonResponse($response, Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
     /**
      * Affichage d'un Patient par son ID

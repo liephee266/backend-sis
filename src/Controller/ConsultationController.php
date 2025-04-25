@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AgentHospital;
 use App\Entity\Consultation;
 use App\Entity\Doctor;
 use App\Entity\HospitalAdmin;
@@ -48,17 +49,13 @@ class ConsultationController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'patient_index', methods: ['GET'])]
+    #[Route('/', name: 'consultation_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        try {
+        // try {
             // Vérification des autorisations
             if (
-                !$this->security->isGranted('ROLE_DOCTOR') &&
-                !$this->security->isGranted('ROLE_AGENT_HOSPITAL') &&
-                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
-                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
-                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
+                !$this->security->isGranted('ROLE_DOCTOR')
             ) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
@@ -89,44 +86,14 @@ class ConsultationController extends AbstractController
                 // Filtrer par ID
                 $filtre['id'] = $patientIds;
             }
-
-            // Si utilisateur est un admin hospitalier
-            elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
-                    ->findOneBy(['user' => $user]);
-
-                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
-                    return new JsonResponse([
-                        'code' => 403,
-                        'message' => "Aucun hôpital trouvé pour cet admin."
-                    ], Response::HTTP_FORBIDDEN);
-                }
-
-                $adminHospital = $hospitalAdmin->getHospital();
-
-                // Récupérer les patients via les consultations dans cet hôpital
-                $consultations = $this->entityManager->getRepository(Consultation::class)
-                    ->createQueryBuilder('c')
-                    ->select('DISTINCT p.id')
-                    ->join('c.patient', 'p')
-                    ->where('c.hospital = :hospital')
-                    ->setParameter('hospital', $adminHospital)
-                    ->getQuery()
-                    ->getScalarResult();
-
-                $patientIds = array_column($consultations, 'id');
-
-                // Appliquer le filtre par ID
-                $filtre['id'] = $patientIds;
-            }
-
+           
             // Si autres rôles, pas de filtre
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', $filtre);
 
             return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
 

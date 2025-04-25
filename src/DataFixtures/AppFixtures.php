@@ -12,8 +12,8 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $states = [
-            'PENDING'=>'Pending',
-            'VALIDATED'=>'Validated',
+            'PENDING'=>'pending',
+            'VALIDATED'=>'validated',
             'REFUSED'=>'Refused',
             'CANCELED'=>'Canceled',
             'IN_PROGRESS'=>'In Progress',
