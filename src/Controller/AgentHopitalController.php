@@ -88,7 +88,7 @@ class AgentHopitalController extends AbstractController
             }
     
             // Récupération des AgentHopitals avec pagination
-            $response = $this->toolkit->getPagitionOption($request, 'User', 'user:read', $filtre);
+            $response = $this->toolkit->getPagitionOption($request, 'AgentHospital', 'agenthospital:read', $filtre);
     
             // Retour d'une réponse JSON avec les AgentHopitals et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
@@ -147,7 +147,7 @@ class AgentHopitalController extends AbstractController
             }
     
             // Sérialisation de l'entité AgentHopital en JSON avec le groupe de sérialisation 'AgentHopital:read'
-            $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'user:read']);
+            $agenthopital = $this->serializer->serialize($agenthopital, 'json', ['groups' => 'agenthospital:read']);
         
             // Retour de la réponse JSON avec les données de l'AgentHopital et un code HTTP 200
             return new JsonResponse(["data" => json_decode($agenthopital, true), "code" => 200], Response::HTTP_OK);
@@ -208,7 +208,7 @@ class AgentHopitalController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'user:read']);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'agenthospital:read']);
                 $response = json_decode($response, true);
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Agent hopital crée avec succès"], Response::HTTP_OK);
             }
@@ -218,7 +218,6 @@ class AgentHopitalController extends AbstractController
         } catch (\Throwable $th) {
             return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'agent hopital" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 
     /**
@@ -288,7 +287,9 @@ class AgentHopitalController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "AgentHopital modifié avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'agenthospital:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "AgentHopital modifié avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
@@ -296,7 +297,6 @@ class AgentHopitalController extends AbstractController
         } catch (\Throwable $th) {
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'AgentHopital" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
     
     /**

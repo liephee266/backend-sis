@@ -95,12 +95,6 @@ class DisponibiliteController extends AbstractController
         try {
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
-
-            $data['date_j'] = new \DateTimeInterface();
-
-            $data['heure_debut'] = new \DateTimeInterface();
-
-            $data['heure_fin'] = new \DateTimeInterface();
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Disponibilite", $data);
@@ -108,7 +102,9 @@ class DisponibiliteController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Disponibilité créée avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'disponibilite:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "Disponibilité créée avec succès"], Response::HTTP_OK);
             }
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -143,7 +139,9 @@ class DisponibiliteController extends AbstractController
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Disponibilité modifiée avec succès"], Response::HTTP_OK);
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'disponibilite:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "Disponibilité modifiée avec succès"], Response::HTTP_OK);
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur

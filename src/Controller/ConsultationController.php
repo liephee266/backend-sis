@@ -52,7 +52,7 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // try {
+        try {
             // Vérification des autorisations
             if (
                 !$this->security->isGranted('ROLE_DOCTOR')
@@ -86,16 +86,15 @@ class ConsultationController extends AbstractController
                 // Filtrer par ID
                 $filtre['id'] = $patientIds;
             }
-           
+
             // Si autres rôles, pas de filtre
             $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', $filtre);
 
             return new JsonResponse($response, Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
-
 
     /**
      * Affichage d'un Consultation par son ID
@@ -145,13 +144,11 @@ class ConsultationController extends AbstractController
             // Sérialisation de l'entité Consultation en JSON avec le groupe de sérialisation 'Consultation:read'
             $consultation = $this->serializer->serialize($consultation, 'json', ['groups' => 'consultation:read']);
 
-            
             // Retour de la réponse JSON avec les données de l'Consultation et un code HTTP 200
             return new JsonResponse(["data" => json_decode($consultation, true), "code" => 200], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
     
     /**
@@ -194,7 +191,6 @@ class ConsultationController extends AbstractController
         } catch (\Throwable $th) {
             return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 
     /**
@@ -285,6 +281,5 @@ class ConsultationController extends AbstractController
         } catch (\Throwable $th) {
             return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 }

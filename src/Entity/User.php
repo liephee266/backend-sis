@@ -24,28 +24,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "autorisation:read",])]
+    "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
+    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","patient:read:restricted", "autorisation:read"])]
+    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","patient:read:restricted", "autorisation:read"])]
+    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private array $roles = [];
 
     /**
@@ -60,55 +67,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "dossier_medicale:read","patient:read:restricted", "hospital:read", "autorisation:read"])]
+    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read",])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "dossier_medicale:read", "hospital:read", "autorisation:read"])]
+    "availability:read", "dossier_medicale:read", 
+    "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "hospital:read", "autorisation:read"])]
+    "availability:read", "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read","patient:read:restricted", "hospital:read", "autorisation:read"])]
+    "availability:read","patient:read:restricted", 
+    "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "hospital:read", "dossier_medicale:read","patient:read:restricted", "autorisation:read"])]
+    "availability:read", "hospital:read", "dossier_medicale:read",
+    "patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read","patient:read:restricted", "autorisation:read"])]
+    "hospitaladmin:read", "affiliation:read", "hospitaladmin:read", 
+    "availability:read", "hospital:read","patient:read:restricted", "autorisation:read","agenthospital:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", 
-    "dossier_medicale:read","patient:read:restricted", "autorisation:read"])]
+    "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read",
-    "dossier_medicale:read","patient:read:restricted", "autorisation:read"])]
+    "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $updated_at;
 
     /**
@@ -129,22 +141,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Autorisation::class, mappedBy: 'demander_id')]
     private Collection $autorisations;
 
-    /**
-     * @var Collection<int, AgentHospital>
-     */
-    #[ORM\OneToMany(targetEntity: AgentHospital::class, mappedBy: 'user')]
-    private Collection $agentHospitals;
-
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read","autorisation:read"])]
+    "hospitaladmin:read", "affiliation:read","hospitaladmin:read", 
+    "availability:read", "hospital:read","autorisation:read", "agenthospital:read"])]
     private ?string $image = null;
 
     #[ORM\Column(length: 1)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read","autorisation:read"])]
+    "hospitaladmin:read", "affiliation:read","hospitaladmin:read", 
+    "availability:read", "hospital:read","autorisation:read", "agenthospital:read"])]
     private ?string $gender = null;
 
 
