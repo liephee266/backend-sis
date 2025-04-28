@@ -79,22 +79,19 @@ class PatientController extends AbstractController
                 // Récupérer les patients associés au médecin via consultations
                 $consultations = $this->entityManager->getRepository(Consultation::class)
                     ->createQueryBuilder('c')
+                    ->select('DISTINCT p.id') // ne pas charger tous les patients, juste leurs IDs
                     ->innerJoin('c.patient', 'p')
                     ->where('c.doctor = :doctor')
                     ->setParameter('doctor', $doctor)
                     ->getQuery()
-                    ->getResult();
+                    ->getScalarResult();
 
-                $patients = [];
-                foreach ($consultations as $consultation) {
-                    $patients[] = $consultation->getPatient();
-                }
-                $patientIds = array_map(fn($p) => $p->getId(), $patients);
+                $patientIds = array_column($consultations, 'id');
 
-
-                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read',[
+                // Paginer sur les patients, pas sur les consultations
+                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
                     'id' => $patientIds
-                ]); 
+                ]);
             }
 
             // Si utilisateur est un admin hospitalier
@@ -118,7 +115,6 @@ class PatientController extends AbstractController
                     ->getResult();
 
                 // Extraire les patients uniques
-                $patients = [];
                 $ids = array_map(function($obj) {
                     return $obj->getPatient()->getId();
                 }, $consultations);
@@ -149,7 +145,7 @@ class PatientController extends AbstractController
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
     public function show(Patient $patient, Request $request, DossierMedicale $dossierMedicale): Response
     {
-        try {
+        // try {
             // Vérification des autorisations de l'utilisateur connecté
             if (
                 !$this->security->isGranted('ROLE_DOCTOR') &&
@@ -236,9 +232,9 @@ class PatientController extends AbstractController
                 'code' => 200,
             ], Response::HTTP_OK);
         // } catch (\Throwable $th) {
-        } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     /**

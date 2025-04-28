@@ -14,7 +14,7 @@ class DossierMedicale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("DossierMedicale:read","patient:read")]
+    #[Groups("dossier_medicale:read","patient:read")]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'dossierMedicales')]
@@ -38,7 +38,6 @@ class DossierMedicale
     private ?array $antecedents_familiaux = null;
 
     #[ORM\Column(type: 'json',nullable: true)]
-    #[Groups("dossier_medicale:read","urgency:read","patient:read")]
     private ?array $access = null;
 
     #[ORM\Column(nullable: true)]

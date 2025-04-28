@@ -76,34 +76,59 @@ class HistoriqueMedicalController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
      #[Route('/{id}', name: 'HistoriqueMedical_show', methods: ['GET'])]
-    public function show(HistoriqueMedical $historiqueMedical, Request $request, Consultation $consultation): Response
+    public function show(HistoriqueMedical $historiqueMedical, Request $request, Consultation $consultation,$id): Response
     {
-         try {
+    //   try {
             // Vérification des autorisations de l'utilisateur connecté
             if (!$this->security->isGranted('ROLE_PATIENT')) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-             // Récupération de l'utilisateur connecté
+
+            // Récupération de l'utilisateur connecté
             $user = $this->toolkit->getUser($request);
-              
+
             // Récupérer le patient lié à l'utilisateur connecté
-            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);                    
-            
-            // On vérifie si le patient est bien associé à cette consultatio
-            if ($historiqueMedical=$consultation->getPatient()->getId() !== $patient->getId());  {
-                    // Si ce n'est pas le cas, retour d'une réponse JSON avec une erreur 403 (Accès refusé)
-                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Vous ne pouvez pas accéder à cet histrique."], Response::HTTP_FORBIDDEN);
+            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+            // Vérifier que le patient est bien associé à cette consultation
+            // On va d'abord récupérer toutes les consultations du patient
+            $consultations = $this->entityManager->getRepository(Consultation::class)
+                ->findBy(['patient' => $patient]); // Récupère toutes les consultations du patient
+
+            if (!$consultations) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucune consultation trouvée pour ce patient."], Response::HTTP_NOT_FOUND);
             }
-            
-            // Sérialisation de l'entité Availability en JSON avec le groupe de sérialisation 'Availability:read'
+
+            // Récupérer l'historique médical à partir de son ID
+            $historiqueMedical = $this->entityManager->getRepository(HistoriqueMedical::class)->find($id);
+
+            if (!$historiqueMedical) {
+                return new JsonResponse(['code' => 404, 'message' => "Historique médical introuvable."], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier que le patient associé à cet historique médical est bien celui de l'utilisateur connecté
+            if ($historiqueMedical->getPatient()->getId() !== $patient->getId()) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé. Cet historique médical ne correspond pas à votre patient."], Response::HTTP_FORBIDDEN);
+            }
+
+            // Assigner toutes les consultations à l'historique médical
+            foreach ($consultations as $consultation) {
+                // Ajoute chaque consultation à l'historique médical
+                $historiqueMedical->addHistoriqueMedicalGeneral($consultation); // Assure-toi d'avoir une méthode `addHistoriqueMedicalGeneral` dans ton entité HistoriqueMedical
+            }
+
+            // Sauvegarder les modifications dans la base de données
+            $this->entityManager->flush();
+
+            // Sérialisation de l'entité HistoriqueMedical en JSON avec le groupe de sérialisation 'HistoriqueMedical:read'
             $historiqueMedical = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
-            
-        
-            // Retour de la réponse JSON avec les données de l'Availability et un code HTTP 200
+
+            // Retour de la réponse JSON avec les données de l'historique médical et un code HTTP 200
             return new JsonResponse(["data" => json_decode($historiqueMedical, true), "code" => 200], Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche de l'Availability" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche de l'historique médical: " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
+
     }
 
 

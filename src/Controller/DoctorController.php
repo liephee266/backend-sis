@@ -53,7 +53,7 @@ class DoctorController extends AbstractController
     public function index(Request $request): Response
     {
 
-        try {
+        // try {
             //code...
             if (
                 !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
@@ -79,6 +79,7 @@ class DoctorController extends AbstractController
     
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
                     ->findOneBy(['user' => $user]);
+
     
                 if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
                     return new JsonResponse([
@@ -86,17 +87,23 @@ class DoctorController extends AbstractController
                         "code" => 403
                     ], Response::HTTP_FORBIDDEN);
                 }
-    
+                
                 $hospital = $hospitalAdmin->getHospital();
-    
-                // Récupérer les IDs des médecins liés à cet hôpital via la table DoctorHospital
-                $doctorHospitalRepository = $this->entityManager->getRepository(Doctor::class);
-                $doctorHops = $doctorHospitalRepository->findBy(['hospital' => $hospital]);
-    
-                $doctorIds = array_map(function ($dh) {
-                    return $dh->getDoctor()->getId();
-                }, $doctorHops);
-    
+
+                $doctors = $this->entityManager->createQueryBuilder()
+                    ->select('d')
+                    ->from(Doctor::class, 'd')
+                    ->join('d.hospital', 'h') // 'hospital' étant la propriété ManyToMany dans Doctor
+                    ->where('h = :hospital')
+                    ->setParameter('hospital', $hospital)
+                    ->getQuery()
+                    ->getResult();
+
+                   
+                $doctorIds = array_map(function ($doctor) {
+                    return $doctor->getId();
+                }, $doctors);
+
                 // Ajouter ce filtre pour n'afficher que les médecins de cet hôpital
                 $filtre['id'] = $doctorIds;
             }
@@ -104,10 +111,10 @@ class DoctorController extends AbstractController
             $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
     
             return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-            //throw $th;
-            return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     //throw $th;
+        //     return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
 
