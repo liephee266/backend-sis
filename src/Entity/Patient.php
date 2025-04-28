@@ -15,17 +15,17 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","HistoriqueMedical:read","patient:read:restricted"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "DossierMedicale:read","patient:read:restricted"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","patient:read:"])]
     private ?User $tutor = null;
     
 
@@ -81,12 +81,19 @@ class Patient
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'patient')]
     private Collection $historiqueMedicals;
 
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'patient')]
+    private Collection $HistoriqueMedical;
+
     public function __construct()
     {
         $this->meeting_id = new ArrayCollection();
         $this->consultations = new ArrayCollection();
         $this->dossierMedicales = new ArrayCollection();
         $this->historiqueMedicals = new ArrayCollection();
+        $this->HistoriqueMedical = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -299,5 +306,35 @@ class Patient
     public function getHistoriqueMedicals(): Collection
     {
         return $this->historiqueMedicals;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriqueMedical(): Collection
+    {
+        return $this->HistoriqueMedical;
+    }
+
+    public function addHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if (!$this->HistoriqueMedical->contains($historiqueMedical)) {
+            $this->HistoriqueMedical->add($historiqueMedical);
+            $historiqueMedical->setPatient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriqueMedical(HistoriqueMedical $historiqueMedical): static
+    {
+        if ($this->HistoriqueMedical->removeElement($historiqueMedical)) {
+            // set the owning side to null (unless already changed)
+            if ($historiqueMedical->getPatient() === $this) {
+                $historiqueMedical->setPatient(null);
+            }
+        }
+
+        return $this;
     }
 }

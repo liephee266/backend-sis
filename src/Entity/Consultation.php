@@ -38,7 +38,7 @@ class Consultation
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["data_select","consultation:read", "treatment:read", "examination:read", "dossier_medicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?string $raison_visite = null;
 
     #[ORM\Column(type: "text", nullable: true)]
@@ -46,7 +46,7 @@ class Consultation
     private ?string $symptoms = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read", "HistoriqueMedical:read", "patient:read"])]
     private ?string $recommandation = null;
 
     #[ORM\Column(type: "text", nullable: true)]
@@ -115,6 +115,7 @@ class Consultation
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->historiquesMedicals = new ArrayCollection();
 
     }
 
@@ -303,6 +304,15 @@ class Consultation
 
         return $this;
     }
+    
+    /**
+     * @var Collection<int, HistoriqueMedical>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'historiqueMedicalGeneral')]
+    private Collection $historiquesMedicals;
+
+    #[ORM\ManyToOne(inversedBy: 'HistoriqueMedicalGeneral')]
+    private ?HistoriqueMedical $historiqueMedical = null;
 
     public function getUuid(): ?String
     {
@@ -396,4 +406,25 @@ class Consultation
 
         return $this;
     }
+    
+    /**
+     * @return Collection<int, HistoriqueMedical>
+     */
+    public function getHistoriquesMedicals(): Collection
+    {
+        return $this->historiquesMedicals;
+    }
+
+    public function getHistoriqueMedical(): ?HistoriqueMedical
+    {
+        return $this->historiqueMedical;
+    }
+
+    public function setHistoriqueMedical(?HistoriqueMedical $historiqueMedical): static
+    {
+        $this->historiqueMedical = $historiqueMedical;
+
+        return $this;
+    }
+
 }

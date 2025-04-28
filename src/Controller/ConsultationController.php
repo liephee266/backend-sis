@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\AgentHospital;
 use App\Entity\Consultation;
 use App\Entity\Doctor;
+use App\Entity\HistoriqueMedical;
 use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
 use App\Services\Toolkit;
@@ -52,10 +53,11 @@ class ConsultationController extends AbstractController
     #[Route('/', name: 'consultation_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // try {
+        try {
             // Vérification des autorisations
             if (
-                !$this->security->isGranted('ROLE_DOCTOR')
+                !$this->security->isGranted('ROLE_DOCTOR') &&
+                !$this->security->isGranted('ROLE_PATIENT')
             ) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
@@ -71,29 +73,51 @@ class ConsultationController extends AbstractController
                     return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
                 }
 
-                // Récupérer les consultations du médecin
+                // Pour un médecin, filtrer par ses consultations
                 $consultations = $this->entityManager->getRepository(Consultation::class)
                     ->createQueryBuilder('c')
-                    ->select('DISTINCT p.id')
-                    ->join('c.patient', 'p')
+                    ->select('c.id')
                     ->where('c.doctor = :doctor')
                     ->setParameter('doctor', $doctor)
                     ->getQuery()
                     ->getScalarResult();
 
-                $patientIds = array_column($consultations, 'id');
-
+                $consultationIds = array_column($consultations, 'id');
                 // Filtrer par ID
-                $filtre['id'] = $patientIds;
+                $filtre['id'] = $consultationIds;
+
+            }
+            // Si utilisateur est un patient
+            if ($this->security->isGranted('ROLE_PATIENT')) {
+                $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+                if (!$patient) {
+                    return new JsonResponse(['code' => 403, 'message' => "Patient non trouvé"], Response::HTTP_FORBIDDEN);
+                }
+
+       
+            // Récupérer toutes les consultations du patient
+            $consultations = $patient->getConsultations();  // Accéder à la relation OneToMany
+
+            // Si le patient n'a pas de consultations
+            if (empty($consultations)) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucune consultation trouvée"], Response::HTTP_NOT_FOUND);
+            }
+                 // Extraire les IDs des consultations
+                $consultationIds = array_map(function($consultation) {
+                    return $consultation->getId();
+                }, $consultations->toArray());
+                // Filtrer par ID
+                $filtre['id'] = $consultationIds;
             }
            
             // Si autres rôles, pas de filtre
-            $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', $filtre);
+            $response = $this->toolkit->getPagitionOption($request, 'Consultation', 'consultation:read', $filtre);
 
             return new JsonResponse($response, Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -167,7 +191,7 @@ class ConsultationController extends AbstractController
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
+            if (!$this->security->isGranted('ROLE_DOCTOR'))  {
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
@@ -177,8 +201,35 @@ class ConsultationController extends AbstractController
             $data["dateSymptoms"] = new \DateTime($data["dateSymptoms"]);
 
             $data["prochaine_consultation"] = new \DateTime($data["prochaine_consultation"]);
-            
-            // Appel à la méthode persistEntity pour insérer les données dans la base
+
+             // Vérifie que l’ID du patient est fourni
+            if (!isset($data['patient'])) {
+                return new JsonResponse(['code' => 400, 'message' => "ID du patient manquant"], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Récupération de l’entité Patient
+            $patient = $this->entityManager->getRepository(Patient::class)->find($data['patient']);
+
+            if (!$patient) {
+                return new JsonResponse(['code' => 404, 'message' => "Patient introuvable"], Response::HTTP_NOT_FOUND);
+            }
+
+            //on Vérifie si un historique médical existe déjà pour ce patient
+            $historiqueMedical = $this->entityManager->getRepository(HistoriqueMedical::class)
+                ->findOneBy(['patient' => $patient]);
+
+            // Si non, on le crée
+            if (!$historiqueMedical) {
+                $historiqueMedical = new HistoriqueMedical();
+                $historiqueMedical->setPatient($patient);
+                $this->entityManager->persist($historiqueMedical);
+                $this->entityManager->flush(); // Nécessaire pour générer l’ID
+            }
+
+            // Injecte l’historique médical dans les données de la consultation
+            $data['historiqueMedical'] = $historiqueMedical->getId();
+
+                        // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Consultation", $data);
 
             // Vérification des erreurs après la persistance des données

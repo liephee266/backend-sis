@@ -48,7 +48,7 @@ class DossierMedicaleController extends AbstractController
     #[Route('/', name: 'DossierMedicale_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        try {
+        // try {
             // Vérification des autorisations de l'utilisateur connecté
             if (!$this->security->isGranted('ROLE_ADMIN_SIS')
                 && !$this->security->isGranted('ROLE_SUPER_ADMIN')
@@ -59,10 +59,11 @@ class DossierMedicaleController extends AbstractController
             }
             // Initialisation du filtre
             $filtre = [];
+            $dossiersAccessibles = [];
 
             // Récupération de l'utilisateur connecté
             $user = $this->toolkit->getUser($request);
-
+        
             // Si c'est un patient, on filtre uniquement ses historiques
             if ($this->security->isGranted('ROLE_PATIENT')) {
                 if (!$user) {
@@ -99,12 +100,12 @@ class DossierMedicaleController extends AbstractController
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'DossierMedicale:read', $filtre, $dossiersAccessibles);
+            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre, $dossiersAccessibles);
 
             return new JsonResponse($response, Response::HTTP_OK);
-        } catch (\Throwable $th) {
-                return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des Historique Medicals : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+        // } catch (\Throwable $th) {
+        //         return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des Historique Medicals : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        //     }
     }
 
 
@@ -161,7 +162,7 @@ class DossierMedicaleController extends AbstractController
                 ],Response::HTTP_FORBIDDEN);
             }
             }
-            $historiqueSerialized = $this->serializer->serialize($DossierMedicale,'json',['groups' => 'DossierMedicale:read']);
+            $historiqueSerialized = $this->serializer->serialize($DossierMedicale,'json',['groups' => 'dossier_medicale:read']);
 
             return new JsonResponse(["data" => json_decode($historiqueSerialized, true),"code" => 200], Response::HTTP_OK);
 
