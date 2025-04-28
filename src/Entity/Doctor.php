@@ -17,56 +17,67 @@ class Doctor
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
     #[Groups(["data_select","doctor:read","meeting:read", "consultation:read","treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read","HistoriqueMedical:read","patient:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read",
+    "HistoriqueMedical:read","patient:read", "hospitaladmin:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
     #[Groups(["data_select","doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read",
+    "hospital:read", "hospitaladmin:read"])]
     private ?User $user = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $medLisenceNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
+    "affiliation:read", "agenda:read", "availability:read", 
+    "dossier_medicale:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $speciality = null;
 
     #[ORM\Column(type: "integer", nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?int $experience = null;
 
     #[ORM\Column(type: "date", nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?\DateTimeInterface $serviceStartingDate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $diplome = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $other = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $cni = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $medicalLisenceCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", "availability:read", "hospital:read"])]
+    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $cv = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class)]
     #[ORM\JoinColumn(name: "service_id", referencedColumnName: "id", nullable: true, onDelete: "CASCADE")]
     #[Groups(["doctor:read", "meeting:read", "consultation:read", "treatment:read", "examination:read",
-    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read"])]
+    "affiliation:read", "agenda:read", "availability:read", "dossier_medicale:read", "hospital:read", "hospitaladmin:read"])]
     private ?Service $service = null;
 
     #[ORM\Column(nullable: true)]

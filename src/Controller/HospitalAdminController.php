@@ -116,6 +116,8 @@ class HospitalAdminController extends AbstractController
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
     
+            $data["password"] = $data["password"] ?? 123456789;
+
             // Début de la transaction
             $this->entityManager->beginTransaction();
     
@@ -123,14 +125,15 @@ class HospitalAdminController extends AbstractController
             $user_data = [
                 'email' => $data['email'],
                 'password' => $data['password'],
-                'roles' => ["ROLE_ADMIN_HOSPITAL"],
+                'roles' => ["ROLE_ADMIN_HOPITAL"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'nickname' => $data['nickname'],
+                'nickname' => $data['nickname']?? null,
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
-                'address' => $data['address'],
+                'address' => $data['address']?? null,
+                'image' => $data['image']?? null,
             ];
             
             // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
@@ -143,7 +146,7 @@ class HospitalAdminController extends AbstractController
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'hospitaladmin:read']);
                 $response = json_decode($response, true);
                 // Retour d'une réponse JSON avec les données de l'HospitalAdmin et un code HTTP 201 (Créé)
-                return new JsonResponse(['data' => $response, 'code' => 201, 'message' => "Admin hopital créé avec succès"], Response::HTTP_CREATED);
+                return new JsonResponse(['data' => $response, 'code' => 200, 'message' => "Admin hopital créé avec succès"], Response::HTTP_CREATED);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur

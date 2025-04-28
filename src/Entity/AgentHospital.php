@@ -18,12 +18,12 @@ class AgentHospital
 
     #[ORM\ManyToOne(inversedBy: 'agentHospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["user:read"])]
+    #[Groups(["agenthospital:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'agentHospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["user:read"])] 
+    #[Groups(["agenthospital:read"])] 
     private ?Hospital $hospital = null;
 
     public function getId(): ?int

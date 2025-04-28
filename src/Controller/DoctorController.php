@@ -245,7 +245,7 @@ class DoctorController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse(['data' => $response, 'code' => 201,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response, 'code' => 200,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
                     }
 
                     // Erreur dans la persistance
@@ -266,7 +266,7 @@ class DoctorController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse(['data' => $response,'code' => 201,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response,'code' => 200,'message' => "Médecin créé avec succès"], Response::HTTP_CREATED);
                     }
 
                     // Erreur dans la persistance

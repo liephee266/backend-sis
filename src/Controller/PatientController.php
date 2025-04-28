@@ -133,6 +133,7 @@ class PatientController extends AbstractController
             return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    
     /**
      * Affichage d'un Patient par son ID
      *
@@ -235,7 +236,6 @@ class PatientController extends AbstractController
         //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         // }
     }
-    
 
     /**
      * Création d'un nouvel Patient

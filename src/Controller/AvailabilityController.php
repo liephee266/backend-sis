@@ -79,7 +79,6 @@ class AvailabilityController extends AbstractController
         } catch (\Throwable $th) {
             return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche de l'Availability" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 
     /**
@@ -151,7 +150,6 @@ class AvailabilityController extends AbstractController
         } catch (\Throwable $th) {
             return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Availability" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
     
     /**
@@ -178,6 +176,5 @@ class AvailabilityController extends AbstractController
         } catch (\Throwable $th) {
             return $this->json(['code' => 500, 'message' => "Erreur lors de la suppression de l'Availability" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        
     }
 }

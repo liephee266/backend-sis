@@ -21,15 +21,15 @@ class Disponibilite
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["disponibilite:read","meeting:read"])]
+    #[Groups(["disponibilite:read", "meeting:read"])]
     private ?\DateTimeInterface $date_j = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(["disponibilite:read","meeting:read"])]
+    #[ORM\Column(type: Types::TIME_MUTABLE, columnDefinition: "TIME")]
+    #[Groups(["disponibilite:read", "meeting:read"])]
     private ?\DateTimeInterface $heure_debut = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(["disponibilite:read","meeting:read"])]
+    
+    #[ORM\Column(type: Types::TIME_MUTABLE, columnDefinition: "TIME")]
+    #[Groups(["disponibilite:read", "meeting:read"])]
     private ?\DateTimeInterface $heure_fin = null;
 
     #[ORM\Column]
@@ -49,7 +49,7 @@ class Disponibilite
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
-    #[Groups(["disponibilite:read","meeting:read"])]
+    #[Groups(["disponibilite:read"])]
     private ?Meeting $meeting = null;
 
     public function __construct()
@@ -81,35 +81,52 @@ class Disponibilite
         return $this->date_j;
     }
 
-    public function setDateJ(\DateTimeInterface $date_j): static
+    public function setDateJ(\DateTimeInterface|string $date_j): static
     {
-        $this->date_j = $date_j;
-
+        if (is_string($date_j)) {
+            $this->date_j = new \DateTime($date_j);
+        } else {
+            $this->date_j = $date_j;
+        }
         return $this;
     }
 
-    public function getHeureDebut()
-    {
-        return $this->heure_debut->format('H:i:s');
-    }
+    public function getHeureDebut(): ?string
+{
+    return $this->heure_debut ? $this->heure_debut->format('H:i') : null;
+}
 
-    public function setHeureDebut(\DateTimeInterface $heure_debut): static
-    {
-        $this->heure_debut = $heure_debut;
-        return $this;
+public function setHeureDebut(\DateTimeInterface|string $heure_debut): static
+{
+    if (is_string($heure_debut)) {
+        $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut);
+        if ($this->heure_debut === false) {
+            throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+        }
+    } else {
+        // Si c'est un DateTimeInterface, on extrait juste l'heure
+        $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut->format('H:i'));
     }
+    return $this;
+}
 
-    public function getHeureFin()
-    {
-        return $this->heure_fin->format('H:i:s');
+public function getHeureFin(): ?string
+{
+    return $this->heure_fin ? $this->heure_fin->format('H:i') : null;
+}
+
+public function setHeureFin(\DateTimeInterface|string $heure_fin): static
+{
+    if (is_string($heure_fin)) {
+        $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin);
+        if ($this->heure_fin === false) {
+            throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+        }
+    } else {
+        $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin->format('H:i'));
     }
-
-    public function setHeureFin(\DateTimeInterface $heure_fin): static
-    {
-        $this->heure_fin = $heure_fin;
-
-        return $this;
-    }
+    return $this;
+}
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
