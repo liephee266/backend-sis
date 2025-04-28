@@ -53,7 +53,7 @@ class DoctorController extends AbstractController
     public function index(Request $request): Response
     {
 
-        // try {
+        try {
             //code...
             if (
                 !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
@@ -111,10 +111,10 @@ class DoctorController extends AbstractController
             $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
     
             return new JsonResponse($response, Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        //     //throw $th;
-        //     return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->json(['code' => 500, 'message' => "Une erreur s'est produite" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -143,44 +143,38 @@ class DoctorController extends AbstractController
                     "code" => 403
                 ], Response::HTTP_FORBIDDEN);
             }
-    
-            // Si c’est un admin hospitalier, vérifier que le docteur appartient bien à son hôpital
-            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-                $user = $this->toolkit->getUser($request);
-    
-                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
-                    ->findOneBy(['user' => $user]);
-    
-                if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
-                    return new JsonResponse([
-                        "message" => "Aucun hôpital trouvé pour cet admin.",
-                        "code" => 403
-                    ], Response::HTTP_FORBIDDEN);
-                }
-    
-                $hospital = $hospitalAdmin->getHospital();
-    
-                // Vérifier que le docteur appartient bien à cet hôpital
-                $hospital = $this->entityManager->getRepository(Hospital::class)
-                    ->findOneBy([
-                        'doctor' => $doctor,
-                    ]);
-    
-                if (!$hospital) {
-                    return new JsonResponse([
-                        "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
-                        "code" => 403
-                    ], Response::HTTP_FORBIDDEN);
-                }
+             // Vérification si l'utilisateur est un admin hospitalier
+        if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            $user = $this->toolkit->getUser($request);
+
+            $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
+                ->findOneBy(['user' => $user]);
+
+            if (!$hospitalAdmin || !$hospitalAdmin->getHospital()) {
+                return new JsonResponse([
+                    "message" => "Aucun hôpital associé à cet administrateur.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
             }
-    
-            // Sérialisation avec le groupe doctor:read
-            $doctorData = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
-    
-            return new JsonResponse([
-                "data" => json_decode($doctorData, true),
-                "code" => 200
-            ], Response::HTTP_OK);
+
+            $hospital = $hospitalAdmin->getHospital();
+
+            // Vérifier que le docteur appartient bien à cet hôpital (relation ManyToMany)
+            if (!$doctor->getHospital()->contains($hospital)) {
+                return new JsonResponse([
+                    "message" => "Ce médecin n'est pas rattaché à votre hôpital.",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+        // Sérialisation et réponse
+        $doctorData = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
+
+        return new JsonResponse([
+            "data" => json_decode($doctorData, true),
+            "code" => 200
+        ], Response::HTTP_OK);
         } catch (\Throwable $e) {
             //throw $th;
             return $this->json(['code' => 500, 'message' => "Une erreur est survenue" . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
