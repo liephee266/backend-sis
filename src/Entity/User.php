@@ -37,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "dossier_medicale:read","agenthospital:read",
@@ -48,7 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "dossier_medicale:read","agenthospital:read",
@@ -72,7 +72,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["data_select","user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read", 
@@ -87,7 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read","patient:read:restricted", 
@@ -95,7 +95,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "hospital:read", "dossier_medicale:read",
@@ -103,21 +103,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $tel = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "hospitaladmin:read", 
     "availability:read", "hospital:read","patient:read:restricted", "autorisation:read","agenthospital:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", 
     "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read",
     "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]

@@ -92,41 +92,41 @@ class Disponibilite
     }
 
     public function getHeureDebut(): ?string
-{
-    return $this->heure_debut ? $this->heure_debut->format('H:i') : null;
-}
-
-public function setHeureDebut(\DateTimeInterface|string $heure_debut): static
-{
-    if (is_string($heure_debut)) {
-        $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut);
-        if ($this->heure_debut === false) {
-            throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
-        }
-    } else {
-        // Si c'est un DateTimeInterface, on extrait juste l'heure
-        $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut->format('H:i'));
+    {
+        return $this->heure_debut ? $this->heure_debut->format('H:i') : null;
     }
-    return $this;
-}
 
-public function getHeureFin(): ?string
-{
-    return $this->heure_fin ? $this->heure_fin->format('H:i') : null;
-}
-
-public function setHeureFin(\DateTimeInterface|string $heure_fin): static
-{
-    if (is_string($heure_fin)) {
-        $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin);
-        if ($this->heure_fin === false) {
-            throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+    public function setHeureDebut(\DateTimeInterface|string $heure_debut): static
+    {
+        if (is_string($heure_debut)) {
+            $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut);
+            if ($this->heure_debut === false) {
+                throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+            }
+        } else {
+            // Si c'est un DateTimeInterface, on extrait juste l'heure
+            $this->heure_debut = \DateTime::createFromFormat('H:i', $heure_debut->format('H:i'));
         }
-    } else {
-        $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin->format('H:i'));
+        return $this;
     }
-    return $this;
-}
+
+    public function getHeureFin(): ?string
+    {
+        return $this->heure_fin ? $this->heure_fin->format('H:i') : null;
+    }
+
+    public function setHeureFin(\DateTimeInterface|string $heure_fin): static
+    {
+        if (is_string($heure_fin)) {
+            $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin);
+            if ($this->heure_fin === false) {
+                throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+            }
+        } else {
+            $this->heure_fin = \DateTime::createFromFormat('H:i', $heure_fin->format('H:i'));
+        }
+        return $this;
+    }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {

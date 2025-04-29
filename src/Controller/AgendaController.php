@@ -61,6 +61,12 @@ class AgendaController extends AbstractController
             return new JsonResponse(["data"=> $a, "code" => 200], Response::HTTP_OK);
         }elseif ($this->security->isGranted('ROLE_PATIENT')) {
             // Si l'utilisateur est un patient, on récupère son ID
+            $id_patient = $this->toolkit->getUser($request)->getId();
+            // On appelle la méthode getAgendaPatient avec les paramètres appropriés et id_doctor devient id_patient
+            $a = $this->toolkit->getAgendaPatient($monts_and_year, ['id_doctor'=> $id_patient,'id_hospital'=>$id_hospital] );
+            $agenda = $this->serializer->serialize($a, 'json', ['groups' => 'meeting:read']);
+            $agenda = json_decode($agenda, true);
+            return new JsonResponse(["data"=> $agenda, "code" => 200], Response::HTTP_OK);
             
         }else {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)

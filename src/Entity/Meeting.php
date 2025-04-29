@@ -24,9 +24,13 @@ class Meeting
     #[Groups(["meeting:read"])]
     private ?Doctor $doctor = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["meeting:read"])]
     private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(type: Types::TIME_MUTABLE, columnDefinition: "TIME")]
+    #[Groups(["meeting:read"])]
+    private ?\DateTimeInterface $heure = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     #[Groups(["meeting:read"])]
@@ -45,6 +49,7 @@ class Meeting
     private ?Patient $patient_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
+    #[Groups(["meeting:read"])]
     private ?State $state_id = null;
 
     /**
@@ -65,6 +70,10 @@ class Meeting
     #[ORM\Column(type: Types::DATE_MUTABLE,  nullable: true)]
     #[Groups(["meeting:read"])]
     private  $updated_at;
+
+    #[ORM\ManyToOne(inversedBy: 'meetings')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Hospital $hospital = null;
 
     public function __construct()
     {
@@ -97,9 +106,32 @@ class Meeting
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(\DateTimeInterface|string $date): static
     {
-        $this->date = $date;
+        if (is_string($date)) {
+            $this->date = new \DateTime($date);
+        } else {
+            $this->date = $date;
+        }
+        return $this;
+    }
+
+    public function getHeure(): ?string
+    {
+        return $this->heure ? $this->heure->format('H:i') : null;
+    }
+
+    public function setHeure(\DateTimeInterface|string $heure): static
+    {
+        if (is_string($heure)) {
+            $this->heure = \DateTime::createFromFormat('H:i', $heure);
+            if ($this->heure === false) {
+                throw new \InvalidArgumentException('Format d\'heure invalide. Utilisez HH:MM');
+            }
+        } else {
+            // Si c'est un DateTimeInterface, on extrait juste l'heure
+            $this->heure = \DateTime::createFromFormat('H:i', $heure->format('H:i'));
+        }
         return $this;
     }
 
@@ -221,6 +253,18 @@ class Meeting
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): static
+    {
+        $this->hospital = $hospital;
+
         return $this;
     }
 }

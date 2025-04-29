@@ -11,6 +11,7 @@ use App\Entity\User;
 use DateTimeImmutable;
 use Pagerfanta\Pagerfanta;
 use App\Entity\Disponibilite;
+use App\Entity\Meeting;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -524,6 +525,43 @@ class Toolkit
                         'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
                         'heure_debut' => $disponibilitie->getHeureDebut(),
                         'heure_fin' => $disponibilitie->getHeureFin(),
+                    ];
+                }
+            }
+            $n[$month] = $a;
+        }
+        return $n;
+    }
+
+    /**
+     * Récupère l'agenda d'un patient pour un mois donné.
+     * 
+     * @param array $months
+     * @param array $meetings
+     * @return object|null
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com>
+     */
+    public function getAgendaPatient(array $months, array $filtre)
+    {
+        $a = null;
+        $n = [];
+        foreach ($months['months'] as $key => $month) {
+            $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
+            foreach ($a as $key_a => $value) {
+                $meetings = $this->entityManager->getRepository(Meeting::class)->findBy([
+                    'date' => new DateTime($key_a),
+                    'patient_id' => $filtre['id_doctor'],
+                    'hospital' => $filtre['id_hospital']
+                ]);
+                foreach ($meetings as $key_d => $meeting) {
+                    $a[$key_a][] = [
+                        'id' => $meeting->getId(),
+                        'date' => $meeting->getDate()->format('Y-m-d'),
+                        'heure' => $meeting->getHeure(),
+                        'motif' => $meeting->getMotif(),
+                        'status_id' => $meeting->getStateId(),
+                        'doctor' => $meeting->getDoctor(),
                     ];
                 }
             }

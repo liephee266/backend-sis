@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AgentHospital;
 use App\Entity\Doctor;
 use App\Entity\Meeting;
 use App\Entity\Patient;
@@ -162,18 +163,20 @@ class MeetingController extends AbstractController
     public function create(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
-        // if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
-        //     // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-        //     return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
-        // }
+        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+
+            $user = $this->toolkit->getUser($request);
+            $agenthospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user])->getHospital()->getId();
 
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
 
-            // Conversion de la date en objet DateTime
-            $data["date"] = new \DateTime($data["date"]);
-
             $data['state_id'] = 1;
+
+            $data['hospital'] = $agenthospital;
 
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);
@@ -217,6 +220,7 @@ class MeetingController extends AbstractController
         if ($data["state_id"] == 3) {
             $data_update = [
                 "state_id" => $data["state_id"],
+                "heure" => $data["heure"],
                 "date" => $data["date"],
                 "id" => $data["id"],
             ];

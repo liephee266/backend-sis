@@ -14,11 +14,11 @@ class State
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["data_select","state:read", "message:read", "notification:read"])]
+    #[Groups(["data_select","state:read", "message:read", "notification:read", "meeting:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Groups(["data_select","state:read", "message:read", "notification:read"])]
+    #[Groups(["data_select","state:read", "message:read", "notification:read", "meeting:read"])]
     private ?string $name = null;
 
     /**

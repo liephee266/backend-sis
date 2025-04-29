@@ -29,7 +29,7 @@ class Doctor
     private ?User $user = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $medLisenceNumber = null;
 
@@ -40,37 +40,37 @@ class Doctor
     private ?string $speciality = null;
 
     #[ORM\Column(type: "integer", nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?int $experience = null;
 
     #[ORM\Column(type: "date", nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read",
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?\DateTimeInterface $serviceStartingDate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $diplome = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read", 
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $other = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read",
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $cni = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read",
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $medicalLisenceCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["doctor:read", "meeting:read", "consultation:read", "affiliation:read",
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read",
     "availability:read", "hospital:read", "hospitaladmin:read"])]
     private ?string $cv = null;
 
