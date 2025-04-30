@@ -169,7 +169,7 @@ class AgentHopitalController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 # code...
                 return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
@@ -187,7 +187,7 @@ class AgentHopitalController extends AbstractController
                 'roles' => ["ROLE_AGENT_HOSPITAL"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'username' => $data['username'],
+                'nickname' => $data['nickname'],
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
@@ -200,7 +200,7 @@ class AgentHopitalController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
                 $this->entityManager->commit();
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Agent hopital crée avec succès"], Response::HTTP_OK);
+                return new JsonResponse(['data' => json_decode($this->serializer->serialize($errors['entity'], 'json', ['groups' => 'agent_hospital:read']), true), "message" => "Agent hopital crée avec succès", "code" => 200], Response::HTTP_OK);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur

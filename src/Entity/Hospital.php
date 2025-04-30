@@ -17,43 +17,43 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "hospital:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $address = null;
     
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read","agent_hospital:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read', "hospitaladmin:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "agent_hospital:read"])]
     private ?string $registrationNumber = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]

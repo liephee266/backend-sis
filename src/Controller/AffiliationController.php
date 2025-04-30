@@ -106,7 +106,7 @@ class AffiliationController extends AbstractController
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Affiliation crée avec succès"], Response::HTTP_OK);
+                return new JsonResponse(['data' => json_decode($this->serializer->serialize($errors['entity'], 'json', ['groups' => 'affiliation:read']), true), "message" => "Affiliation crée avec succès", "code" => 200], Response::HTTP_OK);
             }
     
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
@@ -143,6 +143,8 @@ class AffiliationController extends AbstractController
             if (!empty($errors['entity'])) {
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
                 return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Affiliation modifié avec succès"], Response::HTTP_OK);
+                return new JsonResponse(json_decode($this->serializer->serialize($errors['entity'], 'json', ['groups' => 'affiliation:read']), true), Response::HTTP_CREATED);
+
             }
         
             // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
