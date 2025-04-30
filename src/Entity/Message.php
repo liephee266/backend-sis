@@ -14,44 +14,47 @@ class Message
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["data_select","message:read"])]
+    #[Groups(["data_select","message:read","conversation:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "sender", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?User $sender = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "receiver", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?User $receiver = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\ManyToOne(targetEntity: ContentMessage::class)]
     #[ORM\JoinColumn(name: "content_msg_id", referencedColumnName: "id", nullable: false)]
-    #[Groups(["data_select","message:read"])]
+    #[Groups(["data_select","message:read","conversation:read"])]
     private ?ContentMessage $contentMsg = null;
 
     #[ORM\ManyToOne(targetEntity: State::class)]
     #[ORM\JoinColumn(name: "state_id", referencedColumnName: "id", nullable: false)]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?State $state = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read","conversation:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["message:read"])]
+    #[Groups(["message:read",   "conversation:read"])]
     private ?\DateTimeInterface $updated_at = null;
+
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?Conversation $conversation = null;
 
        public function __construct()
     {
@@ -157,6 +160,18 @@ class Message
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getConversation(): ?Conversation
+    {
+        return $this->conversation;
+    }
+
+    public function setConversation(?Conversation $conversation): static
+    {
+        $this->conversation = $conversation;
+
         return $this;
     }
 }

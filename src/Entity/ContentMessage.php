@@ -16,19 +16,19 @@ class ContentMessage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["contentmessage:read", "message:read"])]
+    #[Groups(["content_message:read", "message:read", "conversation:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
-    #[Groups(["contentmessage:read", "message:read"])]
+    #[Groups(["content_message:read", "message:read", "conversation:read"])]
     private ?string $msg = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Groups(["contentmessage:read", "message:read"])]
+    #[Groups(["content_message:read", "message:read", "conversation:read"])]
     private ?string $type = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["contentmessage:read", "message:read"])]
+    #[Groups(["content_message:read", "message:read", "conversation:read"])]
     private ?string $path = null;
 
     /**

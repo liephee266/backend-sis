@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Conversation;
 use App\Entity\Message;
+use App\Entity\User;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
@@ -48,16 +50,32 @@ class MessageController extends AbstractController
     public function index(Request $request): Response
     {
         try {
-            // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
-            $filtre = [];
+            //recupération de l'utilisateur connecté
+            $user = $this->toolkit->getUser($request);
+             
+            // $messages = $this->entityManager->getRepository(Message::class)
+            //     ->createQueryBuilder('m')
+            //     ->where('m.sender = :user')
+            //     ->orWhere('m.receiver = :user')
+            //     ->setParameter('user', $user)
+            //     ->orderBy('m.date', 'DESC')
+            //     ->getQuery()
+            //     ->getResult();
+            $filtre = [
+                'sender' => $user->getId(),
+                'receiver' => $user->getId()
+            ];
+            
+        // Récupération des Messages avec pagination et filtre personnalisé
+            $response = $this->toolkit->getPagitionOption($request, 'Message', 'message:read', $filtre,'orWhere');
 
-            // Récupération des Messages avec pagination
-            $response = $this->toolkit->getPagitionOption($request, 'Message', 'message:read', $filtre);
-
-            // Retour d'une réponse JSON avec les Messages et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
+
         } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' =>'Erreur interne serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json([
+                'code' => 500,
+                'message' => 'Erreur interne serveur : ' . $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -70,18 +88,35 @@ class MessageController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'message_show', methods: ['GET'])]
-    public function show(Message $message): Response
+    public function show(Message $message, Request $request): Response
     {
         try {
-            // Sérialisation de l'entité Message en JSON avec le groupe de sérialisation 'Message:read'
-            $message = $this->serializer->serialize($message, 'json', ['groups' => 'message:read']);
-        
-            // Retour de la réponse JSON avec les données de l'Message et un code HTTP 200
-            return new JsonResponse(["data" => json_decode($message, true), "code" => 200], Response::HTTP_OK);
+           
+            $user = $this->toolkit->getUser($request);
+
+            // Vérifie que l'utilisateur connecté est bien le destinataire
+            if ($message->getReceiver() !== $user && $message->getSender() !== $user) {
+                return $this->json([
+                    'code' => 403,
+                    'message' => 'Vous n\'avez pas le droit d\'accéder à ce message.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $jsonMessage = $this->serializer->serialize($message, 'json', ['groups' => 'message:read']);
+
+            return new JsonResponse([
+                "data" => json_decode($jsonMessage, true),
+                "code" => 200
+            ], Response::HTTP_OK);
+
         } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' =>'Erreur interne serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json([
+                'code' => 500,
+                'message' => 'Erreur interne serveur : ' . $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * Création d'un nouvel Message
@@ -91,33 +126,67 @@ class MessageController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
+  
     #[Route('/', name: 'message_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try {
-            // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
 
-            $data["date"] = new \DateTime($data["date"]);
-            
-            // Appel à la méthode persistEntity pour insérer les données dans la base
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\Message", $data);
-
-            // Vérification des erreurs après la persistance des données
-            if (!empty($errors['entity'])) {
-                // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'message:read']);
-                $response = json_decode($response, true);
-                return $this->json(['data' => $response,'code' => 200, 'message' => "Message crée avec succès"], Response::HTTP_OK);
+            // 1. Obtenir l'utilisateur connecté
+            $sender = $this->toolkit->getUser($request);
+            if (!$sender) {
+                return $this->json(['error' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
             }
 
-            // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Message"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            // 2. Vérification des champs requis
+            if (!isset($data["receiver"], $data["contentMsg"], $data["date"])) {
+                return $this->json(['error' => 'Champs manquants'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // 3. Formatage de la date
+            $data["date"] = new \DateTime($data["date"]);
+
+            // 4. Récupérer le receiver
+            $receiver = $this->entityManager->getRepository(User::class)->find($data["receiver"]);
+            if (!$receiver) {
+                return $this->json(['error' => 'Destinataire introuvable'], Response::HTTP_NOT_FOUND);
+            }
+
+            // 5. Vérifier si une conversation existe déjà entre les deux utilisateurs
+            $conversation = $this->entityManager->getRepository(Conversation::class)
+                ->findOneBetweenUsers($sender, $receiver);
+
+            // 6. Si non, créer une nouvelle conversation
+            if (!$conversation) {
+                $conversation = new Conversation();
+                $conversation->setParticipants([$sender->getId(), $receiver->getId()]);
+                $this->entityManager->persist($conversation);
+                $this->entityManager->flush();
+            }
+
+            // 7. Associer la conversation et l'expéditeur au message
+            $data['conversation'] = $conversation->getId();
+            $data['sender'] = $sender->getId(); // Important pour que persistEntity ait l'expéditeur
+
+            // 8. Persister le message
+            $errors = $this->genericEntityManager->persistEntity(Message::class, $data);
+
+            if (!empty($errors['entity'])) {
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'message:read']);
+                return $this->json([
+                    'data' => json_decode($response, true),
+                    'code' => 200,
+                    'message' => "Message créé avec succès"
+                ], Response::HTTP_OK);
+            }
+
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la création du message"], Response::HTTP_INTERNAL_SERVER_ERROR);
+
         } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' =>'Erreur interne serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['code' => 500, 'message' => 'Erreur interne serveur : ' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
     /**
      * Modification d'un Message par son ID
      *
