@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\SuperAdmin;
 use App\Services\Toolkit;
+use App\Entity\SuperAdmin;
+use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/superadmins')]
+#[ApiEntity(\App\Entity\SuperAdmin::class)]
 class SuperAdminController extends AbstractController
 {
     private $toolkit;

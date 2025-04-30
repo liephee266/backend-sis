@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Availability;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Availability;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/availabilitys')]
+#[ApiEntity(\App\Entity\Availability::class)]
 class AvailabilityController extends AbstractController
 {
     private $toolkit;

@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\User;
 use App\Entity\Urgency;
 use App\Entity\Urgentist;
 use App\Services\Toolkit;
 use App\Entity\HospitalAdmin;
+use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -23,6 +25,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/urgentists')]
+#[ApiEntity(\App\Entity\User::class)]
 class UrgentistController extends AbstractController
 {
     private $toolkit;

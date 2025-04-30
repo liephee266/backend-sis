@@ -2,19 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\Consultation;
-use App\Entity\HistoriqueMedical;
 use App\Entity\Patient;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Consultation;
+use App\Entity\HistoriqueMedical;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des HistoriqueMedical
@@ -22,6 +23,7 @@ use Symfony\Bundle\SecurityBundle\Security;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/historiqueMedicals')]
+#[ApiEntity(\App\Entity\HistoriqueMedical::class)]
 class HistoriqueMedicalController extends AbstractController
 {
     private $toolkit;

@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Affiliation;
 use App\Services\Toolkit;
+use App\Entity\Affiliation;
+use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/affiliations')]
+#[ApiEntity(\App\Entity\Affiliation::class)]
 class AffiliationController extends AbstractController
 {
     private $toolkit;
@@ -93,6 +95,7 @@ class AffiliationController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
+    
     #[Route('/', name: 'affiliation_create', methods: ['POST'])]
     public function create(Request $request): Response
     {

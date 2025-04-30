@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Notification;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Notification;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/notifications')]
+#[ApiEntity(\App\Entity\Notification::class)]
 class NotificationController extends AbstractController
 {
     private $toolkit;

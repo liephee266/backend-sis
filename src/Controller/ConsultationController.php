@@ -2,22 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\AgentHospital;
-use App\Entity\Consultation;
 use App\Entity\Doctor;
-use App\Entity\HistoriqueMedical;
-use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Consultation;
+use App\Entity\AgentHospital;
+use App\Entity\HospitalAdmin;
+use App\Entity\HistoriqueMedical;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Consultation
@@ -25,6 +26,7 @@ use Symfony\Bundle\SecurityBundle\Security;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/consultations')]
+#[ApiEntity(\App\Entity\Consultation::class)]
 class ConsultationController extends AbstractController
 {
     private $toolkit;

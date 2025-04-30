@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\AgentHospital;
 use App\Entity\Doctor;
 use App\Entity\Meeting;
 use App\Entity\Patient;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\AgentHospital;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,7 +18,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Meeting
@@ -24,6 +25,8 @@ use Symfony\Bundle\SecurityBundle\Security;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/meetings')]
+#[ApiEntity(\App\Entity\Meeting::class)]
+
 class MeetingController extends AbstractController
 {
     private $toolkit;
