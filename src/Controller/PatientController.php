@@ -219,13 +219,12 @@ class PatientController extends AbstractController
                     ], Response::HTTP_FORBIDDEN);
                 }
             }
-            $patient = $dossierMedicale->getPatientId(); // ✅ Récupération du patient à partir du dossier
-            $serializationGroup = $this->toolkit->getPatientSerializationGroup($user, $dossierMedicale);
-
-            // $patient= $dossierMedicale->getAntecedentsMedicaux();
-            // dd($patient);
+            
+            // $patient = $dossierMedicale->getPatientId(); // ✅ Récupération du patient à partir du dossier
+            // $serializationGroup = $this->toolkit->getPatientSerializationGroup($user, $dossierMedicale);
+            // dd($serializationGroup);
         
-            $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => $serializationGroup]);
+            $patientJson = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
 
             return new JsonResponse([
                 'data' => json_decode($patientJson, true),

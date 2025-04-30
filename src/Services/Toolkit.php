@@ -199,7 +199,7 @@ class Toolkit
      * 
      * @return array Les données paginées et les informations de pagination.
      */
-    public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = []) : array
+    public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
     {
         $context = (new ObjectNormalizerContextBuilder())
             ->withGroups($groupe_attribute)
@@ -224,20 +224,20 @@ class Toolkit
                     // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
                     if (in_array($key, ['roles', 'tags', 'permissions'])) {
                         // On utilise JSON_CONTAINS (MySQL uniquement)
-                        $queryBuilder->andWhere("JSON_CONTAINS(u.$key, :$key) = 1");
+                        $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
                         // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
                         // Doctrine attend une chaîne JSON ici
                         $queryBuilder->setParameter($key, json_encode($value));
                     } else {
                         // Cas classique avec IN
-                        $queryBuilder->andWhere($queryBuilder->expr()->in("u.$key", ":$key"));
+                        $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
                         $queryBuilder->setParameter($key, $value);
                     }
                 } elseif ($key === 'created_at' || $key === 'updated_at') {
-                    $queryBuilder->andWhere("u.$key >= :$key");
+                    $queryBuilder->$operator("u.$key >= :$key");
                     $queryBuilder->setParameter($key, $value);
                 } else {
-                    $queryBuilder->andWhere("u.$key = :$key");
+                    $queryBuilder->$operator("u.$key = :$key");
                     $queryBuilder->setParameter($key, $value);
                 }
             }

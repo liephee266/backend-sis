@@ -25,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read",
     "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
-    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read"])]
+    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read",])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -155,6 +155,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "availability:read", "hospital:read","autorisation:read", "agenthospital:read"])]
     private ?string $gender = null;
 
+    /**
+     * @var Collection<int, Conversations>
+     */
+    #[ORM\OneToMany(targetEntity: Conversation::class, mappedBy: 'receiver')]
+    private Collection $conversations;
+
+    /**
+     * @var Collection<int, Conversations>
+     */
+    #[ORM\OneToMany(targetEntity: Conversation::class, mappedBy: 'sender')]
+    private Collection $conversationsSender;
+
 
     public function __construct()
     {
@@ -164,6 +176,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
+        $this->conversations = new ArrayCollection();
+        $this->conversationsSender = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -453,4 +467,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Conversations>
+     */
+    public function getConversations(): Collection
+    {
+        return $this->conversations;
+    }
+
 }
