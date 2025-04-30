@@ -2,14 +2,17 @@
 
 namespace App\Command;
 
+use ReflectionClass;
+use Symfony\Component\Finder\Finder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Finder\Finder;
-use ReflectionClass;
+
+#[AsCommand(name: 'app:generate-api-config', description: 'Génère automatiquement un fichier JSON de configuration des endpoints API')]
 
 class GenerateApiConfigCommand extends Command
 {
