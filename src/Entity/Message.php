@@ -54,7 +54,6 @@ class Message
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
-    #[Groups(["message:read"])]   
     private ?Conversation $conversation = null;
 
        public function __construct()

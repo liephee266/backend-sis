@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Conversation;
 use App\Entity\Message;
+use App\Entity\User;
 use App\Services\Toolkit;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -122,48 +124,67 @@ class MessageController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
+  
     #[Route('/', name: 'message_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try {
-            // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
 
-            $data["date"] = new \DateTime($data["date"]);
-
-            $receiver = $data["receiver"] ?? null;
-
-            $contentMsg = $data["contentMsg"] ?? null;
-
-
-        if (!$receiver || !$contentMsg) {
-            return $this->json(['error' => 'Invalid data'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $receiver = $this->entityManager->getRepository('App\Entity\User')->find($receiver);
-
-        if (!$receiver) {
-            return $this->json(['error' => 'receiver not found'], Response::HTTP_NOT_FOUND);
-        }
-            
-            // Appel à la méthode persistEntity pour insérer les données dans la base
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\Message", $data);
-
-            // Vérification des erreurs après la persistance des données
-            if (!empty($errors['entity'])) {
-                // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
-                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'message:read']);
-                $response = json_decode($response, true);
-                return $this->json(['data' => $response,'code' => 200, 'message' => "Message crée avec succès"], Response::HTTP_OK);
+            // 1. Obtenir l'utilisateur connecté
+            $sender = $this->toolkit->getUser($request);
+            if (!$sender) {
+                return $this->json(['error' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
             }
 
-            // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Message"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            // 2. Vérification des champs requis
+            if (!isset($data["receiver"], $data["contentMsg"], $data["date"])) {
+                return $this->json(['error' => 'Champs manquants'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // 3. Formatage de la date
+            $data["date"] = new \DateTime($data["date"]);
+
+            // 4. Récupérer le receiver
+            $receiver = $this->entityManager->getRepository(User::class)->find($data["receiver"]);
+            if (!$receiver) {
+                return $this->json(['error' => 'Destinataire introuvable'], Response::HTTP_NOT_FOUND);
+            }
+
+            // 5. Vérifier si une conversation existe déjà entre les deux utilisateurs
+            $conversation = $this->entityManager->getRepository(Conversation::class)
+                ->findOneBetweenUsers($sender, $receiver);
+
+            // 6. Si non, créer une nouvelle conversation
+            if (!$conversation) {
+                $conversation = new Conversation();
+                $conversation->setParticipants([$sender->getId(), $receiver->getId()]);
+                $this->entityManager->persist($conversation);
+                $this->entityManager->flush();
+            }
+
+            // 7. Associer la conversation et l'expéditeur au message
+            $data['conversation'] = $conversation->getId();
+            $data['sender'] = $sender->getId(); // Important pour que persistEntity ait l'expéditeur
+
+            // 8. Persister le message
+            $errors = $this->genericEntityManager->persistEntity(Message::class, $data);
+
+            if (!empty($errors['entity'])) {
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'message:read']);
+                return $this->json([
+                    'data' => json_decode($response, true),
+                    'code' => 200,
+                    'message' => "Message créé avec succès"
+                ], Response::HTTP_OK);
+            }
+
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la création du message"], Response::HTTP_INTERNAL_SERVER_ERROR);
+
         } catch (\Throwable $th) {
-            return $this->json(['code' => 500, 'message' =>'Erreur interne serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['code' => 500, 'message' => 'Erreur interne serveur : ' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
     /**
      * Modification d'un Message par son ID
      *

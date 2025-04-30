@@ -17,16 +17,21 @@ class ConversationRepository extends ServiceEntityRepository
         parent::__construct($registry, Conversation::class);
     }
 
-    public function findOneBetweenUsers(User $user1, User $user2): ?Conversation
+   public function findOneBetweenUsers(User $user1, User $user2): ?Conversation
     {
-        return $this->createQueryBuilder('c')
-            ->where('(c.sender = :u1 AND c.receiver = :u2) OR (c.sender = :u2 AND c.receiver = :u1)')
-            ->setParameter('u1', $user1)
-            ->setParameter('u2', $user2)
+        $conversations = $this->createQueryBuilder('c')
             ->getQuery()
-            ->getOneOrNullResult();
-    }
+            ->getResult();
 
+        foreach ($conversations as $conversation) {
+            $participants = $conversation->getParticipants() ?? [];
+            if (in_array($user1->getId(), $participants) && in_array($user2->getId(), $participants)) {
+                return $conversation;
+            }
+        }
+
+        return null;
+    }
 
 //    /**
 //     * @return Conversations[] Returns an array of Conversations objects
