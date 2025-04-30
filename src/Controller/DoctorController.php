@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Doctor;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
 use App\Entity\HospitalAdmin;
 use App\Entity\DoctorHospital;
 use App\Services\GenericEntityManager;
@@ -24,6 +25,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/doctors')]
+#[ApiEntity(\App\Entity\Doctor::class)]
+
 class DoctorController extends AbstractController
 {
     private $toolkit;

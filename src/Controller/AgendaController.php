@@ -3,19 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Agenda;
-use App\Entity\Disponibilite;
 use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Agenda
@@ -23,6 +24,7 @@ use Symfony\Bundle\SecurityBundle\Security;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/agendas')]
+#[ApiEntity(\App\Entity\Agenda::class)]
 class AgendaController extends AbstractController
 {
     private $toolkit;

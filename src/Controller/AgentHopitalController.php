@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\AgentHospital;
-use App\Entity\HospitalAdmin;
 use App\Entity\User;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\AgentHospital;
+use App\Entity\HospitalAdmin;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -22,6 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/agenthopitals')]
+#[ApiEntity(\App\Entity\AgentHospital::class)]
 class AgentHopitalController extends AbstractController
 {
     private $toolkit;

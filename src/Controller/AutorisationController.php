@@ -7,6 +7,7 @@ use App\Entity\Doctor;
 use App\Entity\Status;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
 use App\Entity\Autorisation;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,6 +25,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Michel MIYALOU<michelmiyalou0@gmail.com>
  */
 #[Route('/api/v1/autorisation', name: 'autorisation_')]
+#[ApiEntity(\App\Entity\Autorisation::class)]
 class AutorisationController extends AbstractController
 {
     private $toolkit;

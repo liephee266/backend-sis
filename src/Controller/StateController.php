@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\State;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/states')]
+#[ApiEntity(\App\Entity\State::class)]
 class StateController extends AbstractController
 {
     private $toolkit;

@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Disponibilite;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
+use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/disponibilite', name: 'disponibilite')]
+#[ApiEntity(\App\Entity\Disponibilite::class)]
+
 class DisponibiliteController extends AbstractController
 {
     private $toolkit;

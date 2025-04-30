@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Urgency;
 use App\Services\Toolkit;
+use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -20,6 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
 #[Route('/api/v1/urgencys')]
+#[ApiEntity(\App\Entity\Urgency::class)]
 class UrgencyController extends AbstractController
 {
     private $toolkit;
