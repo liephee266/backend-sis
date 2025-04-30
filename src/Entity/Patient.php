@@ -15,17 +15,20 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "tutor_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read","patient:read:"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read","patient:read:"])]
     private ?User $tutor = null;
     
 
@@ -49,30 +52,36 @@ class Patient
     private Collection $dossierMedicales;
 
     #[ORM\Column]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?int $poids = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?string $groupe_sanguins = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?string $taille = null;
 
     #[ORM\Column]
     private ?bool $signaler_comme_decedé = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?string $nom_urgence = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?string $adresse_urgence = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read"])]
     private ?string $numero_urgence = null;
 
     /**

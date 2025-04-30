@@ -21,26 +21,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "examination:read", "notification:read", "hospitaladmin:read",
+    "examination:read", "notification:read", "hospitaladmin:read","urgentist:read",
     "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
     "dossier_medicale:read", "autorisation:read", "hospitaladmin:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read","urgentist:read",
     "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
     "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private ?string $email = null;
 
@@ -51,7 +51,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
     "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
     private array $roles = [];
 
@@ -64,60 +64,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
     "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read",])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["data_select","user:read", "doctor:read", "patient:read",
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "dossier_medicale:read", 
+    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
     "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgentist:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $nickname;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read","patient:read:restricted", 
+    "availability:read","patient:read:restricted", "urgentist:read", 
     "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?string $address = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "hospital:read", "dossier_medicale:read",
+    "availability:read", "hospital:read", "dossier_medicale:read", "urgentist:read",
     "patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?string $tel = null;
 
     #[ORM\Column(type: "datetime")]
     #[Groups(["user:read", "doctor:read", "patient:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read", "hospitaladmin:read", 
+    "hospitaladmin:read", "affiliation:read", "hospitaladmin:read", "urgentist:read", 
     "availability:read", "hospital:read","patient:read:restricted", "autorisation:read","agenthospital:read"])]
     private $created_at;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "urgentist:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read", 
     "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?\DateTimeInterface $birth = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read","urgentist:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "hospitaladmin:read", "affiliation:read", "availability:read", "hospital:read",
     "dossier_medicale:read","patient:read:restricted", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
@@ -142,18 +142,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $autorisations;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read","hospitaladmin:read", 
+    "hospitaladmin:read", "affiliation:read","hospitaladmin:read","urgentist:read", 
     "availability:read", "hospital:read","autorisation:read", "agenthospital:read"])]
     private ?string $image = null;
 
     #[ORM\Column(length: 1)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
-    "hospitaladmin:read", "affiliation:read","hospitaladmin:read", 
+    "hospitaladmin:read", "affiliation:read","hospitaladmin:read","urgentist:read", 
     "availability:read", "hospital:read","autorisation:read", "agenthospital:read"])]
     private ?string $gender = null;
+
+    /**
+     * @var Collection<int, Urgentist>
+     */
+    #[ORM\OneToMany(targetEntity: Urgentist::class, mappedBy: 'user')]
+    private Collection $urgentists;
 
 
     public function __construct()
@@ -164,6 +170,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
+        $this->urgentists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -371,36 +378,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Urgency>
-     */
-    public function getUrgencies(): Collection
-    {
-        return $this->urgencies;
-    }
-
-    public function addUrgency(Urgency $urgency): static
-    {
-        if (!$this->urgencies->contains($urgency)) {
-            $this->urgencies->add($urgency);
-            $urgency->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUrgency(Urgency $urgency): static
-    {
-        if ($this->urgencies->removeElement($urgency)) {
-            // set the owning side to null (unless already changed)
-            if ($urgency->getUser() === $this) {
-                $urgency->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Autorisation>
      */
     public function getAutorisations(): Collection
@@ -450,6 +427,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImage(?string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Urgentist>
+     */
+    public function getUrgentists(): Collection
+    {
+        return $this->urgentists;
+    }
+
+    public function addUrgentist(Urgentist $urgentist): static
+    {
+        if (!$this->urgentists->contains($urgentist)) {
+            $this->urgentists->add($urgentist);
+            $urgentist->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUrgentist(Urgentist $urgentist): static
+    {
+        if ($this->urgentists->removeElement($urgentist)) {
+            // set the owning side to null (unless already changed)
+            if ($urgentist->getUser() === $this) {
+                $urgentist->setUser(null);
+            }
+        }
 
         return $this;
     }

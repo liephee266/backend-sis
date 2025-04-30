@@ -2,18 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\Urgency;
 use App\Entity\User;
+use App\Entity\Urgency;
+use App\Entity\Urgentist;
 use App\Services\Toolkit;
+use App\Entity\HospitalAdmin;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Controleur pour la gestion des Urgentist
@@ -77,7 +79,7 @@ class UrgentistController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'urgentist_show', methods: ['GET'])]
-    public function show(User $urgentist): Response
+    public function show(Urgentist $urgentist): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
@@ -107,16 +109,18 @@ class UrgentistController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
-                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
-                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            // Vérification des autorisations
+            if (
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL') &&
+                !$this->security->isGranted('ROLE_ADMIN_SIS')
+            ) {
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
             }
-            // Décodage du contenu JSON envoyé dans la requête
+
+            // Récupération et décodage des données
             $data = json_decode($request->getContent(), true);
-            
-            // Début de la transaction
-            $this->entityManager->beginTransaction();
+
+            $data["password"] = $data["password"] ?? 123456789;
 
             // Création du User
             $user_data = [
@@ -125,30 +129,64 @@ class UrgentistController extends AbstractController
                 'roles' => ["ROLE_URGENTIST"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'nickname' => $data['nickname'],
+                'nickname' => $data['nickname']?? null,
                 'tel' => $data['tel'],
                 'birth' => new \DateTime($data['birth']),
                 'gender' => $data['gender'],
-                'address' => $data['address'],
-                'image' => $data['image'],
+                'address' => $data['address']?? null,
+                'image' => $data['image']?? null,
             ];
-            
-            // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
-            $errors = $this->genericEntityManager->persistUser($user_data, $data);
 
-            // Vérification des erreurs après la persistance des données
-            if (!empty($errors['entity'])) {
-                // Si l'entité a been correctement enregistrée, retour d'une réponse JSON avec успех
-                $this->entityManager->commit();
-                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgentist:read']);
-                $response = json_decode($response, true);
-                return $this->json(['data' => $response,'code' => 200, 'message' => "Urgentist crée avec succès"], Response::HTTP_OK);
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
+
+                $data["hospital_id"] = $hospitalAdmin;
+
+                if (!$data) {
+                    return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
+                }
+
+                // Démarrer la transaction
+                $this->entityManager->beginTransaction();
+
+                    $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Urgentist", $user_data, $data);
+
+                    // Vérification si l'entité a été créée sans erreur
+                    if (!empty($errors['entity'])) {
+                        $this->entityManager->commit();
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgentist:read']);
+                        $response = json_decode($response, true);
+                        return new JsonResponse(['data' => $response, 'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_CREATED);
+                    }
+
+                    // Erreur dans la persistance
+                    return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'urgentist"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }else {
+
+                if (!$data) {
+                    return $this->json(['code' => 400, 'message' => "Données invalides ou manquantes"], Response::HTTP_BAD_REQUEST);
+                }
+
+                // Démarrer la transaction
+                $this->entityManager->beginTransaction();
+
+                    $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Urgentit", $user_data, $data);
+
+                    // Vérification si l'entité a été créée sans erreur
+                    if (!empty($errors['entity'])) {
+                        $this->entityManager->commit();
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgentist:read']);
+                        $response = json_decode($response, true);
+                        return new JsonResponse(['data' => $response,'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_CREATED);
+                    }
+
+                    // Erreur dans la persistance
+                    return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'urgentist"], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            // Si une erreur se produit, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'Urgentist"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $th) {
-            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+            return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -177,7 +215,7 @@ class UrgentistController extends AbstractController
             $data['id'] = $id;
         
             // Appel à la méthode persistEntity pour mettre à jour l'entité Urgentist dans la base de données
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\User", $data, true);
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgentist", $data, true);
         
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
@@ -204,7 +242,7 @@ class UrgentistController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'urgentist_delete', methods: ['DELETE'])]
-    public function delete(User $urgentist, EntityManagerInterface $entityManager): Response
+    public function delete(Urgentist $urgentist, EntityManagerInterface $entityManager): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté

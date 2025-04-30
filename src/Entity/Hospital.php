@@ -17,46 +17,46 @@ class Hospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",
-    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read",
+    #[Groups(["data_select","hospital:read", "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
+    "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read","urgency:read",
     "doctor:read","HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",'urgentist:read',"urgency:read",
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read",
     "hospital:read", "doctor:read", "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["data_select","hospital:read","urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read","urgency:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read","urgency:read"])]
     private ?string $address = null;
     
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(["hospital:read", "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read","urgency:read"])]
     private ?string $clientServiceTel = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read","urgency:read"])]
     private ?string $email = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "agenthospital:read", "disponibilite:read","urgency:read"])]
     private ?string $webSite = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -80,11 +80,11 @@ class Hospital
     private ?string $rccm = null;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read","urgentist:read"])]
     private ?bool $hasUrgency = false;
 
     #[ORM\Column(type: "boolean", nullable: false)]
-    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read"])]
+    #[Groups(['hospital:read', "urgency:read", "hospitaladmin:read",'urgentist:read'])]
     private ?bool $hasAmbulance = false;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
@@ -96,9 +96,9 @@ class Hospital
     private ?string $accreditationCertificate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",
+    #[Groups(['hospital:read', "urgency:read", "consultation:read", "treatment:read",'urgentist:read',
     "examination:read", "hospitaladmin:read", "affiliation:read", "agenda:read", "dossier_medicale:read", "doctor:read",
-    "HistoriqueMedical:read", "patient:read", "user:read", "disponibilite:read"])]
+    "HistoriqueMedical:read", "patient:read", "user:read", "disponibilite:read","urgency:read"])]
     private ?string $logo = null;
 
     #[ORM\Column(nullable: true)]
@@ -132,23 +132,23 @@ class Hospital
     private Collection $agentHospitals;
 
     #[ORM\Column]
-    #[Groups(['hospital:read', "hospitaladmin:read", "disponibilite:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "disponibilite:read",'urgentist:read'])]
     private ?int $infirmiers = null;
 
     #[ORM\Column]
-    #[Groups(['hospital:read', "hospitaladmin:read", "disponibilite:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "disponibilite:read",'urgentist:read'])]
     private ?int $autres_personnel_de_sante = null;
 
     #[ORM\ManyToOne(inversedBy: 'hospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "agenthospital:read", "disponibilite:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "agenthospital:read", "disponibilite:read",'urgentist:read'])]
     private ?TypeHopital $type_hospital = null;
 
     /**
      * @var Collection<int, Service>
      */
     #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'hospital')]
-    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "agenthospital:read", "disponibilite:read"])]
+    #[Groups(['hospital:read', "hospitaladmin:read", "doctor:read", "agenthospital:read", "disponibilite:read",'urgentist:read'])]
     private Collection $services;
 
     /**
@@ -169,6 +169,18 @@ class Hospital
     #[ORM\OneToMany(targetEntity: Meeting::class, mappedBy: 'hospital')]
     private Collection $meetings;
 
+    /**
+     * @var Collection<int, Urgentist>
+     */
+    #[ORM\OneToMany(targetEntity: Urgentist::class, mappedBy: 'hospital_id')]
+    private Collection $urgentists;
+
+    /**
+     * @var Collection<int, Urgency>
+     */
+    #[ORM\OneToMany(targetEntity: Urgency::class, mappedBy: 'tranfere_a')]
+    private Collection $urgencies;
+
     public function __construct()
     {
         $this->agentHospitals = new ArrayCollection();
@@ -179,6 +191,8 @@ class Hospital
         $this->disponibilites = new ArrayCollection();
         $this->historiqueMedicals = new ArrayCollection();
         $this->meetings = new ArrayCollection();
+        $this->urgentists = new ArrayCollection();
+        $this->urgencies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -581,6 +595,66 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($meeting->getHospital() === $this) {
                 $meeting->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Urgentist>
+     */
+    public function getUrgentists(): Collection
+    {
+        return $this->urgentists;
+    }
+
+    public function addUrgentist(Urgentist $urgentist): static
+    {
+        if (!$this->urgentists->contains($urgentist)) {
+            $this->urgentists->add($urgentist);
+            $urgentist->setHospitalId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUrgentist(Urgentist $urgentist): static
+    {
+        if ($this->urgentists->removeElement($urgentist)) {
+            // set the owning side to null (unless already changed)
+            if ($urgentist->getHospitalId() === $this) {
+                $urgentist->setHospitalId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Urgency>
+     */
+    public function getUrgencies(): Collection
+    {
+        return $this->urgencies;
+    }
+
+    public function addUrgency(Urgency $urgency): static
+    {
+        if (!$this->urgencies->contains($urgency)) {
+            $this->urgencies->add($urgency);
+            $urgency->setTranfereA($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUrgency(Urgency $urgency): static
+    {
+        if ($this->urgencies->removeElement($urgency)) {
+            // set the owning side to null (unless already changed)
+            if ($urgency->getTranfereA() === $this) {
+                $urgency->setTranfereA(null);
             }
         }
 

@@ -17,13 +17,13 @@ class Service
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read", "hospital:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read","urgentist:read",
     "meeting:read", "disponibilite:read", "hospitaladmin:read", "user:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: false)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read", 
+    "examination:read", "affiliation:read", "availability:read","urgentist:read", 
     "hospital:read","meeting:read", "disponibilite:read", "hospitaladmin:read", "user:read"])]
     private string $name;
 
@@ -42,19 +42,19 @@ class Service
     
     #[ORM\Column(length: 255)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read", 
+    "examination:read", "affiliation:read", "availability:read", "urgentist:read", 
     "hospital:read","meeting:read", "disponibilite:read", "hospitaladmin:read", "agenthospital:read"])]
     private ?string $uuid = null;
     
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read", 
+    "examination:read", "affiliation:read", "availability:read", "urgentist:read", 
     "hospital:read","meeting:read", "disponibilite:read", "hospitaladmin:read", "agenthospital:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["data_select","service:read", "doctor:read", "meeting:read", "consultation:read", "treatment:read",
-    "examination:read", "affiliation:read", "availability:read", "hospital:read",
+    "examination:read", "affiliation:read", "availability:read", "hospital:read","urgentist:read",
     "meeting:read", "disponibilite:read", "hospitaladmin:read", "agenthospital:read"])]
     private ?\DateTimeInterface $updated_at = null;
 

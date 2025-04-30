@@ -22,21 +22,7 @@ class Urgency
     #[Groups(["data_select","urgency:read"])]
     private ?Patient $patient = null;
 
-    #[ORM\ManyToOne(targetEntity: Hospital::class)]
-    #[ORM\JoinColumn(name: "id_hospital", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["data_select","urgency:read"])]
-    private ?Hospital $hospital = null;
-
-    #[ORM\ManyToOne(inversedBy: 'urgencies')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["data_select","urgency:read"])]
-    private ?User $user = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(["data_select","urgency:read"])]
-    private ?string $description = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(["data_select","urgency:read"])]
     private ?\DateTimeInterface $created_at = null;
 
@@ -47,6 +33,14 @@ class Urgency
     #[ORM\Column(length: 255)]
     #[Groups(["data_select","urgency:read"])]
     private ?string $uuid = null;
+
+    #[ORM\ManyToOne(inversedBy: 'urgencies')]
+    #[Groups(["data_select","urgency:read"])]
+    private ?Hospital $tranfere_a = null;
+
+    #[ORM\ManyToOne(inversedBy: 'urgencies')]
+    #[Groups(["data_select","urgency:read"])]
+    private ?Urgentist $prise_en_charge = null;
 
     public function __construct()
     {
@@ -72,42 +66,6 @@ class Urgency
         return $this;
     }
 
-    public function getHospital(): ?Hospital
-    {
-        return $this->hospital;
-    }
-
-    public function setHospital(?Hospital $hospital): self
-    {
-        $this->hospital = $hospital;
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-   
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
@@ -138,6 +96,30 @@ class Urgency
     public function setUuid(String $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getTranfereA(): ?Hospital
+    {
+        return $this->tranfere_a;
+    }
+
+    public function setTranfereA(?Hospital $tranfere_a): static
+    {
+        $this->tranfere_a = $tranfere_a;
+
+        return $this;
+    }
+
+    public function getPriseEnCharge(): ?Urgentist
+    {
+        return $this->prise_en_charge;
+    }
+
+    public function setPriseEnCharge(?Urgentist $prise_en_charge): static
+    {
+        $this->prise_en_charge = $prise_en_charge;
 
         return $this;
     }

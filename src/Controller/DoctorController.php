@@ -62,9 +62,9 @@ class DoctorController extends AbstractController
                 !$this->security->isGranted('ROLE_DOCTOR') &&
                 !$this->security->isGranted('ROLE_PATIENT') &&
                 !$this->security->isGranted('ROLE_SUPER_ADMIN')
-               )
+            )
         
-             {
+            {
                 return new JsonResponse([
                     "message" => "Vous n'avez pas accès à cette ressource",
                     "code" => 403
@@ -99,7 +99,7 @@ class DoctorController extends AbstractController
                     ->getQuery()
                     ->getResult();
 
-                   
+                
                 $doctorIds = array_map(function ($doctor) {
                     return $doctor->getId();
                 }, $doctors);
