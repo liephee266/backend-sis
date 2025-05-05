@@ -42,6 +42,10 @@ class Urgency
     #[Groups(["data_select","urgency:read"])]
     private ?Urgentist $prise_en_charge = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["data_select","urgency:read"])]
+    private ?string $status = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -120,6 +124,18 @@ class Urgency
     public function setPriseEnCharge(?Urgentist $prise_en_charge): static
     {
         $this->prise_en_charge = $prise_en_charge;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }
