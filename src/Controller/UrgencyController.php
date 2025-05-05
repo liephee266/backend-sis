@@ -56,10 +56,10 @@ class UrgencyController extends AbstractController
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
-            $filtre = [];
-
-            // Récupération des Urgencys avec pagination
+            // Filtre fixe pour le statut "pris en charge"
+            $filtre = ['status' => 'Prise en charge'];
+            
+            // Récupération des urgences avec le statut "pris en charge"
             $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
 
             // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
@@ -117,6 +117,7 @@ class UrgencyController extends AbstractController
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             $data['patient'] = $patient;
+            $data['status'] = 'Init';
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data);
@@ -169,6 +170,7 @@ class UrgencyController extends AbstractController
             // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
             $data['id'] = $id;
             $data['prise_en_charge'] = $urgentist;
+            $data['status'] = 'Prise en charge';
 
             // Ajout la date de modification
             $data['updated_at'] = new \DateTimeImmutable('now');
