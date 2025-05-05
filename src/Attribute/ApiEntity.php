@@ -9,5 +9,6 @@ class ApiEntity
 {
     public function __construct(
         public string $entity
+        
     ) {}
 }
