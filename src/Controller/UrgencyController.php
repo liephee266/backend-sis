@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Urgency;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Services\NotificationManager;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -29,14 +30,22 @@ class UrgencyController extends AbstractController
     private $serializer;
     private $genericEntityManager;
     private $security;
+    private $notification;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
+    public function __construct(
+                GenericEntityManager $genericEntityManager, 
+                EntityManagerInterface $entityManager, 
+                SerializerInterface $serializer, 
+                Toolkit $toolkit, 
+                Security $security,
+                NotificationManager $notification)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
         $this->security = $security;
+        $this->notification = $notification;
     }
 
     /**
@@ -112,11 +121,11 @@ class UrgencyController extends AbstractController
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            $patient = $this->toolkit->getUser($request)->getId();
+            $patient = $this->toolkit->getUser($request);
             
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
-            $data['patient'] = $patient;
+            $data['patient'] = $patient->getId();
             $data['status'] = 'Init';
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
@@ -127,6 +136,13 @@ class UrgencyController extends AbstractController
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
                 $response = json_decode($response, true);
+
+                // Lorsqu'une urgence est créée
+                $this->notification->createNotification(
+                    'Nouvelle urgence',
+                    'Une urgence a été déclarée par le patient :'.$patient->getFirstName().' et nécessite une prise en charge'
+                );
+
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Urgency envoyée avec succès"], Response::HTTP_OK);
             }
 
@@ -156,9 +172,9 @@ class UrgencyController extends AbstractController
             }
             $data = json_decode($request->getContent(), true);
         
-            $user = $this->toolkit->getUser($request)->getId();
+            $user = $this->toolkit->getUser($request);
 
-            $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')->findOneBy(['user' => $user])->getId();
+            $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')->findOneBy(['user' => $user->getId()]);
 
             /// On récupère l'urgence à modifier
             $urgence = $this->entityManager->getRepository(Urgency::class)->find($id);
@@ -169,7 +185,7 @@ class UrgencyController extends AbstractController
 
             // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
             $data['id'] = $id;
-            $data['prise_en_charge'] = $urgentist;
+            $data['prise_en_charge'] = $urgentist->getId();
             $data['status'] = 'Prise en charge';
 
             // Ajout la date de modification
@@ -183,6 +199,13 @@ class UrgencyController extends AbstractController
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
                 $response = json_decode($response, true);
+
+                // Lorsqu'une urgence est traitée
+                $this->notification->createNotification(
+                    'Urgence traitée',
+                    'L\'urgence :'.$urgence->getId().' a été prise en charge par l\'urgentiste :'.$user->getFirstName()
+                );
+
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Urgency modifié avec succès"], Response::HTTP_OK);
             }
         

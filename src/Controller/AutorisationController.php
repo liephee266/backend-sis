@@ -10,6 +10,7 @@ use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Entity\Autorisation;
 use App\Services\GenericEntityManager;
+use App\Services\NotificationManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,15 +34,23 @@ class AutorisationController extends AbstractController
     private $serializer;
     private $genericEntityManager;
     private $security;
+    private $notificationManager;
 
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
+    public function __construct(
+        GenericEntityManager $genericEntityManager, 
+        EntityManagerInterface $entityManager, 
+        SerializerInterface $serializer, 
+        Toolkit $toolkit, 
+        Security $security,
+        NotificationManager $notificationManager)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
         $this->security = $security;
+        $this->notificationManager = $notificationManager;
     }
 
     /**
@@ -160,6 +169,21 @@ class AutorisationController extends AbstractController
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'autorisation:read']);
                 $response = json_decode($response, true);
+
+                if ($entity_name === "dossier_medicale") {
+                    // Envoi de la notification
+                    $this->notificationManager->createNotification(
+                        "Nouvelle autorisation",
+                        "Une demande d'autorisation a été soumise pour un dossier médical."
+                    );
+                }else {
+                    // Envoi de la notification
+                    $this->notificationManager->createNotification(
+                        "Nouvelle autorisation",
+                        "Une demande d'affiliation a été soumise pour un hôpital."
+                    );
+                }
+
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Autorisation soumis avec succès"], Response::HTTP_OK);
             }
 
@@ -189,6 +213,14 @@ class AutorisationController extends AbstractController
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
 
+            $user = $this->toolkit->getUser($request);
+            // On récupère l'urgence à modifier
+            $autorisation = $this->entityManager->getRepository(Autorisation::class)->find($id);
+
+            if (!$autorisation) {
+                return $this->json(['code' => 404, 'message' => "Autorisation introuvable"], Response::HTTP_NOT_FOUND);
+            }
+
             // Récupération de l'ID de l'autorisation
             $autorisation_type = $this->entityManager->getRepository(Autorisation::class)->findOneBy(['id' => $id])->getTypeDemande();
 
@@ -214,6 +246,13 @@ class AutorisationController extends AbstractController
                         // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'autorisation:read']);
                         $response = json_decode($response, true);
+
+                        // Envoi de la notification
+                        $this->notificationManager->createNotification(
+                            "Validation d'une demande",
+                            "L'autorisation: ".$autorisation->getId(). "pour un dossier medicale a été traité par: ".$user->getFirstName().'.'
+                        );
+
                         return $this->json(['data' => $response,'code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
                     }
                 
@@ -261,6 +300,12 @@ class AutorisationController extends AbstractController
                         $this->entityManager->persist($hospital); // ou $doctor selon la relation
                         $this->entityManager->flush();
 
+                        // Envoi de la notification
+                        $this->notificationManager->createNotification(
+                            "Validation d'une affiliation",
+                            "L'autorisation: ".$autorisation->getId(). "pour une affiliation a été traité par: ".$user->getFirstName().'.'
+                        );
+
                         return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifiée avec succès"], Response::HTTP_OK);
                 }else {
                     // Mise à jour de l'autorisation
@@ -275,6 +320,13 @@ class AutorisationController extends AbstractController
                     // Vérification si l'entité a été mise à jour sans erreur
                     if (!empty($errors['entity'])) {
                         // Si l'entité a été mise à jour, retour d'une réponse JSON avec un do$autorisation de succès
+
+                        // Envoi de la notification
+                        $this->notificationManager->createNotification(
+                            "Validation d'une affiliation",
+                            "L'autorisation: ".$autorisation->getId(). "pour une affiliation a été traité par: ".$user->getFirstName().'.'
+                        );
+
                         return $this->json(['data' => $errors['entity'],'code' => 200, 'message' => "Autorisation modifié avec succès"], Response::HTTP_OK);
                     }
                 

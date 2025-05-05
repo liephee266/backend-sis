@@ -25,28 +25,9 @@ class Notification
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['notification:read'])]
     private ?NotificationType $notification_type_id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['notification:read'])]
-    private ?State $state_id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['notification:read'])]
-    private ?User $sender_id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['notification:read'])]
-    private ?User $receiver_id = null;
-
-    #[ORM\Column(type: "datetime")]
-    #[Groups(['notification:read'])]
-    private $date_exp;
 
     #[ORM\Column(length: 255)]
     #[Groups(["notification:read"])]
@@ -58,12 +39,17 @@ class Notification
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $updated_at = null;
 
-       public function __construct()
+    #[ORM\Column(length: 255)]
+    private ?string $title = null;
+
+    #[ORM\Column]
+    private ?bool $isRead = false;
+
+    public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->date_exp = new \DateTime();
     }
 
     public function getId(): ?int
@@ -90,65 +76,6 @@ class Notification
     public function setNotificationTypeId(?NotificationType $notification_type_id): static
     {
         $this->notification_type_id = $notification_type_id;
-
-        return $this;
-    }
-
-    public function getStateId(): ?State
-    {
-        return $this->state_id;
-    }
-
-    public function setStateId(?State $state_id): static
-    {
-        $this->state_id = $state_id;
-
-        return $this;
-    }
-
-    public function getSenderId(): ?User
-    {
-        return $this->sender_id;
-    }
-
-    public function setSenderId(?User $sender_id): static
-    {
-        $this->sender_id = $sender_id;
-
-        return $this;
-    }
-
-    public function getReceiverId(): ?User
-    {
-        return $this->receiver_id;
-    }
-
-    public function setReceiverId(?User $receiver_id): static
-    {
-        $this->receiver_id = $receiver_id;
-
-        return $this;
-    }
-
-    public function getDateExp(): ?\DateTimeInterface
-    {
-        return $this->date_exp;
-    }
-
-    public function setDateExp(\DateTimeInterface $date_exp): self
-    {
-        $this->date_exp = $date_exp;
-        return $this;
-    }
-
-    public function getState(): ?State
-    {
-        return $this->state_id;
-    }
-
-    public function setState(?State $state_id): static
-    {
-        $this->state_id = $state_id;
 
         return $this;
     }
@@ -196,6 +123,30 @@ class Notification
     public function setUpdatedAt(\DateTimeInterface $updated_at): static
     {
         $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function isRead(): ?bool
+    {
+        return $this->isRead;
+    }
+
+    public function setIsRead(bool $isRead): static
+    {
+        $this->isRead = $isRead;
 
         return $this;
     }

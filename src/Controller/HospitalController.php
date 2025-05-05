@@ -6,7 +6,9 @@ use App\Entity\Status;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Entity\Notification;
 use App\Services\GenericEntityManager;
+use App\Services\NotificationManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,14 +32,22 @@ class HospitalController extends AbstractController
     private $serializer;
     private $genericEntityManager;
     private $security;
+    private $notificationManager;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit, Security $security)
+    public function __construct(
+        GenericEntityManager $genericEntityManager, 
+        EntityManagerInterface $entityManager, 
+        SerializerInterface $serializer, 
+        Toolkit $toolkit, 
+        Security $security,
+        NotificationManager $notificationManager)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
         $this->security = $security;
+        $this->notificationManager = $notificationManager;
     }
 
     /**
@@ -147,6 +157,12 @@ class HospitalController extends AbstractController
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'hospital:read']);
                 $response = json_decode($response, true);
+
+                // Lorsqu'un hopital est créé
+                $this->notificationManager->createNotification(
+                    'Un nouvel Hopital a été créé',
+                    'Un nouvel Hopital a été créé en attente de validation.',
+                );
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital crée avec succès"], Response::HTTP_OK);
             }
 
@@ -175,6 +191,8 @@ class HospitalController extends AbstractController
             if (!$this->isGranted('ROLE_ADMIN_SIS') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
                 return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
             }
+
+            $user = $this->toolkit->getUser($request);
 
             // Récupération de l'hôpital existant dans la base de données
             $hospital = $this->entityManager->getRepository(Hospital::class)->find($id);
@@ -210,6 +228,13 @@ class HospitalController extends AbstractController
                 // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'hospital:read']);
                 $response = json_decode($response, true);
+
+
+                // Lorsqu'un hopital est traité
+                $this->notificationManager->createNotification(
+                    "La validation d'un hopital a été traité",
+                    'Un Hopital nommé:'.$hospital->getName(). 'été traité par '.$this->$user->getFirstName().'.',
+                );
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
             }
         

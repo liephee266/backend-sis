@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Conversation;
-use App\Entity\Message;
 use App\Entity\User;
+use App\Entity\Message;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Entity\Conversation;
+use App\Services\NotificationManager;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,13 +30,20 @@ class MessageController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $notificationManager;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(
+        GenericEntityManager $genericEntityManager, 
+        EntityManagerInterface $entityManager, 
+        SerializerInterface $serializer, 
+        Toolkit $toolkit,
+        NotificationManager $notificationManager)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->notificationManager = $notificationManager;
     }
 
     /**
@@ -52,7 +60,7 @@ class MessageController extends AbstractController
         try {
             //recupération de l'utilisateur connecté
             $user = $this->toolkit->getUser($request);
-             
+
             // $messages = $this->entityManager->getRepository(Message::class)
             //     ->createQueryBuilder('m')
             //     ->where('m.sender = :user')
@@ -91,7 +99,7 @@ class MessageController extends AbstractController
     public function show(Message $message, Request $request): Response
     {
         try {
-           
+
             $user = $this->toolkit->getUser($request);
 
             // Vérifie que l'utilisateur connecté est bien le destinataire
@@ -126,7 +134,7 @@ class MessageController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-  
+
     #[Route('/', name: 'message_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
@@ -174,6 +182,13 @@ class MessageController extends AbstractController
 
             if (!empty($errors['entity'])) {
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'message:read']);
+
+                // Envoi de la notification
+                $this->notificationManager->createNotification(
+                    "Nouveau message",
+                    "Vous avez reçu un nouveau message de " . $sender->getFirstName()
+                );
+
                 return $this->json([
                     'data' => json_decode($response, true),
                     'code' => 200,
