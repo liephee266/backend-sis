@@ -118,7 +118,7 @@ class HospitalAdminController extends AbstractController
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
     
-            $data["password"] = $data["password"] ?? 123456789;
+            $data["password"] = $data["password"] ?? "123456789";
 
             // Début de la transaction
             $this->entityManager->beginTransaction();
@@ -127,7 +127,7 @@ class HospitalAdminController extends AbstractController
             $user_data = [
                 'email' => $data['email'],
                 'password' => $data['password'],
-                'roles' => ["ROLE_ADMIN_HOPITAL"],
+                'roles' => ["ROLE_ADMIN_HOSPITAL"],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'nickname' => $data['nickname']?? null,

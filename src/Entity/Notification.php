@@ -25,7 +25,7 @@ class Notification
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['notification:read'])]
     private ?NotificationType $notification_type_id = null;
 
