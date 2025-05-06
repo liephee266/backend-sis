@@ -8,7 +8,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
-#[ORM\Table(name: "message")]
 class Message
 {
     #[ORM\Id]

@@ -56,11 +56,9 @@ class HospitalController extends AbstractController
             $filtre = [];
 
             // Si l'utilisateur n'est pas super admin, on filtre par statut "validated"
-            if (!$this->isGranted('ROLE_SUPER_ADMIN') && !$this->isGranted('ROLE_ADMIN_SIS')) {
+            if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
                 // On filtre par statut "validated" pour les utilisateurs normaux
                 $filtre = ['status' => 2];
-
-                return $this->json(['code' => 403, 'message' => "hopital non trouvé"], Response::HTTP_FORBIDDEN);
             }
 
 
@@ -93,10 +91,10 @@ class HospitalController extends AbstractController
             }
 
             // Vérification si l'utilisateur a les droits nécessaires (par exemple, super admin ou validation)
-            if (!$this->isGranted('ROLE_SUPER_ADMIN') && $hospital->getStatus()->getName() !== 'validated') {
+            if (!$this->isGranted('ROLE_SUPER_ADMIN') && $hospital->getStatus()->getName() !== 'Validated') {
                 return new JsonResponse(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
             }
-    
+
             // Sérialisation de l'entité Hospital en JSON avec le groupe de sérialisation 'hospital:read'
             $hospitalData = $this->serializer->serialize($hospital, 'json', ['groups' => 'hospital:read']);
 
