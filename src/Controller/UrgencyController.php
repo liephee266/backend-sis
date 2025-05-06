@@ -40,7 +40,7 @@ class UrgencyController extends AbstractController
     }
 
     /**
-     * Liste des Urgency
+     * Liste de toutes les urgences(prise en charge et init)
      *
      * @param Request $request
      * @return Response
@@ -49,6 +49,36 @@ class UrgencyController extends AbstractController
      */
     #[Route('/', name: 'urgency_index', methods: ['GET'])]
     public function index(Request $request): Response
+    {
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_URGENTIST') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
+            $filtre = [];
+            
+            // Récupération des urgences avec le statut "pris en charge"
+            $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
+
+            // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
+            return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Liste des urgence prise en charge
+     *
+     * @param Request $request
+     * @return Response
+     * 
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
+     */
+    #[Route('/historique-urgence', name: 'historique_index', methods: ['GET'])]
+    public function list(Request $request): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
