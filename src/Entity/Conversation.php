@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\ConversationRepository;
-use App\Repository\ConversationsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,11 +22,10 @@ class Conversation
     #[Groups(["conversation:read", "message:read"])]
     private ?string $uuid = null;
 
-
     /**
-     * @var Collection<int, message>
+     * @var Collection<int, Message>
      */
-    #[ORM\OneToMany(targetEntity: message::class, mappedBy: 'conversation')]
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'conversation')]
     #[Groups(["conversation:read", "message:read"])]
     private Collection $messages;
 
@@ -46,7 +44,6 @@ class Conversation
         return $this->id;
     }
 
-   
     public function getUuid(): ?string
     {
         return $this->uuid;
@@ -58,7 +55,6 @@ class Conversation
         return $this;
     }
 
-   
     /**
      * @return Collection<int, message>
      */
@@ -67,7 +63,7 @@ class Conversation
         return $this->messages;
     }
 
-    public function addMessage(message $message): static
+    public function addMessage(Message $message): static
     {
         if (!$this->messages->contains($message)) {
             $this->messages->add($message);
@@ -77,7 +73,7 @@ class Conversation
         return $this;
     }
 
-    public function removeMessage(message $message): static
+    public function removeMessage(Message $message): static
     {
         if ($this->messages->removeElement($message)) {
             // set the owning side to null (unless already changed)
