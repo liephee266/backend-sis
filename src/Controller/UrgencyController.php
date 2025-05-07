@@ -14,11 +14,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Hospital;
 
 /**
  * Controleur pour la gestion des Urgency
  * 
- * @author  Orphée Lié <lieloumloum@gmail.com>
+ * @author  Michel Miyalou <michelmiyalou0@gmail.com>
  */
 #[Route('/api/v1/urgencys')]
 #[ApiEntity(\App\Entity\Urgency::class)]
@@ -45,7 +46,7 @@ class UrgencyController extends AbstractController
      * @param Request $request
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
      */
     #[Route('/', name: 'urgency_index', methods: ['GET'])]
     public function index(Request $request): Response
@@ -60,6 +61,85 @@ class UrgencyController extends AbstractController
             $filtre = [];
             
             // Récupération des urgences avec le statut "pris en charge"
+            $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
+
+            // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
+            return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Liste de tous les Hopitaux avec un service d'urgence
+     *
+     * @param Request $request
+     * @return Response
+     * 
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
+     */
+    #[Route('/hospital', name: 'urgency_hospital_index', methods: ['GET'])]
+    public function hospital(Request $request): Response
+    {
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_URGENTIST') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
+            // Récupération des hôpitaux avec critères
+            $filtre = [
+                'hasUrgency' => true,
+                'status' => 2
+            ];
+            
+            // Récupération des urgences avec le statut "pris en charge"
+            $response = $this->toolkit->getPagitionOption($request, 'Hospital', 'hospital:read', $filtre);
+
+            // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
+            return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Liste des urgences prise en charge par un urgentist
+     *
+     * @param Request $request
+     * @return Response
+     * 
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
+     */
+    #[Route('/mes-urgence', name: 'my_urgency_index', methods: ['GET'])]
+    public function my_urgence(Request $request): Response
+    {
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_URGENTIST'))  {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
+            // Récupération de l'utilisateur connecté
+            $user = $this->toolkit->getUser($request)->getId();
+            
+            // Récupération de l'urgentiste associé à l'utilisateur
+            $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')
+                ->findOneBy(['user' => $user]);
+                
+            if (!$urgentist) {
+                return new JsonResponse(['code' => 404, 'message' => "Urgentiste non trouvé"], Response::HTTP_NOT_FOUND);
+            }
+
+            // Construction du filtre
+            $filtre = [
+                'prise_en_charge' => $urgentist->getId(),
+                'status' => 'PRISE EN CHARGE' 
+            ];
+            
+            // Récupération paginée
             $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
 
             // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
@@ -87,7 +167,7 @@ class UrgencyController extends AbstractController
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
             // Filtre fixe pour le statut "pris en charge"
-            $filtre = ['status' => 'Prise en charge'];
+            $filtre = ['status' => 'PRISE EN CHARGE'];
             
             // Récupération des urgences avec le statut "pris en charge"
             $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
@@ -105,7 +185,7 @@ class UrgencyController extends AbstractController
      * @param Urgency $Urgency
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
      */
     #[Route('/{id}', name: 'urgency_show', methods: ['GET'])]
     public function show(Urgency $urgency): Response
@@ -127,12 +207,12 @@ class UrgencyController extends AbstractController
     }
 
     /**
-     * Création d'un nouvel Urgency
+     * Création d'une nouvelle Urgence
      *
      * @param Request $request
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
      */
     #[Route('/', name: 'urgency_create', methods: ['POST'])]
     public function create(Request $request): Response
@@ -147,7 +227,7 @@ class UrgencyController extends AbstractController
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             $data['patient'] = $patient;
-            $data['status'] = 'Init';
+            $data['status'] = 'INIT';
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data);
@@ -168,69 +248,91 @@ class UrgencyController extends AbstractController
     }
 
     /**
-     * Modification d'un Urgency par son ID
+     * Modification d'une Urgence par son ID
      *
      * @param Request $request
      * @param int $id
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
      */
-    #[Route('/{id}', name: 'urgency_update', methods: ['PUT'])]
-    public function update(Request $request,  $id): Response
+    #[Route('/{name}/{id}', name: 'urgency_update', methods: ['PUT'])]
+    public function update(Request $request, string $name, int $id): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_URGENTIST'))  {
-                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            // Vérification des permissions
+            if (!$this->security->isGranted('ROLE_URGENTIST')) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            $data = json_decode($request->getContent(), true);
-        
+
+            // Récupération de l'utilisateur et de l'urgentiste
             $user = $this->toolkit->getUser($request)->getId();
+            $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')->findOneBy(['user' => $user]);
+            
+            if (!$urgentist) {
+                return $this->json(['code' => 404, 'message' => "Urgentiste introuvable"], Response::HTTP_NOT_FOUND);
+            }
 
-            $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')->findOneBy(['user' => $user])->getId();
-
-            /// On récupère l'urgence à modifier
+            // Récupération de l'urgence
             $urgence = $this->entityManager->getRepository(Urgency::class)->find($id);
-
             if (!$urgence) {
                 return $this->json(['code' => 404, 'message' => "Urgence introuvable"], Response::HTTP_NOT_FOUND);
             }
 
-            // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
+            $data = json_decode($request->getContent(), true);
             $data['id'] = $id;
-            $data['prise_en_charge'] = $urgentist;
-            $data['status'] = 'Prise en charge';
+            // Traitement différent selon la valeur de $name
+            switch ($name) {
+                case 'prendre-en-charge':
+                    // Traitement pour la prise en charge
+                    $data['prise_en_charge'] = $urgentist->getId();
+                    $data['status'] = 'PRISE EN CHARGE';
+                    $data['transfere_a'] = $urgentist->getHospitalId();
+                    $data['updated_at'] = new \DateTimeImmutable('now');
+                    
+                    $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data, true);
+                    
+                    if (!empty($errors['entity'])) {
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
+                        $response = json_decode($response, true);
+                        return $this->json(['data' => $response, 'code' => 200, 'message' => "Urgence prise en charge avec succès"], Response::HTTP_OK);
+                    }
+                    break;
+                    
+                case 'transferer':
 
-            // Ajout la date de modification
-            $data['updated_at'] = new \DateTimeImmutable('now');
-
-            // Appel à la méthode persistEntity pour mettre à jour l'entité Urgency dans la base de données
-            $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data, true);
-        
-            // Vérification si l'entité a été mise à jour sans erreur
-            if (!empty($errors['entity'])) {
-                // Si l'entité a été mise à jour, retour d'une réponse JSON avec un message de succès
-                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
-                $response = json_decode($response, true);
-                return $this->json(['data' => $response,'code' => 200, 'message' => "Urgence transferée avec succès"], Response::HTTP_OK);
+                    $data['status'] = 'TRANSFERER';
+                    $data['updated_at'] = new \DateTimeImmutable('now');
+                    
+                    $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data, true);
+                    
+                    if (!empty($errors['entity'])) {
+                        $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
+                        $response = json_decode($response, true);
+                        return $this->json(['data' => $response, 'code' => 200, 'message' => "Urgence transférée avec succès"], Response::HTTP_OK);
+                    }
+                    break;
+                    
+                default:
+                    return new JsonResponse(['message' => 'Action non reconnue', 'code' => 404], Response::HTTP_NOT_FOUND);
             }
-        
-            // Si une erreur se produit lors de la mise à jour, retour d'une réponse JSON avec une erreur
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'Urgency"], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            // Si une erreur s'est produite lors de la mise à jour
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification de l'urgence"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            
         } catch (\Throwable $th) {
-            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(["message" => 'Erreur interne du serveur: ' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
     /**
-     * Suppression d'un Urgency par son ID
+     * Suppression d'une Urgence par son ID
      * 
      * @param Urgency $Urgency
      * @param EntityManagerInterface $entityManager
      * @return Response
      * 
-     * @author  Orphée Lié <lieloumloum@gmail.com>
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
      */
     #[Route('/{id}', name: 'urgency_delete', methods: ['DELETE'])]
     public function delete(Urgency $urgency, EntityManagerInterface $entityManager): Response
