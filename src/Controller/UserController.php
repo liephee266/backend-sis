@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Services\GenericEntityManager;
+use App\Services\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,7 +93,7 @@ class UserController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/', name: 'user_create', methods: ['POST'])]
-    public function create(Request $request): Response
+    public function create(Request $request, MailerService $mailerService): Response
     {
         try {
             // Décodage du contenu JSON envoyé dans la requête
@@ -104,6 +105,10 @@ class UserController extends AbstractController
 
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
+
+                 $user = $errors['entity'];
+                // Envoi de l'email de bienvenue
+                $mailerService->sendWelcomeEmail($user->getEmail(), $user->getLastName());
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'user:read']);
                 $response = json_decode($response, true);

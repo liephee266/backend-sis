@@ -1,8 +1,68 @@
-{% extends 'email/email_base.html.twig' %}
-
-{% block title %}Bienvenue{% endblock %}
-
-{% block content %}
-    <h2>Bonjour {{ name }} !</h2>
-    <p>Merci de vous être inscrit.</p>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue dans notre application !</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #0044cc;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #0044cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0033aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Bienvenue, {{ name }} !</h1>
+        </div>
+        <div class="content">
+            <p>Merci de vous être inscrit(e) sur notre application. Nous sommes ravis de vous accueillir parmi nous !</p>
+            <p>Pour finaliser votre inscription, veuillez cliquer sur le bouton ci-dessous :</p>
+            <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+        </div>
+        <div class="footer">
+            <p>Vous avez reçu cet e-mail car vous vous êtes inscrit(e) sur notre plateforme. Si vous n'êtes pas l'auteur de cette demande, veuillez ignorer cet e-mail.</p>
+        </div>
+    </div>
+</body>
+</html>
