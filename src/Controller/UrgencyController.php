@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Doctor;
 use App\Entity\Urgency;
+use App\Entity\Hospital;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Services\NotificationManager;
@@ -15,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Entity\Hospital;
 
 /**
  * Controleur pour la gestion des Urgency
@@ -153,6 +154,54 @@ class UrgencyController extends AbstractController
 
             // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
             return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Lister des urgences transférées à un hôpital par rapport au docteur et à l'admin hospitalier 
+     *
+     * @param Request $request
+     * @return Response
+     * 
+     * @author  Michel Miyalou <michelmiyalou0@gmail.com>
+     */
+    #[Route('/my-hospital-urgence', name: 'my_urgence_index', methods: ['GET'])]
+    public function my_hospital_urgence(Request $request): Response
+    {
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL'))  {
+                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
+            // Récupération de l'utilisateur connecté
+            $user = $this->toolkit->getUser($request)->getId();
+            
+                if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                    // Si l'utilisateur a le rôle ROLE_ADMIN_HOSPITAL, on récupère l'hôpital associé à l'utilisateur
+                    $hospital = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital();
+                }else {
+                    // Sinon, on récupère le doctor associé à l'utilisateur
+                    $hospital = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user])->getHospital()[0];
+                    if ($hospital->isEmpty()) {
+                        return new JsonResponse(['code' => 404, 'message' => "Vous n'êtes associé à aucun hopital"], Response::HTTP_NOT_FOUND);
+                    }
+                }
+
+                // Construction du filtre
+                $filtre = [
+                    'tranfere_a' => $hospital,
+                    'status' => 'TRANSFERER' 
+                ];
+                
+                // Récupération paginée
+                $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
+
+                // Retour d'une réponse JSON avec les Urgencys et un statut HTTP 200 (OK)
+                return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
             return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
