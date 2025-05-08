@@ -160,23 +160,53 @@ class GenerateApiConfigCommand extends Command
         } catch (\Exception) {}
         return null;
     }
-
     private function getEntityFields(string $entityClass): array
     {
         try {
             $meta = $this->em->getClassMetadata($entityClass);
             $fields = [];
+
+            $refClass = new \ReflectionClass($entityClass);
+
             foreach ($meta->fieldMappings as $name => $info) {
                 if ($meta->isIdentifier($name)) continue;
-                $fields[] = ['name' => $name,'type' => $info['type'],'required' => !($info['nullable'] ?? false),'description' => $this->getFieldDescription($entityClass, $name)];
-            }
-            foreach ($meta->associationMappings as $name => $mapping) {
-                $fields[] = ['name' => $name,'type' => 'relation','relation_type' => $mapping['type'],'target_entity' => $mapping['targetEntity'],'required' => !($mapping['joinColumns'][0]['nullable'] ?? true),'description' => $this->getFieldDescription($entityClass, $name)];
-            }
-            return $fields;
-        } catch (\Exception) { return []; }
-    }
 
+                $property = $refClass->hasProperty($name) ? $refClass->getProperty($name) : null;
+                $attr = $property?->getAttributes(\App\Attribute\ApiField::class)[0] ?? null;
+                $auto = $attr ? $attr->newInstance()->auto : false;
+
+                if ($auto) continue; // ← On exclut les champs automatiques
+
+                $fields[] = [
+                    'name' => $name,
+                    'type' => $info['type'],
+                    'required' => !($info['nullable'] ?? false),
+                    'description' => $this->getFieldDescription($entityClass, $name)
+                ];
+            }
+
+            foreach ($meta->associationMappings as $name => $mapping) {
+                $property = $refClass->hasProperty($name) ? $refClass->getProperty($name) : null;
+                $attr = $property?->getAttributes(\App\Attribute\ApiField::class)[0] ?? null;
+                $auto = $attr ? $attr->newInstance()->auto : false;
+
+                if ($auto) continue; // ← Pareil ici
+
+                $fields[] = [
+                    'name' => $name,
+                    'type' => 'relation',
+                    'relation_type' => $mapping['type'],
+                    'target_entity' => $mapping['targetEntity'],
+                    'required' => !($mapping['joinColumns'][0]['nullable'] ?? true),
+                    'description' => $this->getFieldDescription($entityClass, $name)
+                ];
+            }
+
+            return $fields;
+        } catch (\Exception) {
+            return [];
+        }
+    }
     private function getFieldDescription(string $entityClass, string $fieldName): string
     {
         try {

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Attribute\ApiField;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -32,10 +33,12 @@ class Affiliation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["affiliation:read"])]
+    #[ApiField(auto: true)]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(["affiliation:read"])]
+    #[ApiField(auto: true)]
     private ?\DateTimeInterface $updated_at = null;
 
     // ✅ Getters & Setters
