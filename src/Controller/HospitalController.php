@@ -157,10 +157,13 @@ class HospitalController extends AbstractController
                 $response = json_decode($response, true);
 
                 // Lorsqu'un hopital est créé
-                $this->notificationManager->createNotification(
+                $notification = $this->notificationManager->createNotification(
                     'Un nouvel Hopital a été créé',
                     'Un nouvel Hopital a été créé en attente de validation.',
                 );
+
+                $this->notificationManager->publishNotification($notification, '/notifications/superadmin');
+
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital crée avec succès"], Response::HTTP_OK);
             }
 

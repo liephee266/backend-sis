@@ -124,12 +124,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $updated_at;
 
     /**
-     * @var Collection<int, Notification>
-     */
-    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'sender_id')]
-    private Collection $notifications;
-
-    /**
      * @var Collection<int, Urgency>
      */
     #[ORM\OneToMany(targetEntity: Urgency::class, mappedBy: 'user')]
@@ -173,18 +167,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Conversation::class, mappedBy: 'sender')]
     private Collection $conversationsSender;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'sender')]
+    private Collection $notification;
+
 
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->notifications = new ArrayCollection();
         $this->urgencies = new ArrayCollection();
         $this->autorisations = new ArrayCollection();
         $this->urgentists = new ArrayCollection();
         $this->conversations = new ArrayCollection();
         $this->conversationsSender = new ArrayCollection();
+        $this->notification = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -451,6 +451,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getConversations(): Collection
     {
         return $this->conversations;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotification(): Collection
+    {
+        return $this->notification;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notification->contains($notification)) {
+            $this->notification->add($notification);
+            $notification->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notification->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getReceiver() === $this) {
+                $notification->setReceiver(null);
+            }
+        }
+
+        return $this;
     }
 
 }

@@ -45,6 +45,10 @@ class Notification
     #[ORM\Column]
     private ?bool $isRead = false;
 
+    #[ORM\ManyToOne(inversedBy: 'notification')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $receiver = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -147,6 +151,18 @@ class Notification
     public function setIsRead(bool $isRead): static
     {
         $this->isRead = $isRead;
+
+        return $this;
+    }
+
+    public function getReceiver(): ?User
+    {
+        return $this->receiver;
+    }
+
+    public function setReceiver(?User $receiver): static
+    {
+        $this->receiver = $receiver;
 
         return $this;
     }

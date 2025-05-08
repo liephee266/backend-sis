@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use App\Entity\Doctor;
+use App\Entity\Patient;
 use App\Services\Toolkit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,15 +50,30 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
         $data_user = $this->serializer->serialize($trueUser, 'json', ['groups' => 'user:read']);
         $data_user = json_decode($data_user, true);
         $data['user'] = $data_user;
+        // Si c'est un docteur, ajouter les infos dans 'extend'
         if (in_array('ROLE_DOCTOR', $trueUser->getRoles())) {
-            // Si l'utilisateur est un médecin, récupérer les informations de l'administration associée
             $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $trueUser->getId()]);
-            $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
-            $data_doctor = json_decode($data_doctor, true);
-            unset($data_doctor['user']);
-            unset($data_doctor['id']);
-            $data['user'] = array_merge($data['user'], $data_doctor);
-            # code...
+            if ($doctor) {
+                $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
+                $data_doctor = json_decode($data_doctor, true);
+
+                unset($data_doctor['user'], $data_doctor['id']); // Nettoyage
+
+                $data['extends'] = $data_doctor;
+            }
+        }
+
+        // Si c'est un patient, ajouter les infos dans 'extend'
+        if (in_array('ROLE_PATIENT', $trueUser->getRoles())) {
+            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $trueUser->getId()]);
+            if ($patient) {
+                $data_patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
+                $data_patient = json_decode($data_patient, true);
+
+                unset($data_patient['user'], $data_patient['id']); // Nettoyage
+
+                $data['extends'] = $data_patient;
+            }
         }
         
         $data['user']['role'] = $user->getRoles();
