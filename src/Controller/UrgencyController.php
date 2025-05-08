@@ -58,7 +58,7 @@ class UrgencyController extends AbstractController
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
 
-            $filtre = [];
+            $filtre = ["status" => 'INIT'];
             
             // Récupération des urgences avec le statut "pris en charge"
             $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);
