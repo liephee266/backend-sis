@@ -2,9 +2,12 @@
 
 namespace App\EventSubscriber;
 
+use App\Entity\AgentHospital;
 use App\Entity\User;
 use App\Entity\Doctor;
+use App\Entity\HospitalAdmin;
 use App\Entity\Patient;
+use App\Entity\Urgentist;
 use App\Services\Toolkit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -51,30 +54,75 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
         $data_user = json_decode($data_user, true);
         $data['user'] = $data_user;
         // Si c'est un docteur, ajouter les infos dans 'extend'
-        if (in_array('ROLE_DOCTOR', $trueUser->getRoles())) {
-            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $trueUser->getId()]);
-            if ($doctor) {
-                $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
-                $data_doctor = json_decode($data_doctor, true);
+        switch (true) {
+            case in_array('ROLE_DOCTOR', $trueUser->getRoles()):
+                $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $trueUser->getId()]);
+                if ($doctor) {
+                    $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
+                    $data_doctor = json_decode($data_doctor, true);
+        
+                    unset($data_doctor['user'], $data_doctor['id']); // Nettoyage
+        
+                    $data['extends'] = $data_doctor;
+                }
+                break;
+        
+            case in_array('ROLE_PATIENT', $trueUser->getRoles()):
+                // Traitement pour le rôle patient
+                $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $trueUser->getId()]);
+                if ($patient) {
+                    $data_patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
+                    $data_patient = json_decode($data_patient, true);
+        
+                    unset($data_patient['user'], $data_patient['id']); // Nettoyage
+        
+                    $data['extends'] = $data_patient;
+                }
+                break;
+        
+            case in_array('ROLE_URGENTIST', $trueUser->getRoles()):
+                // Traitement pour le rôle urgentist
+                $urgentist = $this->entityManager->getRepository(Urgentist::class)->findOneBy(['user' => $trueUser->getId()]);
+                if ($urgentist) {
+                    $data_urgentist = $this->serializer->serialize($urgentist, 'json', ['groups' => 'urgentist:read']);
+                    $data_urgentist = json_decode($data_urgentist, true);
+        
+                    unset($data_urgentist['user'], $data_urgentist['id']); // Nettoyage
+        
+                    $data['extends'] = $data_urgentist;
+                }
+                break;
+            
+            case in_array('ROLE_ADMIN_HOSPITAL', $trueUser->getRoles()):
+                // Traitement pour le rôle admin_hospital
+                $hospital = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $trueUser->getId()]);
+                if ($hospital) {
+                    $data_hospital = $this->serializer->serialize($hospital, 'json', ['groups' => 'hospitaladmin:read']);
+                    $data_hospital = json_decode($data_hospital, true);
+        
+                    unset($data_hospital['user'], $data_hospital['id']); // Nettoyage
+        
+                    $data['extends'] = $data_hospital;
+                }
+                break;
 
-                unset($data_doctor['user'], $data_doctor['id']); // Nettoyage
-
-                $data['extends'] = $data_doctor;
-            }
+            case in_array('ROLE_AGENT_HOSPITAL', $trueUser->getRoles()):
+                // Traitement pour le rôle agent_hospital
+                $agent = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $trueUser->getId()]);
+                if ($agent) {
+                    $data_agent = $this->serializer->serialize($agent, 'json', ['groups' => 'agentadmin:read']);
+                    $data_agent = json_decode($data_agent, true);
+        
+                    unset($data_agent['user'], $data_agent['id']); // Nettoyage
+        
+                    $data['extends'] = $data_agent;
+                }
+                break;
+            default:
+                // Traitement par défaut si aucun rôle ne correspond
+                break;
         }
-
-        // Si c'est un patient, ajouter les infos dans 'extend'
-        if (in_array('ROLE_PATIENT', $trueUser->getRoles())) {
-            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $trueUser->getId()]);
-            if ($patient) {
-                $data_patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
-                $data_patient = json_decode($data_patient, true);
-
-                unset($data_patient['user'], $data_patient['id']); // Nettoyage
-
-                $data['extends'] = $data_patient;
-            }
-        }
+        
         
         $data['user']['role'] = $user->getRoles();
         unset($data['user']['roles']);

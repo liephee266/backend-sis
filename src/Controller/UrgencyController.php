@@ -7,6 +7,7 @@ use App\Entity\Urgency;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Entity\HospitalAdmin;
 use App\Services\NotificationManager;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -224,8 +225,23 @@ class UrgencyController extends AbstractController
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
+            $user = $this->toolkit->getUser($request)->getId();
+
             // Filtre fixe pour le statut "pris en charge"
-            $filtre = ['status' => 'PRISE EN CHARGE'];
+            $filtre = [];
+
+            if ($this->security->isGranted('ROLE_URGENTIST')) {
+                $urgentist = $this->entityManager->getRepository('App\Entity\Urgentist')
+                    ->findOneBy(['user' => $user]);
+                if (!$urgentist) {
+                    return new JsonResponse(['code' => 404, 'message' => "Urgentiste non trouvé"], Response::HTTP_NOT_FOUND);
+                }
+
+                $filtre = [
+                    'status' => 'PRISE EN CHARGE',
+                    'prise_en_charge' => $urgentist->getId()
+                ];
+            }
             
             // Récupération des urgences avec le statut "pris en charge"
             $response = $this->toolkit->getPagitionOption($request, 'Urgency', 'urgency:read', $filtre);

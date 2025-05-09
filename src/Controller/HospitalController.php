@@ -162,7 +162,7 @@ class HospitalController extends AbstractController
                     'Un nouvel Hopital a été créé en attente de validation.',
                 );
 
-                $this->notificationManager->publishNotification($notification, '/notifications/superadmin');
+                $this->notificationManager->publishNotification($notification, '/notifications/superadminsis');
 
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital crée avec succès"], Response::HTTP_OK);
             }
@@ -232,10 +232,12 @@ class HospitalController extends AbstractController
 
 
                 // Lorsqu'un hopital est traité
-                $this->notificationManager->createNotification(
+                $notification = $this->notificationManager->createNotification(
                     "La validation d'un hopital a été traité",
-                    'Un Hopital nommé:'.$hospital->getName(). 'été traité par '.$this->$user->getFirstName().'.',
+                    "Le statut d'un Hopital nommé:".$hospital->getName(). ' à été modifier par '.$this->$user->getFirstName().'.',
                 );
+
+                $this->notificationManager->publishNotification($notification, '/notifications/superadminsis');
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
             }
         
