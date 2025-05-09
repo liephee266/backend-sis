@@ -27,14 +27,10 @@ class AppFixtures extends Fixture
         }
 
         $statuses = [
-            'EN_COURS'=>'En cours',
-            'REPPORTE'=>'Reporté',
-            'TERMINE'=>'Terminé',
-            'ANNULE'=>'Annulé',
-            'EN_ATTENTE'=>'En attente',
-            'EN_ATTENTE_DE_CONFIRMATION'=>'En attente de confirmation',
-            'EN_ATTENTE_DE_RESULTATS'=>'En attente de résultats',
-            'CONFIRME'=>'Confirmé',
+            'IN_PROGRESS'=>'En cours',
+            'CANCELED'=>'Annulé',
+            'REPORTED'=>'Reporté',
+
         ];
         foreach ($statuses as $key => $statusName) {
             $status = new State();

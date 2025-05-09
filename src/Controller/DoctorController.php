@@ -77,7 +77,7 @@ class DoctorController extends AbstractController
             $filtre = [];
     
             // Si c'est un admin hospitalier, on filtre les docteurs liés à son hôpital
-            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL') || $this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
                 $user = $this->toolkit->getUser($request);
     
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)

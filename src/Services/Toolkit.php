@@ -144,6 +144,8 @@ class Toolkit
                         // Recherche la première clé différente de 'id' et extrait sa valeur
                         $otherKey = array_key_first(array_diff_key($item, ['id' => '']));
                         $value = $otherKey !== null ? $item[$otherKey] : null;
+                        //______à optimiser____________
+                        is_array($value) ? $value = $value["last_name"] : $value;
                         // Ajoute le résultat transformé
                         // if ($key == 'prestation' ) {
                         //     $result[$key][] = [

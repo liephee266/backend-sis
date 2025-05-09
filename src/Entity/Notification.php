@@ -15,12 +15,10 @@ class Notification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['notification:read'])]
     #[Groups(["data_select",'notification:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
-    #[Groups(['notification:read'])]
     #[Groups(["data_select",'notification:read'])]
     private ?string $content = null;
 
@@ -34,19 +32,24 @@ class Notification
     private ?string $uuid = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["notification:read"])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["notification:read"])]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["notification:read"])]
     private ?string $title = null;
 
     #[ORM\Column]
+    #[Groups(["notification:read"])]
     private ?bool $isRead = false;
 
     #[ORM\ManyToOne(inversedBy: 'notification')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["notification:read"])]
     private ?User $receiver = null;
 
     public function __construct()

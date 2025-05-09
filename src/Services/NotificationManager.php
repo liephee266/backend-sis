@@ -27,12 +27,14 @@ class NotificationManager
     /**
      * Crée et publie une notification pour un utilisateur.
      */
-    public function createNotification(string $title, string $content, bool $flush = true): Notification
+    public function createNotification(string $title, string $content, ?User $receiver = null, bool $flush = true): Notification
     {
         $notification = new Notification();
         $notification
             ->setTitle($title)
-            ->setContent($content);
+            ->setContent($content)
+            ->setReceiver($receiver)
+            ->setIsRead(false);
 
 
         $this->em->persist($notification);

@@ -110,7 +110,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                 // Traitement pour le rôle agent_hospital
                 $agent = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $trueUser->getId()]);
                 if ($agent) {
-                    $data_agent = $this->serializer->serialize($agent, 'json', ['groups' => 'agentadmin:read']);
+                    $data_agent = $this->serializer->serialize($agent, 'json', ['groups' => "agenthospital:read"]);
                     $data_agent = json_decode($data_agent, true);
         
                     unset($data_agent['user'], $data_agent['id']); // Nettoyage

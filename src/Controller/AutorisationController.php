@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\Doctor;
 use App\Entity\Status;
+use App\Entity\Patient;
 use App\Entity\Hospital;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Entity\Autorisation;
-use App\Services\GenericEntityManager;
+use App\Entity\DossierMedicale;
 use App\Services\NotificationManager;
+use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -113,12 +115,9 @@ class AutorisationController extends AbstractController
     public function create(Request $request, $entity_name, $id): Response
     {
         try {
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS')
-                && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')
-                && !$this->security->isGranted('ROLE_DOCTOR')) {
-            # code...
-            return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
-        }
+            if (!$this->security->isGranted('ROLE_DOCTOR')) {
+                return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
+            }
 
             $dataEntity = [
                 "dossier_medicale" => "DossierMedicale",
@@ -170,12 +169,20 @@ class AutorisationController extends AbstractController
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'autorisation:read']);
                 $response = json_decode($response, true);
 
-                if ($entity_name === "dossier_medicale") {
+                // Récupération de l'ID du dossier médical associé à l'autorisation
+                $dossier_medicale_patient = $this->entityManager->getRepository(DossierMedicale::class)->find($id)->getPatientId();
+
+                if ($this->security->isGranted('ROLE_DOCTOR') && $entity_name === "dossier_medicale") {
+                    // Récupération de l'utilisateur associé au dossier médical
+                    $user = $this->entityManager->getRepository(Patient::class)->find($dossier_medicale_patient)->getUser();
                     // Envoi de la notification
-                    $this->notificationManager->createNotification(
-                        "Nouvelle autorisation",
-                        "Une demande d'autorisation a été soumise pour un dossier médical."
+                    $notification = $this->notificationManager->createNotification(
+                        'Demande d\'accès',
+                        "Une demande d'autorisation a été soumise pour consulter votre dossier médical.",
+                        $user // Utilisateur associé au dossier médical
                     );
+                    dd($notification);
+                    $this->notificationManager->publishNotification($notification);
                 }else {
                     // Envoi de la notification
                     $this->notificationManager->createNotification(

@@ -33,7 +33,7 @@ class UrgencyController extends AbstractController
     private $serializer;
     private $genericEntityManager;
     private $security;
-    private $notification;
+    private $notificationManager;
 
     public function __construct(
                 GenericEntityManager $genericEntityManager, 
@@ -41,14 +41,14 @@ class UrgencyController extends AbstractController
                 SerializerInterface $serializer, 
                 Toolkit $toolkit, 
                 Security $security,
-                NotificationManager $notification)
+                NotificationManager $notificationManager)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
         $this->security = $security;
-        $this->notification = $notification;
+        $this->notificationManager = $notificationManager;
     }
 
     /**
@@ -296,8 +296,10 @@ class UrgencyController extends AbstractController
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            $patient = $this->toolkit->getUser($request);
+            $user = $this->toolkit->getUser($request)->getId();
             
+            $patient = $this->entityManager->getRepository('App\Entity\Patient')
+                ->findOneBy(['user' => $user])->getId();
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             $data['patient'] = $patient;
@@ -305,12 +307,17 @@ class UrgencyController extends AbstractController
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Urgency", $data);
-
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
                 $response = json_decode($response, true);
+                // Envoi de la notification lors de la création d'une urgence
+                $notification = $this->notificationManager->createNotification(
+                    'Nouvelle Urgence',
+                    "Une nouvelle urgence a été envoyé par le patient: " . $patient
+                );
+                $this->notificationManager->publishNotification($notification, '/notifications/urgentist');
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Urgence envoyée avec succès"], Response::HTTP_OK);
             }
 
@@ -369,6 +376,12 @@ class UrgencyController extends AbstractController
                     if (!empty($errors['entity'])) {
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
                         $response = json_decode($response, true);
+                        // Envoi de la notification lors de la prise en charge d'une rugence
+                        $notification = $this->notificationManager->createNotification(
+                            'Urgence prise en charge',
+                            "Une urgence a été prise en charge par l'urgentiste: " . $urgentist->getId(),
+                        );
+                        $this->notificationManager->publishNotification($notification, '/notifications/urgentist');
                         return $this->json(['data' => $response, 'code' => 200, 'message' => "Urgence prise en charge avec succès"], Response::HTTP_OK);
                     }
                     break;
@@ -383,6 +396,12 @@ class UrgencyController extends AbstractController
                     if (!empty($errors['entity'])) {
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgency:read']);
                         $response = json_decode($response, true);
+                        // Envoi de la notification lors du transfert d'une urgence
+                        $notification = $this->notificationManager->createNotification(
+                            'Urgence transférée',
+                            "L'urgence:" . $id ." a été transférée à l'hôpital: " .$urgence->getTransfereA()->getId() 
+                        );
+                        $this->notificationManager->publishNotification($notification, '/notifications/urgentist');
                         return $this->json(['data' => $response, 'code' => 200, 'message' => "Urgence transférée avec succès"], Response::HTTP_OK);
                     }
                     break;
