@@ -1,0 +1,16 @@
+services:
+  mercure:
+    image: dunglas/mercure
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      # Permettre les abonnés anonymes (sans JWT)
+      MERCURE_ANONYMOUS: '1'
+
+      # Aucune authentification nécessaire pour publier ou s'abonner
+      MERCURE_PUBLISH_ALLOWED_ORIGINS: '*'
+      MERCURE_SUBSCRIBE_ALLOWED_ORIGINS: '*'
+
+      # Interface web d’administration
+      MERCURE_UI: 'true'

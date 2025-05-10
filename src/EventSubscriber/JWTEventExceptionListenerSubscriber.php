@@ -61,7 +61,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                     $data_doctor = $this->serializer->serialize($doctor, 'json', ['groups' => 'doctor:read']);
                     $data_doctor = json_decode($data_doctor, true);
         
-                    unset($data_doctor['user'], $data_doctor['id']); // Nettoyage
+                    unset($data_doctor['user']); // Nettoyage
         
                     $data['extends'] = $data_doctor;
                 }
@@ -74,7 +74,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                     $data_patient = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
                     $data_patient = json_decode($data_patient, true);
         
-                    unset($data_patient['user'], $data_patient['id']); // Nettoyage
+                    unset($data_patient['user']); // Nettoyage
         
                     $data['extends'] = $data_patient;
                 }
@@ -87,7 +87,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                     $data_urgentist = $this->serializer->serialize($urgentist, 'json', ['groups' => 'urgentist:read']);
                     $data_urgentist = json_decode($data_urgentist, true);
         
-                    unset($data_urgentist['user'], $data_urgentist['id']); // Nettoyage
+                    unset($data_urgentist['user']); // Nettoyage
         
                     $data['extends'] = $data_urgentist;
                 }
@@ -100,7 +100,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                     $data_hospital = $this->serializer->serialize($hospital, 'json', ['groups' => 'hospitaladmin:read']);
                     $data_hospital = json_decode($data_hospital, true);
         
-                    unset($data_hospital['user'], $data_hospital['id']); // Nettoyage
+                    unset($data_hospital['user']); // Nettoyage
         
                     $data['extends'] = $data_hospital;
                 }
@@ -113,7 +113,7 @@ class JWTEventExceptionListenerSubscriber implements EventSubscriberInterface
                     $data_agent = $this->serializer->serialize($agent, 'json', ['groups' => "agenthospital:read"]);
                     $data_agent = json_decode($data_agent, true);
         
-                    unset($data_agent['user'], $data_agent['id']); // Nettoyage
+                    unset($data_agent['user']); // Nettoyage
         
                     $data['extends'] = $data_agent;
                 }
