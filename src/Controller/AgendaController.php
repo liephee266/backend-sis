@@ -50,35 +50,41 @@ class AgendaController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id_hospital}/{id_doctor}/{month?}', name: 'agenda_index', methods: ['GET'])]
-    public function index(Request $request, $id_hospital , $id_doctor, $month = null): Response
+    #[Route('/{id_hospital}/{id_doctor}/{year?}/{month?}', name: 'agenda_index', methods: ['GET'])]
+    public function index(Request $request, $id_hospital, $id_doctor, $year = null, $month = null): Response
     {
-        // Assign default value to $month if it is null
-        $month = $month ?? date('n');
-        $year = date('Y');
-        $monts_and_year = ["months"=> [$month, $month = 12 ? 1 : $month +1],"year"=>$year];
-        // Vérification des autorisations de l'utilisateur connecté
+        // Assign default value to $year if it is null
+        $year = $year ?? date('Y');
+
+        // If month is not provided, return all 12 months
+        if (is_null($month)) {
+            $months_and_year = [
+                "months" => range(1, 12),
+                "year" => $year
+            ];
+        } else {
+            // If month is provided, return the month + the next month
+            $month = (int)$month;
+            $months_and_year = [
+                "months" => [$month, ($month == 12 ? 1 : $month + 1)],
+                "year" => $year
+            ];
+        }
+
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
-                $a = $this->toolkit->getAgenda($monts_and_year,  ['id_doctor'=> $id_doctor,'id_hospital'=>$id_hospital] );
-            return new JsonResponse(["data"=> $a, "code" => 200], Response::HTTP_OK);
-        }elseif ($this->security->isGranted('ROLE_PATIENT')) {
-            // Si l'utilisateur est un patient, on récupère son ID
+            $a = $this->toolkit->getAgenda($months_and_year, ['id_doctor' => $id_doctor, 'id_hospital' => $id_hospital]);
+            return new JsonResponse(["data" => $a, "code" => 200], Response::HTTP_OK);
+        } elseif ($this->security->isGranted('ROLE_PATIENT')) {
             $id_patient = $this->toolkit->getUser($request)->getId();
-            // On appelle la méthode getAgendaPatient avec les paramètres appropriés et id_doctor devient id_patient
-            $a = $this->toolkit->getAgendaPatient($monts_and_year, ['id_doctor'=> $id_patient,'id_hospital'=>$id_hospital] );
+            $a = $this->toolkit->getAgendaPatient($months_and_year, ['id_doctor' => $id_patient, 'id_hospital' => $id_hospital]);
             $agenda = $this->serializer->serialize($a, 'json', ['groups' => 'meeting:read']);
             $agenda = json_decode($agenda, true);
-            return new JsonResponse(["data"=> $agenda, "code" => 200], Response::HTTP_OK);
-            
-        }else {
-            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
+        } else {
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-        // Vérification des autorisations de l'utilisateur connecté
-
-        // Retour d'une réponse JSON avec les Agendas et un statut HTTP 200 (OK)
-        return new JsonResponse([], Response::HTTP_OK);
     }
+
 
     /**
      * Affichage d'un Agenda par son ID
