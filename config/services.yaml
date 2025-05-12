@@ -6,10 +6,20 @@
 parameters:
     app.environment: dev
     app.debug: true
+    pusher.app_id: '%env(PUSHER_APP_ID)%'
+    pusher.app_key: '%env(PUSHER_APP_KEY)%'
+    pusher.app_secret: '%env(PUSHER_APP_SECRET)%'
+    pusher.app_cluster: '%env(PUSHER_APP_CLUSTER)%'
 services:
     App\Services\MailerService:
         arguments:
             $fromAddress: '%env(MAILER_FROM)%'
+    App\Services\NotificationManager:
+        arguments:
+            $appId: '%pusher.app_id%'
+            $appKey: '%pusher.app_key%'
+            $appSecret: '%pusher.app_secret%'
+            $cluster: '%pusher.app_cluster%'
     App\Service\Toolkit: ~
     # App\Service\CardPressoMicroService: ~
     App\Service\GenericEntityManager: ~

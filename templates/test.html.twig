@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications Pusher</title>
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <script>
+        // Active les logs de Pusher (utile pour le debug)
+        Pusher.logToConsole = true;
+
+        // Initialisation de Pusher avec votre clé et cluster
+        var pusher = new Pusher('{{ pusher_key }}', {
+            cluster: '{{ pusher_cluster }}',
+            authEndpoint: '/pusher/auth', // uniquement si private/presence channel
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token("authenticate") }}'
+                }
+            }
+        });
+
+        // Abonnement au canal privé
+        var channel = pusher.subscribe('private-user_3');
+
+        // Écoute de l’événement "new_notification"
+        channel.bind('new_notification', function(data) {
+            alert("Nouvelle notification : " + data.title + " - " + data.content);
+        });
+    </script>
+</head>
+<body>
+    <h1>Écoute des notifications</h1>
+    <p>Ce navigateur est abonné au canal <code>private-user_3</code>.</p>
+</body>
+</html>

@@ -48,7 +48,7 @@ class Notification
     private ?bool $isRead = false;
 
     #[ORM\ManyToOne(inversedBy: 'notification')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(["notification:read"])]
     private ?User $receiver = null;
 

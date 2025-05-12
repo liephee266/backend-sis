@@ -51,7 +51,7 @@ class Patient
     #[Groups(["patient:read"])]
     private Collection $dossierMedicales;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
     "examination:read", "dossier_medicale:read"])]
     private ?int $poids = null;

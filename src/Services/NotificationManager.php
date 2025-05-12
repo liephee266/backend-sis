@@ -1,32 +1,36 @@
 <?php
 namespace App\Services;
 
+use Pusher\Pusher;
 use App\Entity\User;
 use App\Entity\Notification;
-use Symfony\Component\Mercure\Update;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class NotificationManager
 {
-    private EntityManagerInterface $em;
-    private HubInterface $hub;
-    private SerializerInterface $serializer;
-
     public function __construct(
-        EntityManagerInterface $em,
-        HubInterface $hub,
-        SerializerInterface $serializer
-    ) {
-        $this->em = $em;
-        $this->hub = $hub;
-        $this->serializer = $serializer;
-    }
+    #[Autowire('%pusher.app_id%')] private string $appId,
+    #[Autowire('%pusher.app_key%')] private string $appKey,
+    #[Autowire('%pusher.app_secret%')] private string $appSecret,
+    #[Autowire('%pusher.app_cluster%')] private string $cluster,
+    private EntityManagerInterface $em,
+    private SerializerInterface $serializer,
+    private Pusher $pusher
+) {
+    date_default_timezone_set('UTC');
+    $this->pusher = new Pusher(
+        $this->appKey,
+        $this->appSecret,
+        $this->appId,
+        [
+            'cluster' => $this->cluster,
+            'useTLS' => true,
+        ]
+    );
+}
 
-    /**
-     * Crée et publie une notification pour un utilisateur.
-     */
     public function createNotification(string $title, string $content, ?User $receiver = null, bool $flush = true): Notification
     {
         $notification = new Notification();
@@ -35,7 +39,6 @@ class NotificationManager
             ->setContent($content)
             ->setReceiver($receiver)
             ->setIsRead(false);
-
 
         $this->em->persist($notification);
 
@@ -48,20 +51,20 @@ class NotificationManager
         return $notification;
     }
 
-    public function publishNotification(Notification $notification, ?string $customTopic = null, bool $isGlobal = false): void
+    public function publishNotification(Notification $notification, ?string $customChannel = null, bool $isGlobal = false): void
     {
         $data = $this->serializer->serialize($notification, 'json', ['groups' => ['notification:read']]);
 
-        // Choix du topic
-        $topic = match (true) {
-            $customTopic !== null => $customTopic,
-            $isGlobal => '/notifications/global',
-            default => '/notifications/user/' . $notification->getReceiver()->getId(),
+        // Choix du canal Pusher
+        $channel = match (true) {
+            $customChannel !== null => $customChannel,
+            $isGlobal => 'notifications-global',
+            default => 'private-user_' . $notification->getReceiver()->getId(),
         };
 
-        $update = new Update($topic, $data);
+        $event = 'new_notification';
 
-        $this->hub->publish($update);
+        $this->pusher->trigger($channel, $event, json_decode($data, true));
     }
 
     public function markAsRead(Notification $notification): void
@@ -70,3 +73,4 @@ class NotificationManager
         $this->em->flush();
     }
 }
+

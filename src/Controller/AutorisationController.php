@@ -181,7 +181,7 @@ class AutorisationController extends AbstractController
                         "Une demande d'autorisation a été soumise pour consulter votre dossier médical.",
                         $user // Utilisateur associé au dossier médical
                     );
-                    dd($notification);
+
                     $this->notificationManager->publishNotification($notification);
                 }else {
                     // Envoi de la notification

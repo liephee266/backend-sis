@@ -146,7 +146,7 @@ class HospitalController extends AbstractController
 
             // Ajouter le statut à la data avant persistance
             $data['status'] = $status->getId();  // Récupérer le statut "en_attente"
-            
+
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Hospital", $data);
 
@@ -162,6 +162,7 @@ class HospitalController extends AbstractController
                     'Un nouvel Hopital a été créé en attente de validation.',
                 );
 
+                dd($notification);
                 $this->notificationManager->publishNotification($notification, '/notifications/superadminsis');
 
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital crée avec succès"], Response::HTTP_OK);
