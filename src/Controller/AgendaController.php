@@ -59,7 +59,7 @@ class AgendaController extends AbstractController
         if ($month === null) {
             $months = range(1, 12); // Tous les mois de l'année
         } else {
-            $months = [$month, $month = 12 ? 1 : $month + 1]; // Mois courant + suivant
+            $months = [$month, $month == 12 ? 1 : $month + 1]; // Mois courant + suivant
         }
 
         $monts_and_year = ["months" => $months, "year" => $year];
