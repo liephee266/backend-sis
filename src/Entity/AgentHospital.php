@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: AgentHospitalRepository::class)]
 class AgentHospital
@@ -25,6 +26,15 @@ class AgentHospital
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["agenthospital:read"])] 
     private ?Hospital $hospital = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(["agenthospital:read"])]
+    private ?string $uuid = null;
+
+    public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+    }
 
     public function getId(): ?int
     {
@@ -52,6 +62,16 @@ class AgentHospital
     {
         $this->hospital = $hospital;
 
+        return $this;
+    }
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): static
+    {
+        $this->uuid = $uuid;
         return $this;
     }
 }

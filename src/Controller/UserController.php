@@ -95,7 +95,7 @@ class UserController extends AbstractController
     #[Route('/', name: 'user_create', methods: ['POST'])]
     public function create(Request $request, MailerService $mailerService): Response
     {
-        try {
+        // try {
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
             
@@ -117,9 +117,9 @@ class UserController extends AbstractController
 
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la création de l'utilisateur"], Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $th) {
-            return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     /**

@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "doctor")]
@@ -88,6 +89,10 @@ class Doctor
     #[Groups(["hospital:read"])]
     private ?bool $isSuspended = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["doctor:read"])]
+    private ?string $uuid = null;
+
     /**
      * @var Collection<int, Hospital>
      */
@@ -109,6 +114,7 @@ class Doctor
 
     public function __construct()
     {
+        $this->uuid = Uuid::v7()->toString();
         $this->hospital = new ArrayCollection();
         $this->historiqueMedicals = new ArrayCollection();
         $this->disponibilites = new ArrayCollection();
@@ -215,6 +221,16 @@ class Doctor
     public function setCv(string $cv): self
     {
         $this->cv = $cv;
+        return $this;
+    }
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): static
+    {
+        $this->uuid = $uuid;
         return $this;
     }
 
