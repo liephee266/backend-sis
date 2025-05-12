@@ -166,7 +166,7 @@ class MeetingController extends AbstractController
     public function create(Request $request): Response
     {
         // Vérification des autorisations de l'utilisateur connecté
-        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
+        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }

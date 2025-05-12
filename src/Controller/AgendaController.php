@@ -50,33 +50,27 @@ class AgendaController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id_hospital}/{id_doctor}/{year?}/{month?}', name: 'agenda_index', methods: ['GET'])]
-    public function index(Request $request, $id_hospital, $id_doctor, $year = null, $month = null): Response
+    #[Route('/{id_hospital}/{id_doctor}/{month?}', name: 'agenda_index', methods: ['GET'])]
+    public function index(Request $request, $id_hospital , $id_doctor, $month = null): Response
     {
-        // Assign default value to $year if it is null
-        $year = $year ?? date('Y');
-
-        // If month is not provided, return all 12 months
-        if (is_null($month)) {
-            $months_and_year = [
-                "months" => range(1, 12),
-                "year" => $year
-            ];
+        // Année actuelle
+        $year = date('Y');
+        // Gestion des mois
+        if ($month === null) {
+            $months = range(1, 12); // Tous les mois de l'année
         } else {
-            // If month is provided, return the month + the next month
-            $month = (int)$month;
-            $months_and_year = [
-                "months" => [$month, ($month == 12 ? 1 : $month + 1)],
-                "year" => $year
-            ];
+            $months = [$month, $month = 12 ? 1 : $month + 1]; // Mois courant + suivant
         }
 
+        $monts_and_year = ["months" => $months, "year" => $year];
+
+        // Vérification des autorisations de l'utilisateur connecté
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)) {
-            $a = $this->toolkit->getAgenda($months_and_year, ['id_doctor' => $id_doctor, 'id_hospital' => $id_hospital]);
+            $a = $this->toolkit->getAgenda($monts_and_year, ['id_doctor' => $id_doctor, 'id_hospital' => $id_hospital]);
             return new JsonResponse(["data" => $a, "code" => 200], Response::HTTP_OK);
         } elseif ($this->security->isGranted('ROLE_PATIENT')) {
             $id_patient = $this->toolkit->getUser($request)->getId();
-            $a = $this->toolkit->getAgendaPatient($months_and_year, ['id_doctor' => $id_patient, 'id_hospital' => $id_hospital]);
+            $a = $this->toolkit->getAgendaPatient($monts_and_year, ['id_doctor' => $id_patient, 'id_hospital' => $id_hospital]);
             $agenda = $this->serializer->serialize($a, 'json', ['groups' => 'meeting:read']);
             $agenda = json_decode($agenda, true);
             return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
@@ -84,8 +78,6 @@ class AgendaController extends AbstractController
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
     }
-
-
     /**
      * Affichage d'un Agenda par son ID
      *
