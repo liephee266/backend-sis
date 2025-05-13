@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Patient;
+use App\Entity\User;
 use App\Services\Toolkit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -377,5 +379,91 @@ class AppController extends AbstractController
             'Orphée Lié',
         );
         return $this->json(['status' => 'email_sent']);
+    }
+        /**
+     * Crée un patient et un utilisateur (User) associé, ou lie un patient à un utilisateur existant.
+     * 
+     * Cette route permet à un agent hospitalier de créer un nouveau patient dans le système.
+     * Si l'utilisateur (User) n'existe pas, il est créé automatiquement avec les informations fournies.
+     * Si l'utilisateur existe déjà, il est simplement lié au patient.
+     * 
+     * @Route("/agentCreate", name="agent_create", methods={"POST"})
+     * 
+     * @param Request $request La requête HTTP contenant les informations du patient et de l'utilisateur.
+     * 
+     * @author Daryon Rocknes <daryonrocknes@icloud.com>
+     */
+    #[Route('/agentCreate', name: 'agent_create', methods: ['POST'])]
+    public function create(Request $request): Response
+    {
+        try {
+            // Vérification des autorisations de l'utilisateur connecté
+            if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+            }
+
+            // Décodage du contenu JSON envoyé dans la requête
+            $data = json_decode($request->getContent(), true);
+            $data["password"] = $data["password"] ?? '123456789';
+
+            // Début de la transaction
+            $this->entityManager->beginTransaction();
+
+            // Vérification si le User existe déjà (par email ou téléphone)
+            $user = $this->entityManager->getRepository(User::class)->findOneBy([
+                'email' => $data['email']
+            ]);
+
+            // Si le User n'existe pas, on le crée
+            if (!$user) {
+                $user = new User();
+                $user->setEmail($data['email']);
+                $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+                $user->setRoles(["ROLE_PATIENT"]);
+                $user->setFirstName($data['first_name']);
+                $user->setLastName($data['last_name']);
+                $user->setNickname($data['nickname'] ?? null);
+                $user->setTel($data['tel']);
+                $user->setBirth($data['birth'] ? new \DateTime($data['birth']) : null);
+                $user->setGender($data['gender']);
+                $user->setAddress($data['address'] ?? null);
+                $user->setImage($data['image'] ?? null);
+
+                // Persist et flush pour le User
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+            }
+
+            // Création de l'entité Patient lié à ce User (sans les champs spécifiques)
+            $patient = new Patient();
+            $patient->setUser($user); 
+
+            // Définir des valeurs par défaut pour tous les champs non-nullables
+            $patient->setPoids(0);
+            $patient->setTaille(0);
+            $patient->setGroupeSanguins('NULL');
+            $patient->setSignalerCommeDecedé(0);
+            $patient->setNomUrgence('NULL');
+            $patient->setAdresseUrgence('NULL');
+            $patient->setNumeroUrgence('NULL');
+
+            // Persist et flush pour le Patient
+            $this->entityManager->persist($patient);
+            $this->entityManager->flush();
+
+            // Commit de la transaction
+            $this->entityManager->commit();
+
+            // Sérialisation et retour de la réponse
+            $response = $this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']);
+            $response = json_decode($response, true);
+
+            return $this->json(['data' => $response, 'code' => 200, 'message' => "Patient et User créés ou liés avec succès"], Response::HTTP_OK);
+
+        } catch (\Throwable $th) {
+            // Annulation de la transaction en cas d'erreur
+            $this->entityManager->rollback();
+            return new JsonResponse(['code' => 500, 'message' => "Erreur interne du serveur : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
