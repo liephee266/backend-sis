@@ -7,6 +7,13 @@ parameters:
     app.environment: dev
     app.debug: true
 services:
+    # config/services.yaml
+    App\Security\UserProvider:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'security.user_provider' }
+
     App\Services\MailerService:
         arguments:
             $fromAddress: '%env(MAILER_FROM)%'

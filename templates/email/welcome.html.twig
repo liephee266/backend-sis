@@ -1,8 +1,224 @@
-{% extends 'email/email_base.html.twig' %}
+{# templates/emails/email_template.html.twig #}
 
-{% block title %}Bienvenue{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Email Template</title>
+    <style>
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .font-sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; }
+        .w-full { width: 100%; }
+        .min-h-screen { min-height: 100vh; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .p-4 { padding: 1rem; }
+        .max-w-600px { max-width: 600px; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .bg-white { background-color: #ffffff; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .justify-center { justify-content: center; }
+        .w-36 { width: 9rem; }
+        .h-12 { height: 3rem; }
+        .from-teal-400 { --tw-gradient-from: #2dd4bf; --tw-gradient-to: rgb(45 212 191 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+        .to-blue-900 { --tw-gradient-to: #1e3a8a; }
+        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+        .text-white { color: #ffffff; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .flex-col { flex-direction: column; }
+        .md\:flex-row { @media (min-width: 768px) { flex-direction: row; } }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .md\:mb-0 { @media (min-width: 768px) { margin-bottom: 0; } }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .font-bold { font-weight: 700; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .font-semibold { font-weight: 600; }
+        .mb-4 { margin-bottom: 1rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .mt-4 { margin-top: 1rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .text-gray-800 { color: #1f2937; }
+        .font-medium { font-weight: 500; }
+        .list-disc { list-style-type: disc; }
+        .list-inside { list-style-position: inside; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .pl-4 { padding-left: 1rem; }
+        .inline-block { display: inline-block; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .hover\:bg-blue-600:hover { background-color: #2563eb; }
+        .text-white { color: #ffffff; }
+        .font-medium { font-weight: 500; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        .duration-300 { transition-duration: 300ms; }
+        .h-4 { height: 1rem; }
+        .text-center { text-align: center; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-500 { color: #6b7280; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        .hover\:text-blue-500:hover { color: #3b82f6; }
+        .h-5 { height: 1.25rem; }
+        .w-5 { width: 1.25rem; }
+        .space-x-4 > * + * { margin-left: 1rem; }
+    </style>
+</head>
+<body>
+<div class="bg-gray-100 font-sans w-full min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-600px w-full mx-auto bg-white shadow-lg">
+        {# Header with Logo #}
+        <div class="py-4 px-6 bg-white">
+            <div class="flex justify-center">
+                <img src="{{ absolute_url(asset('image/Logo_Final_SIS_black.png')) }}" alt="SIS Logo" class="w-36 h-12">
 
-{% block content %}
-    <h2>Bonjour {{ name }} !</h2>
-    <p>Merci de vous être inscrit.</p>
-{% endblock %}
+            </div>
+        </div>
+
+        {# First Banner: Drones #}
+        <div class="bg-gradient-to-r from-teal-400 to-blue-900 px-6 py-8 text-white">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="w-full md:w-2/3 mb-6 md:mb-0">
+                    <h2 class="text-2xl font-bold mb-2">L'AVENIR DES DRONES</h2>
+                    <h3 class="text-xl font-semibold mb-4">QUELLES OPPORTUNITÉS POUR LES STARTUPS</h3>
+                    <p class="text-sm">
+                        De l'aide en temps réel lors de crises jusqu'à la livraison rapide de médicaments d'urgence, les drones transforment 
+                        le secteur de la santé. Découvrez comment ces technologies révolutionnaires peuvent devenir des opportunités 
+                        d'innovation pour vos projets, et quels sont leurs développements futurs.
+                    </p>
+                    <p class="text-xs mt-4">2024</p>
+                </div>
+                <div class="w-full md:w-1/3 flex justify-center">
+                    <img src="{{ absolute_url(asset('image/Mail_img_1.png')) }}" alt="SIS Logo" class="w-36 h-12">
+                </div>
+            </div>
+        </div>
+
+        {# Main Content Section #}
+        <div class="py-8 px-6 bg-white">
+            <h2 class="text-2xl font-bold mb-1">RÉINVENTER LA SANTÉ EN 2025 :</h2>
+            <h3 class="text-xl font-bold mb-6">DES SOLUTIONS HUMAINES POUR UN ACCÈS AUX SOINS PLUS JUSTE ET EFFICACE.</h3>
+            
+            {# Download Button #}
+            <div class="mb-8">
+                <a href="#" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-300">
+                    Télécharger le pdf
+                </a>
+            </div>
+            
+            {# Email Content #}
+            <div class="text-gray-800">
+                <p class="font-medium">Bonjour à Tous,</p>
+                
+                <p class="text-sm mt-4">
+                    L'avenir de la santé se trouve à la croisée des progrès technologiques et d'une approche centrée sur l'humain. 
+                    Face aux défis de nos systèmes de santé actuels (vieillissement, coûts essentiels, etc.) il est essentiel de mettre l'innovation au service de l'humain. 
+                    Explorez cette dynamique que nous explorons ensemble avec une démarche collaborative autour de solutions intégrées, centrées sur le patient.
+                </p>
+                
+                <ul class="list-disc list-inside text-sm mt-4 space-y-4 pl-4">
+                    <li>
+                        <strong>Coordination de l'écosystème de santé:</strong> les associations des professionnels, 
+                        les établissements de santé et les acteurs publics peuvent créer des synergies sanitaires et de répondre 
+                        aux besoins des populations humaines marginalisées.
+                    </li>
+                    <li>
+                        <strong>Intelligence artificielle au service de la médecine de précision:</strong>
+                        Le développement d'outils simples et efficaces permet aux patients de mieux suivre leur état de santé et aux 
+                        professionnels d'apporter des réponses adaptées pour une médecine plus préventive que curative.
+                    </li>
+                    <li>
+                        <strong>Télémédecine et technologies mobiles:</strong>
+                        En rapprochant les soins des communautés, ces services permettent une prise en charge plus rapide. Cela favorise 
+                        également la continuité des soins et réduit les disparités géographiques en matière d'accès aux services de santé.
+                    </li>
+                    <li>
+                        <strong>Développement des compétences en santé:</strong>
+                        Former les professionnels à l'utilisation numérique permet d'améliorer la coordination des projets, 
+                        en efficacité et de se recentrer sur l'essentiel : la qualité des soins apportés aux patients.
+                    </li>
+                </ul>
+                
+                <p class="text-sm mt-4">
+                    Votre expertise et votre sens de l'innovation pourront jouer un rôle clé dans la concrétisation de ces projets. 
+                    Nous serions ravis d'échanger avec vous à ce sujet et d'envisager ensemble les premières pistes d'action.
+                </p>
+                
+                <p class="text-sm mt-4">
+                    Restant à votre disposition pour convenir d'un rendez-vous à votre convenance,
+                    <br />
+                    L'équipe de SIS
+                </p>
+            </div>
+        </div>
+        
+        {# Second Banner: Healthcare Innovation #}
+        <div class="bg-gradient-to-r from-teal-400 to-blue-900 px-6 py-8 text-white">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="w-full md:w-2/3 mb-6 md:mb-0">
+                    <h2 class="text-2xl font-bold mb-2">RÉINVENTER LA SANTÉ</h2>
+                    <h3 class="text-xl font-semibold mb-4">QUELLES OPPORTUNITÉS POUR LES STARTUPS</h3>
+                </div>
+                <div class="w-full md:w-1/3 flex justify-center">
+                    <img src="{{ absolute_url(asset('image/Mail_img_2.png')) }}" alt="Healthcare innovation" class="rounded-lg w-30 h-25">
+                </div>
+            </div>
+        </div>
+        
+        {# Progress Bar Section #}
+        <div class="w-full flex h-4">
+            <div class="w-1/2 bg-teal-400"></div>
+            <div class="w-1/2 bg-blue-900"></div>
+        </div>
+        
+        {# Footer Section #}
+        <div class="px-6 py-8 bg-white text-center">
+            <p class="font-semibold text-gray-700 mb-2">Système Intégré de Santé</p>
+            
+            <div class="text-sm text-gray-600 mb-4">
+                <p>©2025 Sophia Cloud EPVLA Ltd</p>
+                <p>48 Rue Nationale Av Nouvelle-Sangha, Ouenzé, Congo Brazzaville</p>
+            </div>
+            
+            <p class="text-xs text-gray-500 mb-6">
+                You are receiving this email because you have requested to download "Future of AI: Perspectives for Startups 2025"
+            </p>
+            
+            {# Social Media Icons #}
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="text-gray-600 hover:text-blue-500 transition duration-300">
+                    <span class="sr-only">Facebook</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 320 512">
+                        <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-500 transition duration-300">
+                    <span class="sr-only">Twitter</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 512 512">
+                        <path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-500 transition duration-300">
+                    <span class="sr-only">LinkedIn</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 448 512">
+                        <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-500 transition duration-300">
+                    <span class="sr-only">Instagram</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 448 512">
+                        <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

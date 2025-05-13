@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "patient")]
@@ -30,6 +31,12 @@ class Patient
     #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
     "examination:read", "dossier_medicale:read","patient:read:"])]
     private ?User $tutor = null;
+
+    
+    #[ORM\Column(length: 255)]
+    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    "examination:read", "dossier_medicale:read","patient:read:"])]
+    private ?string $uuid = null;
     
 
     /**
@@ -97,7 +104,8 @@ class Patient
     private Collection $HistoriqueMedical;
 
     public function __construct()
-    {
+    {   
+        $this->uuid = Uuid::v7()->toString();
         $this->meeting_id = new ArrayCollection();
         $this->consultations = new ArrayCollection();
         $this->dossierMedicales = new ArrayCollection();
@@ -258,6 +266,16 @@ class Patient
     {
         $this->taille = $taille;
 
+        return $this;
+    }
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): static
+    {
+        $this->uuid = $uuid;
         return $this;
     }
 
