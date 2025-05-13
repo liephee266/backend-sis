@@ -63,8 +63,7 @@ class AgendaController extends AbstractController
         }
 
         $monts_and_year = ["months" => $months, "year" => $year];
-
-
+      
         // Vérification des autorisations de l'utilisateur connecté
         if ($this->security->isGranted('ROLE_DOCTOR') && !empty($id_hospital) && !empty($id_doctor)){
             // dd($monts_and_year);
