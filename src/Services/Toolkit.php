@@ -511,40 +511,28 @@ class Toolkit
     {
         $a = null;
         $n = [];
-
-        foreach ($months['months'] as $month) {
-            $a = $this->getDaysOfMonthAssoc($months['year'], $month);
-
-            // Utilisation de QueryBuilder pour optimiser la requête
-            $query = $this->entityManager->createQueryBuilder()
-                ->select('d')
-                ->from(Disponibilite::class, 'd')
-                ->where('d.date_j IN (:dates)')
-                ->andWhere('d.doctor = :doctor')
-                ->andWhere('d.hospital = :hospital')
-                ->setParameter('dates', array_keys($a))
-                ->setParameter('doctor', $filtre['id_doctor'])
-                ->setParameter('hospital', $filtre['id_hospital'])
-                ->getQuery();
-
-            $disponibilities = $query->getResult();
-            
-            // Organisation des disponibilités par jour
-            foreach ($disponibilities as $disponibilitie) {
-                $date = $disponibilitie->getDateJ();
-                $a[$date][] = [
-                    'id' => $disponibilitie->getId(),
-                    'date_j' => $date,
-                    'heure_debut' => $disponibilitie->getHeureDebut(),
-                    'heure_fin' => $disponibilitie->getHeureFin(),
-                ];
+        foreach ($months['months'] as $key => $month) {
+            $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
+            foreach ($a as $key_a => $value) {
+                $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
+                    'date_j' => new DateTime($key_a),
+                    'doctor' => $filtre['id_doctor'],
+                    'hospital' => $filtre['id_hospital']
+                ]);
+                foreach ($disponibilities as $key_d => $disponibilitie) {
+                    $a[$key_a][] = [
+                        'id' => $disponibilitie->getId(),
+                        'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
+                        'heure_debut' => $disponibilitie->getHeureDebut(),
+                        'heure_fin' => $disponibilitie->getHeureFin(),
+                    ];
+                }
             }
-
             $n[$month] = $a;
         }
-
         return $n;
     }
+
     /**
      * Récupère l'agenda d'un patient pour un mois donné.
      * 
