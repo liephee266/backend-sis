@@ -20,9 +20,9 @@ class Disponibilite
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
     private ?Doctor $doctor = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["disponibilite:read", "meeting:read"])]
-    private ?\DateTimeInterface $date_j = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(["disponibilite:read","meeting:read"])]
+    private ?string $date_j = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, columnDefinition: "TIME")]
     #[Groups(["disponibilite:read", "meeting:read"])]
@@ -76,20 +76,6 @@ class Disponibilite
         return $this;
     }
 
-    public function getDateJ(): ?\DateTimeInterface
-    {
-        return $this->date_j;
-    }
-
-    public function setDateJ(\DateTimeInterface|string $date_j): static
-    {
-        if (is_string($date_j)) {
-            $this->date_j = new \DateTime($date_j);
-        } else {
-            $this->date_j = $date_j;
-        }
-        return $this;
-    }
 
     public function getHeureDebut(): ?string
     {
@@ -160,6 +146,17 @@ class Disponibilite
     public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+    public function getDateJ(): ?string
+    {
+        return $this->date_j;
+    }
+    
+    public function setDateJ(string $date_j): static
+    {
+        $this->date_j = $date_j;
 
         return $this;
     }
