@@ -37,8 +37,12 @@ class NotificationManager
         $notification
             ->setTitle($title)
             ->setContent($content)
-            ->setReceiver($receiver)
             ->setIsRead(false);
+
+        // Ne définir le receiver que s’il est non nul
+        if ($receiver !== null) {
+            $notification->setReceiver($receiver);
+        }
 
         $this->em->persist($notification);
 
@@ -51,7 +55,8 @@ class NotificationManager
         return $notification;
     }
 
-    public function publishNotification(Notification $notification, ?string $customChannel = null, bool $isGlobal = false): void
+
+    public function publishNotification(Notification $notification, ?string $customChannel = null, bool $isGlobal = true): void
     {
         $data = $this->serializer->serialize($notification, 'json', ['groups' => ['notification:read']]);
 

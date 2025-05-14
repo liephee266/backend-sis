@@ -149,7 +149,7 @@ class HospitalController extends AbstractController
 
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Hospital", $data);
-
+            
             // Vérification des erreurs après la persistance des données
             if (!empty($errors['entity'])) {
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
@@ -160,9 +160,11 @@ class HospitalController extends AbstractController
                 $notification = $this->notificationManager->createNotification(
                     'Un nouvel Hopital a été créé',
                     'Un nouvel Hopital a été créé en attente de validation.',
+                    null,
+                    true // Notification globale
                 );
 
-                $this->notificationManager->publishNotification($notification, '/notifications/superadminsis');
+                $this->notificationManager->publishNotification($notification, customChannel: 'notification-adminsis', isGlobal: false);
 
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital crée avec succès"], Response::HTTP_OK);
             }
@@ -237,7 +239,7 @@ class HospitalController extends AbstractController
                     "Le statut d'un Hopital nommé:".$hospital->getName(). ' à été modifier par '.$this->$user->getFirstName().'.',
                 );
 
-                $this->notificationManager->publishNotification($notification, '/notifications/superadminsis');
+                $this->notificationManager->publishNotification($notification, 'notifications-superadminsis');
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Hopital modifié avec succès"], Response::HTTP_OK);
             }
         
