@@ -1,0 +1,7 @@
+# This file is part of the Symfony package.
+mercure:
+    enable_profiler: '%kernel.debug%'
+    hubs:
+        default:
+            url: '%env(MERCURE_URL)%'
+            jwt: '%env(MERCURE_JWT_SECRET)%'

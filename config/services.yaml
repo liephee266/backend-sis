@@ -11,6 +11,13 @@ parameters:
     pusher.app_secret: '%env(PUSHER_APP_SECRET)%'
     pusher.app_cluster: '%env(PUSHER_APP_CLUSTER)%'
 services:
+    # config/services.yaml
+    App\Security\UserProvider:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'security.user_provider' }
+
     App\Services\MailerService:
         arguments:
             $fromAddress: '%env(MAILER_FROM)%'

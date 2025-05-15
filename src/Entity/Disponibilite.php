@@ -77,20 +77,6 @@ class Disponibilite
         return $this;
     }
 
-    public function getDateJ(): ?\DateTimeInterface
-    {
-        return $this->date_j;
-    }
-
-    public function setDateJ(\DateTimeInterface|string $date_j): static
-    {
-        if (is_string($date_j)) {
-            $this->date_j = new \DateTime($date_j);
-        } else {
-            $this->date_j = $date_j;
-        }
-        return $this;
-    }
 
     public function getHeureDebut(): ?string
     {
@@ -164,7 +150,20 @@ class Disponibilite
 
         return $this;
     }
+    public function getDateJ(): ?\DateTimeInterface
+    {
+        return $this->date_j;
+    }
 
+    public function setDateJ(\DateTimeInterface|string $date_j): static
+    {
+        if (is_string($date_j)) {
+            $this->date_j = new \DateTime($date_j);
+        } else {
+            $this->date_j = $date_j;
+        }
+        return $this;
+    }
     public function getHospital(): ?Hospital
     {
         return $this->hospital;

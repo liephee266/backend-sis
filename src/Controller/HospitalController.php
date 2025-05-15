@@ -62,6 +62,21 @@ class HospitalController extends AbstractController
     public function index(Request $request): Response
     {
         try {
+             if (
+                !$this->security->isGranted('ROLE_SUPER_ADMIN') &&
+                !$this->security->isGranted('ROLE_ADMIN_SIS') &&
+                !$this->security->isGranted('ROLE_ADMIN_HOSPITAL') &&
+                !$this->security->isGranted('ROLE_DOCTOR') &&
+                !$this->security->isGranted('ROLE_PATIENT') &&
+                !$this->security->isGranted('ROLE_SUPER_ADMIN')
+            )
+        
+            {
+                return new JsonResponse([
+                    "message" => "Vous n'avez pas accès à cette ressource",
+                    "code" => 403
+                ], Response::HTTP_FORBIDDEN);
+            }
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
@@ -70,8 +85,6 @@ class HospitalController extends AbstractController
                 // On filtre par statut "validated" pour les utilisateurs normaux
                 $filtre = ['status' => 2];
             }
-
-
             // Récupération des utilisateurs avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Hospital', 'hospital:read', $filtre);
 

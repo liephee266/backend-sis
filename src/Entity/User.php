@@ -79,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $last_name;
 
-    #[ORM\Column(type: "string", nullable: true)]
+    #[ORM\Column(type: "string",unique: true, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgentist:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
@@ -94,7 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private ?string $address = null;
 
-    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[ORM\Column(type: "string", length: 255,unique: true, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",

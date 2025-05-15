@@ -75,33 +75,33 @@ class Toolkit
      * @author Orphée Lié <lieloumloum@gmail.com>
      */
     public function formatArrayEntityLabel(array $dataSelect, array $filtres=[], string $portail = null): array
-{
-    $allData = [];
-    $entities = [];
-    foreach ($dataSelect as $key => $value) {
-        if ( !empty($filtres)) {
-            // Pour les autres entités, on applique simplement le filtre
-            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
-        } else {
-            // Si aucune condition de filtre spécifique, on prend toutes les entités
-            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
+    {
+        $allData = [];
+        $entities = [];
+        foreach ($dataSelect as $key => $value) {
+            if ( !empty($filtres)) {
+                // Pour les autres entités, on applique simplement le filtre
+                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
+            } else {
+                // Si aucune condition de filtre spécifique, on prend toutes les entités
+                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
+            }
+            // Sérialisation des données
+            $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
+            
+            if ($value == 'TypeHopital') {
+                # code...
+                $value = 'typeHopital';
+                $allData[$value] = $data;
+            }else {
+                # code...
+                $allData[strtolower($value)] = $data;
+            }
+            // $allData[$value] = $data;
         }
-        // Sérialisation des données
-        $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-        
-        if ($value == 'TypeHopital') {
-            # code...
-            $value = 'typeHopital';
-            $allData[$value] = $data;
-        }else {
-            # code...
-            $allData[strtolower($value)] = $data;
-        }
-        // $allData[$value] = $data;
+        // Retourner les données transformées
+        return $this->transformArray($allData);
     }
-    // Retourner les données transformées
-    return $this->transformArray($allData);
-}
 
     /**
      * Transforme un tableau d'entrées en un format où l'ID devient la clé et la première autre valeur est également ajoutée.

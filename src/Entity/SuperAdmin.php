@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\Uuid;
 
 
 #[ORM\Entity]
@@ -23,6 +24,15 @@ class SuperAdmin
     #[ORM\Column(type: "string", length: 255)]
     #[Groups("superadmin:read")]
     private string $password;
+
+    #[ORM\Column(length: 255)]
+    #[Groups("superadmin:read")]
+    private ?string $uuid = null;
+
+    public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toString();
+    }
 
     // ✅ Getters & Setters
 
@@ -50,6 +60,16 @@ class SuperAdmin
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): static
+    {
+        $this->uuid = $uuid;
         return $this;
     }
 }
