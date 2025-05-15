@@ -73,6 +73,7 @@ class Meeting
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["meeting:read"])]
     private ?Hospital $hospital = null;
 
     public function __construct()
