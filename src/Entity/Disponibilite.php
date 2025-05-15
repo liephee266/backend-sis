@@ -15,6 +15,7 @@ class Disponibilite
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["disponibilite:read", "meeting:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
