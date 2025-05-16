@@ -97,6 +97,11 @@ class MeetingController extends AbstractController
             if (!$patient && !$doctor) {
                 return new JsonResponse(['code' => 404, 'message' => "Aucun patient ou médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
             }
+            //si c'est un agent hospitalier
+            if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+                $agenthospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user])->getHospital()->getId();
+                $filtre['hospital'] = $agenthospital;
+            }
 
             // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
