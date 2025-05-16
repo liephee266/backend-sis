@@ -93,16 +93,20 @@ class MeetingController extends AbstractController
                 $filtre['doctor'] = $doctor->getId();
             }
 
-            //si l'utilusateur est un agent hospitalier
-            $agenthospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user])->getHospital()->getId();
-            if ($agenthospital) {
-                $filtre['hospital'] = $agenthospital->getId();
-                $filtre['date'] = $request->query->get('date');
-            }
+                    // Cas : Agent hospitalier
+            $agentHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user]);
+            if ($agentHospital && $agentHospital->getHospital()) {
+                $filtre['hospital'] = $agentHospital->getHospital()->getId();
 
+                // Filtrage facultatif par date (ex: ?date=2025-05-16)
+                $date = $request->query->get('date');
+                if ($date) {
+                    $filtre['date'] = $date;
+                }
+            }
             // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-            if (!$patient && !$doctor && !$agenthospital) {
-                return new JsonResponse(['code' => 404, 'message' => "Aucun utilisateur trouvé pour ce rendez vouss"], Response::HTTP_NOT_FOUND);
+            if (!$patient && !$doctor && !$agentHospital) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucun utilisateur trouvé pour ce rendez vous"], Response::HTTP_NOT_FOUND);
             }
             // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
@@ -147,7 +151,20 @@ class MeetingController extends AbstractController
                     return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous n'est pas lié à vous"], Response::HTTP_FORBIDDEN);
                 }
             }
+           // L’agent hospitalier ne peut voir que les rendez-vous de son hôpital
+            if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+                $agentHospital = $this->entityManager
+                    ->getRepository(AgentHospital::class)
+                    ->findOneBy(['user' => $user]);
 
+                if (!$agentHospital || !$agentHospital->getHospital()) {
+                    return new JsonResponse(['code' => 403, 'message' => "Aucun hôpital associé à cet agent"], Response::HTTP_FORBIDDEN);
+                }
+
+                if ($meeting->getHospital()?->getId() !== $agentHospital->getHospital()->getId()) {
+                    return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous n'est pas lié à votre hôpital"], Response::HTTP_FORBIDDEN);
+                }
+            }
             // Sérialisation du rendez-vous
             $serialized = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
 

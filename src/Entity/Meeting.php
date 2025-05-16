@@ -16,40 +16,40 @@ class Meeting
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(["data_select","meeting:read"])]
+    #[Groups(["data_select","meeting:read","agenthospital:read","hospital:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Doctor::class)]
     #[ORM\JoinColumn(name: "id_medecin", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, columnDefinition: "TIME")]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private ?\DateTimeInterface $heure = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private string $firstName;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private string $lastName;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["data_select","meeting:read"])]
+    #[Groups(["data_select","meeting:read","agenthospital:read","hospital:read"])]
     private ?string $motif = null;
 
     #[ORM\ManyToOne(inversedBy: 'meeting_id')]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private ?Patient $patient_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private ?State $state_id = null;
 
     /**
@@ -57,14 +57,14 @@ class Meeting
      * 
      */
     #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'meeting')]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
     private Collection $disponibilites;
 
     #[ORM\Column(length: 255)]
     private ?string $uuid = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read",])]
     private  $created_at;
 
     #[ORM\Column(type: Types::DATE_MUTABLE,  nullable: true)]
@@ -73,7 +73,7 @@ class Meeting
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["meeting:read"])]
+    #[Groups(["meeting:read","agenthospital:read"])]
     private ?Hospital $hospital = null;
 
     public function __construct()
