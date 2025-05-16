@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Doctor;
+use App\Entity\Hospital;
 use App\Entity\Patient;
 use App\Entity\User;
 use App\Services\Toolkit;
@@ -466,4 +468,69 @@ class AppController extends AbstractController
             return new JsonResponse(['code' => 500, 'message' => "Erreur interne du serveur : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+        /**
+     * Récupère les rendez-vous (meetings) d’un médecin pour un hôpital donné.
+     *
+     * Accessible uniquement aux utilisateurs ayant le rôle ROLE_DOCTOR.
+     * Vérifie que le médecin est bien rattaché à l’hôpital passé dans l’URL.
+     *
+     * @Route("/api/doctor/meetings/hospital/{hospitalId}", name="doctor_meetings_by_hospital", methods={"GET"})
+     *
+     * @param int $hospitalId L’identifiant de l’hôpital à filtrer
+     * @param Request $request La requête HTTP (utile pour la pagination, les filtres éventuels, etc.)
+     *
+     * @return JsonResponse
+     * - 200 : Liste paginée des rendez-vous
+     * - 403 : Accès refusé (rôle ou hôpital non autorisé)
+     * - 404 : Médecin ou hôpital introuvable
+     * - 500 : Erreur interne
+     * @author Daryon Rocknes <daryonrocknes@icloud.com>
+     */
+    #[Route('/doctor/meetings/{hospitalId}', name: 'doctor_meetings_by_hospital', methods: ['GET'])]
+    public function getMeetingsByHospital(int $hospitalId, Request $request): JsonResponse
+    {
+        try {
+            //  Vérification rôle
+            if (!$this->security->isGranted('ROLE_DOCTOR')) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès réservé aux médecins"], Response::HTTP_FORBIDDEN);
+            }
+
+            //  Récupérer le médecin
+            $user = $this->toolkit->getUser($request);
+            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+            if (!$doctor) {
+                return new JsonResponse(['code' => 404, 'message' => "Médecin introuvable"], Response::HTTP_NOT_FOUND);
+            }
+
+            // Récupérer l'hôpital
+            $hospital = $this->entityManager->getRepository(Hospital::class)->find($hospitalId);
+
+            if (!$hospital) {
+                return new JsonResponse(['code' => 404, 'message' => "Hôpital introuvable"], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier que le médecin est rattaché à cet hôpital
+            if (!$doctor->getHospitals()->contains($hospital)) {
+                return new JsonResponse([
+                    'code' => 403,
+                    'message' => "Ce médecin n'est pas rattaché à l'hôpital demandé"
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            //  Appliquer les filtres
+            $filtre = [
+                'doctor' => $doctor->getId(),
+                'hospital' => $hospitalId
+            ];
+
+            // Pagination des rendez-vous
+            $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
+
+            return new JsonResponse($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' => 'Erreur interne : ' . $th->getMessage()], 500);
+        }
+    }
+
 }
