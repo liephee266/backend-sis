@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\Doctor;
 use App\Entity\Hospital;
+use App\Entity\Meeting;
 use App\Entity\Patient;
 use App\Entity\User;
 use App\Services\Toolkit;
@@ -490,47 +491,75 @@ class AppController extends AbstractController
     public function getMeetingsByHospital(int $hospitalId, Request $request): JsonResponse
     {
         try {
-            //  Vérification rôle
+            // Vérification que l'utilisateur a bien le rôle DOCTOR
             if (!$this->security->isGranted('ROLE_DOCTOR')) {
-                return new JsonResponse(['code' => 403, 'message' => "Accès réservé aux médecins"], Response::HTTP_FORBIDDEN);
-            }
-
-            //  Récupérer le médecin
-            $user = $this->toolkit->getUser($request);
-            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-
-            if (!$doctor) {
-                return new JsonResponse(['code' => 404, 'message' => "Médecin introuvable"], Response::HTTP_NOT_FOUND);
-            }
-
-            // Récupérer l'hôpital
-            $hospital = $this->entityManager->getRepository(Hospital::class)->find($hospitalId);
-
-            if (!$hospital) {
-                return new JsonResponse(['code' => 404, 'message' => "Hôpital introuvable"], Response::HTTP_NOT_FOUND);
-            }
-
-            // Vérifier que le médecin est rattaché à cet hôpital
-            if (!$doctor->getHospitals()->contains($hospital)) {
                 return new JsonResponse([
                     'code' => 403,
-                    'message' => "Ce médecin n'est pas rattaché à l'hôpital demandé"
-                ], Response::HTTP_FORBIDDEN);
+                    'message' => "Accès réservé aux médecins"
+                ], JsonResponse::HTTP_FORBIDDEN);
             }
-
-            //  Appliquer les filtres
-            $filtre = [
-                'doctor' => $doctor->getId(),
-                'hospital' => $hospitalId
-            ];
-
-            // Pagination des rendez-vous
-            $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
-
-            return new JsonResponse($response, Response::HTTP_OK);
+    
+            // Récupération de l'utilisateur connecté
+            $user = $this->toolkit->getUser($request);
+    
+            // Récupération de l'entité Doctor
+            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+            if (!$doctor) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Médecin introuvable"
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+    
+            // Récupération de l'hôpital demandé
+            $hospital = $this->entityManager->getRepository(Hospital::class)->find($hospitalId);
+            if (!$hospital) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Hôpital introuvable"
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+    
+            // Vérification de l'appartenance du meeting à ce médecin et cet hôpital
+            $meetings = $this->entityManager->getRepository(Meeting::class)->findBy([
+                'doctor' => $doctor,
+                'hospital' => $hospital
+            ]);
+    
+            // Si aucun meeting trouvé
+            if (!$meetings) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Aucun meeting trouvé pour ce médecin dans cet hôpital"
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+    
+            // Optionnel : filtre par date si présent dans les query params
+            $date = $request->query->get('date');
+            if ($date) {
+                $meetings = array_filter($meetings, function($meeting) use ($date) {
+                    return $meeting->getDate()->format('Y-m-d') === $date;
+                });
+            }
+    
+            // Construction de la réponse
+            $response = array_map(function($meeting) {
+                return [
+                    'id' => $meeting->getId(),
+                    'doctor' => $meeting->getDoctor()->getUser()->getFirstName() . ' ' . $meeting->getDoctor()->getUser()->getLastName(),
+                    'hospital' => $meeting->getHospital()->getName(),
+                    'patient' => $meeting->getPatientId()->getUser()->getFirstName() . ' ' . $meeting->getPatientId()->getUser()->getLastName(),
+                    'date' => $meeting->getDate()->format('Y-m-d H:i'),
+                    // Autres champs à retourner
+                ];
+            }, $meetings);
+    
+            return new JsonResponse($response, JsonResponse::HTTP_OK);
         } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' => 'Erreur interne : ' . $th->getMessage()], 500);
+            return new JsonResponse([
+                'code' => 500,
+                'message' => 'Erreur interne : ' . $th->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
 }
