@@ -103,10 +103,25 @@ class MeetingController extends AbstractController
                     $filtre['hospital'] = $agentHospital->getHospital()->getId();
                 }
             }
+              // ✅ Filtrage par année et mois
+            $year = $request->query->get('year');
+            $month = $request->query->get('month');
+
+            if ($year && $month) {
+                try {
+                    $startDate = new \DateTimeImmutable("$year-$month-01");
+                    $endDate = $startDate->modify('last day of this month')->setTime(23, 59, 59);
+
+                    $filtre['date_start'] = $startDate;
+                    $filtre['date_end'] = $endDate;
+                } catch (\Exception $e) {
+                    return new JsonResponse(['code' => 400, 'message' => "Format de date invalide"], Response::HTTP_BAD_REQUEST);
+                }
+            }
             // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-            // if (!$patient && !$doctor && !$agentHospital) {
-            //     return new JsonResponse(['code' => 404, 'message' => "Aucun utilisateur trouvé pour ce rendez vous"], Response::HTTP_NOT_FOUND);
-            // }
+            if (!$patient && !$doctor && !$agentHospital) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucun utilisateur trouvé pour ce rendez vous"], Response::HTTP_NOT_FOUND);
+            }
             // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
 
