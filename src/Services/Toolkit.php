@@ -602,5 +602,6 @@ class Toolkit
         }
         return $daysAssoc;
     }
+   
 }
 
