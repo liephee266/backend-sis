@@ -118,11 +118,7 @@ class MeetingController extends AbstractController
                     return new JsonResponse(['code' => 400, 'message' => "Format de date invalide"], Response::HTTP_BAD_REQUEST);
                 }
             }
-            // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-            if (!$patient && !$doctor && !$agentHospital) {
-                return new JsonResponse(['code' => 404, 'message' => "Aucun utilisateur trouvé pour ce rendez vous"], Response::HTTP_NOT_FOUND);
-            }
-            // Récupération des Meetings avec pagination
+            // // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
 
             // Retour d'une réponse JSON avec les Meetings et un statut HTTP 200 (OK)
