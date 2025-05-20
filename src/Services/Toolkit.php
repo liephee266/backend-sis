@@ -602,6 +602,14 @@ class Toolkit
         }
         return $daysAssoc;
     }
-   
+
+    function hasRoles(array $roles) : bool {
+        foreach ($roles as $role) {
+            if ($this->security->isGranted($role)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

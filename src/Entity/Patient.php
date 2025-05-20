@@ -103,6 +103,9 @@ class Patient
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'patient')]
     private Collection $HistoriqueMedical;
 
+    #[ORM\ManyToOne(inversedBy: 'patients')]
+    private ?User $created_by = null;
+
     public function __construct()
     {   
         $this->uuid = Uuid::v7()->toString();
@@ -361,6 +364,18 @@ class Patient
                 $historiqueMedical->setPatient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): static
+    {
+        $this->created_by = $created_by;
 
         return $this;
     }
