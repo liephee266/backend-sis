@@ -1,24 +1,26 @@
 <?php
 namespace App\Services;
 
-use App\Entity\DossierMedicale;
-use App\Entity\Patient;
 use DateTime;
 use Exception;
 use DatePeriod;
 use DateInterval;
 use App\Entity\User;
 use DateTimeImmutable;
+use App\Entity\Meeting;
+use App\Entity\Patient;
 use Pagerfanta\Pagerfanta;
 use App\Entity\Disponibilite;
-use App\Entity\Meeting;
+use App\Entity\DossierMedicale;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+// use Symfony\Component\DependencyInjection\Loader\Configurator\security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 
@@ -37,12 +39,14 @@ class Toolkit
     private EntityManagerInterface $entityManager;
     private SerializerInterface $serializer;
     private JWTEncoderInterface $jwtManager;
-    
-    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager)
+    private Security $security;
+
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager, Security $security)
     {
         $this->entityManager = $entityManager;  
         $this->serializer = $serializer;
         $this->jwtManager = $jwtManager;
+        $this->security = $security;
     }
 
     /**
