@@ -94,7 +94,7 @@ class AgendaController extends AbstractController
         return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
 
         // ROLE_RECEPTIONIST (agent d'accueil)
-    }elseif ($this->security->isGranted('ROLE_RECEPTIONIST')) {
+    }elseif ($this->security->isGranted('ROLE_AGENT_ACCEUIL')) {
             $currentUser = $this->toolkit->getUser($request);
             $idAgenttHospital = $currentUser->getHospital()->getId();
 

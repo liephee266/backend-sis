@@ -103,21 +103,6 @@ class MeetingController extends AbstractController
                     $filtre['hospital'] = $agentHospital->getHospital()->getId();
                 }
             }
-              // ✅ Filtrage par année et mois
-            $year = $request->query->get('year');
-            $month = $request->query->get('month');
-
-            if ($year && $month) {
-                try {
-                    $startDate = new \DateTimeImmutable("$year-$month-01");
-                    $endDate = $startDate->modify('last day of this month')->setTime(23, 59, 59);
-
-                    $filtre['date_start'] = $startDate;
-                    $filtre['date_end'] = $endDate;
-                } catch (\Exception $e) {
-                    return new JsonResponse(['code' => 400, 'message' => "Format de date invalide"], Response::HTTP_BAD_REQUEST);
-                }
-            }
             // // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
 
@@ -198,7 +183,7 @@ class MeetingController extends AbstractController
     #[Route('/', name: 'meeting_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        // Vérification des autorisations de l'utilisateur connecté
+        // // Vérification des autorisations de l'utilisateur connecté
         if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
