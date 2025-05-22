@@ -20,7 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * 
  * @author  Orphée Lié <lieloumloum@gmail.com>
  */
-#[Route('/api/v1/dossier_medicale')]
+#[Route('/api/v1/dossier-medicale')]
 #[ApiEntity(\App\Entity\DossierMedicale::class)]
 class DossierMedicaleController extends AbstractController
 {
@@ -47,7 +47,7 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'DossierMedicale_index', methods: ['GET'])]
+    #[Route('/', name: 'dossier-medicale_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
         // try {
@@ -80,12 +80,22 @@ class DossierMedicaleController extends AbstractController
                 if (!$patient) {
                     return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
                 }
-
+                
                 // Récupérer le dossier médical du patient connecté
                 $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
+                
                 if (!$dossierMedical) {
                     return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
                 }
+                // filtre dossier médical
+                $filtre = [
+                    'patient_id' => $patient->getId(),
+
+                ];
+                  // Récupération des DossierMedicales avec pagination et filtre
+                $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
+                return new JsonResponse($response, Response::HTTP_OK);
+
             }
             else {
             // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
@@ -96,13 +106,15 @@ class DossierMedicaleController extends AbstractController
                 $dossiersAccessibles = array_filter($dossiers, function ($dossier) use ($user) {
                     return in_array($user->getId(), $dossier->getAccess() ?? []);
                 });
-
                 }
+                $filtre = [
+                    'access' => $dossiersAccessibles
+                ];
 
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre, $dossiersAccessibles);
+            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
 
             return new JsonResponse($response, Response::HTTP_OK);
         // } catch (\Throwable $th) {
@@ -119,7 +131,7 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'DossierMedicale_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'dossier-medicale_show', methods: ['GET'])]
     public function show(DossierMedicale $DossierMedicale, Request $request): Response
     {
         try {
@@ -174,14 +186,14 @@ class DossierMedicaleController extends AbstractController
         }
     }
     /**
-     * Création d'un nouvel DossierMedicale
+     * Création d'un nouveau DossierMedicale
      *
      * @param Request $request
      * @return Response
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'DossierMedicale_create', methods: ['POST'])]
+    #[Route('/', name: 'dossier-medicale_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try {
@@ -220,7 +232,7 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'DossierMedicale_update', methods: ['PUT'])]
+    #[Route('/{id}', name: 'dossier-medicale_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
         try {
@@ -271,7 +283,7 @@ class DossierMedicaleController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/{id}', name: 'DossierMedicale_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'dossier-medicale_delete', methods: ['DELETE'])]
     public function delete(DossierMedicale $DossierMedicale, EntityManagerInterface $entityManager, Request $request,$id): Response
     {
         try {

@@ -203,67 +203,68 @@ class Toolkit
      * @return array Les données paginées et les informations de pagination.
      */
     public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
-    {
-        $context = (new ObjectNormalizerContextBuilder())
-            ->withGroups($groupe_attribute)
-            ->toArray();
-        // Initialiser les paramètres de pagination par défaut
-        $query = [];
-        // Vérifie si les paramètres `page` et `limit` sont présents dans la requête, sinon valeurs par défaut
-        if ($request->query->has('page') && $request->query->has('limit')) {
-            $query['page'] = $request->query->get('page');
-            $query['limit'] = $request->query->get('limit');
-        } 
-        // Définit le numéro de page et la limite d'éléments par page à partir de la requête
-        $page = $request->query->getInt('page', $query['page'] ?? 1);
-        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
-        // Création du QueryBuilder pour la classe d'entité spécifiée
-        $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
-        // Appliquer les filtres si ils existent
-        if ($filtre) {
-            foreach ($filtre as $key => $value) {
-                if (is_array($value)) {
-                    // Si la valeur est un tableau, on vérifie si le champ est aussi un tableau JSON
-                    // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
-                    if (in_array($key, ['roles', 'tags', 'permissions'])) {
-                        // On utilise JSON_CONTAINS (MySQL uniquement)
-                        $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
-                        // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
-                        // Doctrine attend une chaîne JSON ici
-                        $queryBuilder->setParameter($key, json_encode($value));
-                    } else {
-                        // Cas classique avec IN
-                        $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
-                        $queryBuilder->setParameter($key, $value);
-                    }
-                } elseif ($key === 'created_at' || $key === 'updated_at') {
-                    $queryBuilder->$operator("u.$key >= :$key");
-                    $queryBuilder->setParameter($key, $value);
+{
+    $context = (new ObjectNormalizerContextBuilder())
+        ->withGroups($groupe_attribute)
+        ->toArray();
+
+    $query = [];
+
+    if ($request->query->has('page') && $request->query->has('limit')) {
+        $query['page'] = $request->query->get('page');
+        $query['limit'] = $request->query->get('limit');
+    }
+
+    $page = $request->query->getInt('page', $query['page'] ?? 1);
+    $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
+
+    $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
+
+    if (!is_string($operator) || !method_exists($queryBuilder, $operator)) {
+        throw new \InvalidArgumentException("Invalid query builder method: $operator");
+    }
+
+    if ($filtre) {
+        foreach ($filtre as $key => $value) {
+            if ($value === null) {
+                // Cas où on veut les entités où le champ est NULL
+                $queryBuilder->$operator("u.$key IS NULL");
+            } elseif (is_array($value)) {
+                if (in_array($key, ['roles', 'tags', 'permissions'])) {
+                    $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
+                    $queryBuilder->setParameter($key, json_encode($value));
                 } else {
-                    $queryBuilder->$operator("u.$key = :$key");
+                    $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
                     $queryBuilder->setParameter($key, $value);
                 }
+            } elseif ($key === 'created_at' || $key === 'updated_at') {
+                $queryBuilder->$operator("u.$key >= :$key");
+                $queryBuilder->setParameter($key, $value);
+            } else {
+                $queryBuilder->$operator("u.$key = :$key");
+                $queryBuilder->setParameter($key, $value);
             }
-        }        
-        $queryBuilder->orderBy('u.id', 'DESC');
-        // Configuration de l'adaptateur pour Pagerfanta pour gérer la pagination
-        $adapter = new QueryAdapter($queryBuilder);
-        $pagerfanta = new Pagerfanta($adapter);
-        $pagerfanta->setMaxPerPage($maxPerPage);
-        $pagerfanta->setCurrentPage($page);
-
-        // Obtenir les résultats de la page actuelle
-        $items = $pagerfanta->getCurrentPageResults();
-        
-        // Sérialiser les résultats paginés avec le groupe de sérialisation spécifié
-        $data = $this->serializer->serialize($items, 'json', $context);
-
-        // Vérifie si le nom de la classe se termine par "s", sinon ajoute "s" pour un pluriel de convention
-        if (!str_ends_with($class_name, 's')) {
-            $class_name = $class_name . 's';
         }
-        return $this->p($pagerfanta, json_decode($data), $page, $maxPerPage, $class_name);
     }
+
+    $queryBuilder->orderBy('u.id', 'DESC');
+
+    $adapter = new QueryAdapter($queryBuilder);
+    $pagerfanta = new Pagerfanta($adapter);
+    $pagerfanta->setMaxPerPage($maxPerPage);
+    $pagerfanta->setCurrentPage($page);
+
+    $items = $pagerfanta->getCurrentPageResults();
+
+    $data = $this->serializer->serialize($items, 'json', $context);
+
+    if (!str_ends_with($class_name, 's')) {
+        $class_name .= 's';
+    }
+
+    return $this->p($pagerfanta, json_decode($data), $page, $maxPerPage, $class_name);
+}
+
     /**
      * Récupère l'utilisateur authentifié depuis la requête HTTP.
      * Et renvoie l'objet User correspondant.
