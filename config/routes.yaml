@@ -8,3 +8,10 @@ controllers:
 api_login_check:
     path: /api/v1/connexion
     methods: [POST]
+
+api_test_config_doc:
+    path: /
+    methods: [GET]
+    defaults:
+        _controller: App\Controller\DebugController::index
+        _format: json

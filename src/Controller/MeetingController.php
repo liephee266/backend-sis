@@ -66,39 +66,59 @@ class MeetingController extends AbstractController
     public function index(Request $request): Response
     {
         try {
+            
             // Vérification des autorisations de l'utilisateur connecté
             if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-
-            $filtre = [];
-
+            
             // Récupération de l'utilisateur connectéù&
             $user = $this->toolkit->getUser($request);
 
             // Vérifier si l'utilisateur est un patient
+            if ($this->security->isGranted('ROLE_PATIENT')) {
             $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
-            // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
-            if ($patient) {
-                $filtre['patient_id'] = $patient->getId();
-            }
+                // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
+                if ($patient) {
+                    $filtre['patient_id'] = $patient->getId();
 
+                }
+            }
             // Vérifier si l'utilisateur est un médecin
-            $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-
-            // Si un médecin est trouvé, appliquer le filtre sur l'ID du médecin
-            if ($doctor) {
-                $filtre['doctor'] = $doctor->getId();
+            if ($this->security->isGranted('ROLE_DOCTOR')) {
+                // Vérifier si l'utilisateur est un médecin
+                $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+                if ($doctor) {
+                    $filtre['doctor'] = $doctor->getId();
+                }
             }
-
-            // Si aucun des deux n'est trouvé (pas de patient et pas de médecin), vous pouvez retourner une erreur
-            if (!$patient && !$doctor) {
-                return new JsonResponse(['code' => 404, 'message' => "Aucun patient ou médecin trouvé pour cet utilisateur"], Response::HTTP_NOT_FOUND);
+            
+             // Cas : Agent hospitalier
+             if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+                // Vérifier si l'utilisateur est un agent hospitalier
+                $agentHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user]);
+                if ($agentHospital && $agentHospital->getHospital()) {
+                    $filtre['hospital'] = $agentHospital->getHospital()->getId();
+                }
             }
+              // ✅ Filtrage par année et mois
+            $year = $request->query->get('year');
+            $month = $request->query->get('month');
 
-            // Récupération des Meetings avec pagination
+            if ($year && $month) {
+                try {
+                    $startDate = new \DateTimeImmutable("$year-$month-01");
+                    $endDate = $startDate->modify('last day of this month')->setTime(23, 59, 59);
+
+                    $filtre['date_start'] = $startDate;
+                    $filtre['date_end'] = $endDate;
+                } catch (\Exception $e) {
+                    return new JsonResponse(['code' => 400, 'message' => "Format de date invalide"], Response::HTTP_BAD_REQUEST);
+                }
+            }
+            // // Récupération des Meetings avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
 
             // Retour d'une réponse JSON avec les Meetings et un statut HTTP 200 (OK)
@@ -137,11 +157,24 @@ class MeetingController extends AbstractController
 
             if ($this->security->isGranted('ROLE_DOCTOR')) {
                 // Le médecin ne peut voir que ses rendez-vous
-                if ($meeting->getPatientId()?->getUser()?->getId() !== $user->getId()) {
+                if ($meeting->getDoctor()?->getUser()?->getId() !== $user->getId()) {
                     return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous n'est pas lié à vous"], Response::HTTP_FORBIDDEN);
                 }
             }
+           // L’agent hospitalier ne peut voir que les rendez-vous de son hôpital
+            if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+                $agentHospital = $this->entityManager
+                    ->getRepository(AgentHospital::class)
+                    ->findOneBy(['user' => $user]);
 
+                if (!$agentHospital || !$agentHospital->getHospital()) {
+                    return new JsonResponse(['code' => 403, 'message' => "Aucun hôpital associé à cet agent"], Response::HTTP_FORBIDDEN);
+                }
+
+                if ($meeting->getHospital()?->getId() !== $agentHospital->getHospital()->getId()) {
+                    return new JsonResponse(['code' => 403, 'message' => "Ce rendez-vous n'est pas lié à votre hôpital"], Response::HTTP_FORBIDDEN);
+                }
+            }
             // Sérialisation du rendez-vous
             $serialized = $this->serializer->serialize($meeting, 'json', ['groups' => 'meeting:read']);
 

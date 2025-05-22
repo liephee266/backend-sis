@@ -55,7 +55,7 @@ class Consultation
 
     #[ORM\Column(type: "date", nullable: true)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "DossierMedicale:read", "HistoriqueMedical:read", "patient:read"])]
-    private ?\DateTimeInterface $dateSymptoms = null;
+    private ?\DateTimeInterface $date_symptoms = null;
 
     /**
      * @var Collection<int, Examination>
@@ -89,7 +89,7 @@ class Consultation
 
     #[ORM\Column(length: 255)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
-    private ?string $intensité_symptome = null;
+    private ?string $intensite_symptome = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(["consultation:read", "treatment:read", "examination:read", "dossier_medicale:read"])]
@@ -170,12 +170,12 @@ class Consultation
 
     public function getDateSymptoms(): ?\DateTimeInterface
     {
-        return $this->dateSymptoms;
+        return $this->date_symptoms;
     }
 
     public function setDateSymptoms(?\DateTimeInterface $dateSymptoms): self
     {
-        $this->dateSymptoms = $dateSymptoms;
+        $this->date_symptoms = $dateSymptoms;
         return $this;
     }
 
@@ -347,14 +347,14 @@ class Consultation
         return $this;
     }
 
-    public function getIntensitéSymptome(): ?string
+    public function getIntensiteSymptome(): ?string
     {
-        return $this->intensité_symptome;
+        return $this->intensite_symptome;
     }
 
-    public function setIntensitéSymptome(string $intensité_symptome): static
+    public function setIntensiteSymptome(string $intensite_symptome): static
     {
-        $this->intensité_symptome = $intensité_symptome;
+        $this->intensite_symptome = $intensite_symptome;
 
         return $this;
     }

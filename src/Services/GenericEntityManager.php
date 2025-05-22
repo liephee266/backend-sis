@@ -86,30 +86,24 @@ class GenericEntityManager
                     
                     // Récupère la collection existante (pour les updates)
                     $collection = $this->propertyAccessor->getValue($entity, $field);
-                    
                     $collection = new ArrayCollection();
-                    
                     // Ajoute chaque entité associée
                     foreach ($ids as $id) {
                         $relatedEntity = $this->entityManager
                             ->getRepository($associationMetadata['targetEntity'])
                             ->find(is_array($id) ? $id['id'] : $id);
-                        
                         if ($relatedEntity) {
                             $collection->add($relatedEntity);
                         }
                     }
-                    
                     $this->propertyAccessor->setValue($entity, $field, $collection);
                 }
                 // Si l'association est une relation "one-to-many"
                 elseif ($associationMetadata['type'] & ClassMetadata::ONE_TO_MANY) {
                     // On s'assure que la valeur est un tableau
                     $ids = is_array($value) ? $value : [$value];
-                    
                     // Récupère la collection existante (pour les updates)
                     $collection = $this->propertyAccessor->getValue($entity, $field);
-                    
                     // Ajoute chaque entité associée
                     foreach ($ids as $id) {
                         $relatedEntity = $this->entityManager
@@ -119,7 +113,6 @@ class GenericEntityManager
                             $collection->add($relatedEntity);
                         }
                     }
-                    
                     $this->propertyAccessor->setValue($entity, $field, $collection);
                 }
             }

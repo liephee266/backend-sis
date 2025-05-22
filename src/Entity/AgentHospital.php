@@ -15,16 +15,17 @@ class AgentHospital
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["agenthospital:read","meeting:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agentHospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["agenthospital:read"])]
+    #[Groups(["agenthospital:read","meeting:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'agentHospitals')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["agenthospital:read"])] 
+    #[Groups(["agenthospital:read","meeting:read"])] 
     private ?Hospital $hospital = null;
 
     #[ORM\Column(length: 255)]
