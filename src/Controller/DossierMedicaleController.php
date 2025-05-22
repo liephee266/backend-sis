@@ -67,7 +67,7 @@ class DossierMedicaleController extends AbstractController
             $user = $this->toolkit->getUser($request);
         
             // Si c'est un patient, on filtre uniquement ses historiques
-            if ($this->security->isGranted('ROLE_PATIENT')) {
+            // if ($this->security->isGranted('ROLE_PATIENT')) {
                 if (!$user) {
                     return new JsonResponse(['code' => 401, 'message' => "Utilisateur non connecté"], Response::HTTP_UNAUTHORIZED);
                 }
@@ -77,46 +77,55 @@ class DossierMedicaleController extends AbstractController
                     ->getRepository('App\Entity\Patient')
                     ->findOneBy(['user' => $user]);
 
-                if (!$patient) {
-                    return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
-                }
-                
+                // if (!$patient) {
+                //     return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
+                // }
                 // Récupérer le dossier médical du patient connecté
-                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
+                // $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
                 
-                if (!$dossierMedical) {
-                    return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
-                }
-                // filtre dossier médical
-                $filtre = [
-                    'patient_id' => $patient->getId(),
+            //     if (!$dossierMedical) {
+            //       return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
+            //     }
+            //     // filtre dossier médical
+            //     $filtre = [
+                    
 
+            //     ];
+            //       // Récupération des DossierMedicales avec pagination et filtre
+            //     $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
+            //     return new JsonResponse($response, Response::HTTP_OK);
+
+            // }
+            // else {
+            // // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
+            //     $dossiers = $this->entityManager
+            //     ->getRepository(DossierMedicale::class)
+            //     ->findAll();
+
+            //     $dossiersAccessibles = array_filter($dossiers, function ($dossier) use ($user) {
+            //         return in_array($user->getId(), $dossier->getAccess() ?? []);
+            //     });
+                
+                
+            //     $dossierIds = array_map(function ($dossier) {
+            //     return $dossier->getId();
+            // }, $dossiersAccessibles);
+
+            // Filtrer sur l'id
+                $filtre = [
+                    // 'patient_id' => $patient->getId(),
+                    'access' => [$user->getId()],
                 ];
-                  // Récupération des DossierMedicales avec pagination et filtre
+                // dd($filtre);
                 $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
                 return new JsonResponse($response, Response::HTTP_OK);
 
-            }
-            else {
-            // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
-                $dossiers = $this->entityManager
-                ->getRepository(DossierMedicale::class)
-                ->findAll();
-
-                $dossiersAccessibles = array_filter($dossiers, function ($dossier) use ($user) {
-                    return in_array($user->getId(), $dossier->getAccess() ?? []);
-                });
-                }
-                $filtre = [
-                    'access' => $dossiersAccessibles
-                ];
-
+            // }   
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre);
 
-            return new JsonResponse($response, Response::HTTP_OK);
+            // return new JsonResponse($response, Response::HTTP_OK);
         // } catch (\Throwable $th) {
         //         return $this->json(['code' => 500, 'message' => "Erreur lors de la recherche des Historique Medicals : " . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         //     }

@@ -228,13 +228,14 @@ class Toolkit
         throw new \InvalidArgumentException("Invalid query builder method: $operator");
     }
 
+    // dd($filtre);
     if ($filtre) {
         foreach ($filtre as $key => $value) {
             if ($value === null) {
                 // Cas où on veut les entités où le champ est NULL
                 $queryBuilder->$operator("u.$key IS NULL");
             } elseif (is_array($value)) {
-                if (in_array($key, ['roles', 'tags', 'permissions'])) {
+                if (in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
                     $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
                     $queryBuilder->setParameter($key, json_encode($value));
                 } else {
