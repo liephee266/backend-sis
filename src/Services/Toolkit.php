@@ -1,26 +1,24 @@
 <?php
 namespace App\Services;
 
+use App\Entity\DossierMedicale;
+use App\Entity\Patient;
 use DateTime;
 use Exception;
 use DatePeriod;
 use DateInterval;
 use App\Entity\User;
 use DateTimeImmutable;
-use App\Entity\Meeting;
-use App\Entity\Patient;
 use Pagerfanta\Pagerfanta;
 use App\Entity\Disponibilite;
-use App\Entity\DossierMedicale;
+use App\Entity\Meeting;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-// use Symfony\Component\DependencyInjection\Loader\Configurator\security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 
@@ -39,14 +37,12 @@ class Toolkit
     private EntityManagerInterface $entityManager;
     private SerializerInterface $serializer;
     private JWTEncoderInterface $jwtManager;
-    private Security $security;
-
-    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager, Security $security)
+    
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager)
     {
         $this->entityManager = $entityManager;  
         $this->serializer = $serializer;
         $this->jwtManager = $jwtManager;
-        $this->security = $security;
     }
 
     /**
@@ -79,33 +75,33 @@ class Toolkit
      * @author Orphée Lié <lieloumloum@gmail.com>
      */
     public function formatArrayEntityLabel(array $dataSelect, array $filtres=[], string $portail = null): array
-    {
-        $allData = [];
-        $entities = [];
-        foreach ($dataSelect as $key => $value) {
-            if ( !empty($filtres)) {
-                // Pour les autres entités, on applique simplement le filtre
-                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
-            } else {
-                // Si aucune condition de filtre spécifique, on prend toutes les entités
-                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
-            }
-            // Sérialisation des données
-            $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-            
-            if ($value == 'TypeHopital') {
-                # code...
-                $value = 'typeHopital';
-                $allData[$value] = $data;
-            }else {
-                # code...
-                $allData[strtolower($value)] = $data;
-            }
-            // $allData[$value] = $data;
+{
+    $allData = [];
+    $entities = [];
+    foreach ($dataSelect as $key => $value) {
+        if ( !empty($filtres)) {
+            // Pour les autres entités, on applique simplement le filtre
+            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
+        } else {
+            // Si aucune condition de filtre spécifique, on prend toutes les entités
+            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
         }
-        // Retourner les données transformées
-        return $this->transformArray($allData);
+        // Sérialisation des données
+        $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
+        
+        if ($value == 'TypeHopital') {
+            # code...
+            $value = 'typeHopital';
+            $allData[$value] = $data;
+        }else {
+            # code...
+            $allData[strtolower($value)] = $data;
+        }
+        // $allData[$value] = $data;
     }
+    // Retourner les données transformées
+    return $this->transformArray($allData);
+}
 
     /**
      * Transforme un tableau d'entrées en un format où l'ID devient la clé et la première autre valeur est également ajoutée.
@@ -148,8 +144,6 @@ class Toolkit
                         // Recherche la première clé différente de 'id' et extrait sa valeur
                         $otherKey = array_key_first(array_diff_key($item, ['id' => '']));
                         $value = $otherKey !== null ? $item[$otherKey] : null;
-                        //______à optimiser____________
-                        is_array($value) ? $value = $value["last_name"] : $value;
                         // Ajoute le résultat transformé
                         // if ($key == 'prestation' ) {
                         //     $result[$key][] = [
@@ -206,70 +200,82 @@ class Toolkit
      * 
      * @return array Les données paginées et les informations de pagination.
      */
-    public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
-{
-    $context = (new ObjectNormalizerContextBuilder())
-        ->withGroups($groupe_attribute)
-        ->toArray();
+public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
+    {
+        $context = (new ObjectNormalizerContextBuilder())
+            ->withGroups($groupe_attribute)
+            ->toArray();
+        // Initialiser les paramètres de pagination par défaut
+        $query = [];
+        // Vérifie si les paramètres `page` et `limit` sont présents dans la requête, sinon valeurs par défaut
+        if ($request->query->has('page') && $request->query->has('limit')) {
+            $query['page'] = $request->query->get('page');
+            $query['limit'] = $request->query->get('limit');
+        } 
+        // Définit le numéro de page et la limite d'éléments par page à partir de la requête
+        $page = $request->query->getInt('page', $query['page'] ?? 1);
+        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
+        // Création du QueryBuilder pour la classe d'entité spécifiée
+        $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
+        // Appliquer les filtres si ils existent
+        if ($filtre) {
+            foreach ($filtre as $key => $value) {
+                if (true) {
+                    // Si la valeur est un tableau, on vérifie si le champ est aussi un tableau JSON
+                    // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
+                    if (in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
+                        // On utilise JSON_CONTAINS (MySQL uniquement)
+                        
+                        // $queryBuilder->andWhere("JSON_CONTAINS(u.$key, :$key) = 1");
+                        
+                        // // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
+                        // // Doctrine attend une chaîne JSON ici
+                        // // dd($value[0]);
+                        // $queryBuilder->setParameter($key, json_encode($value)); 
 
-    $query = [];
+                        $qb = $this->entityManager->createQueryBuilder();
 
-    if ($request->query->has('page') && $request->query->has('limit')) {
-        $query['page'] = $request->query->get('page');
-        $query['limit'] = $request->query->get('limit');
-    }
-
-    $page = $request->query->getInt('page', $query['page'] ?? 1);
-    $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
-
-    $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
-
-    if (!is_string($operator) || !method_exists($queryBuilder, $operator)) {
-        throw new \InvalidArgumentException("Invalid query builder method: $operator");
-    }
-
-    // dd($filtre);
-    if ($filtre) {
-        foreach ($filtre as $key => $value) {
-            if ($value === null) {
-                // Cas où on veut les entités où le champ est NULL
-                $queryBuilder->$operator("u.$key IS NULL");
-            } elseif (is_array($value)) {
-                if (in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
-                    $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
-                    $queryBuilder->setParameter($key, json_encode($value));
+                        $qb->select('d')
+                        ->from(\App\Entity\DossierMedicale::class, 'd')
+                        ->where("JSON_CONTAINS(d.access, :value, '$') = 1")
+                        ->setParameter('value', '"4"'); 
+                        dd($qb->getQuery()->getSQL());
+                        $queryBuilder->$operator("JSON_CONTAINS(u.access, :$key, '$') = 1");
+                        $queryBuilder->setParameter($key, json_encode((string) $value[0]));
+                        dd($queryBuilder->getQuery()->getSQL());    
+                    } else {
+                        // Cas classique avec IN
+                        $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
+                        $queryBuilder->setParameter($key, $value);
+                    }
+                } elseif ($key === 'created_at' || $key === 'updated_at') {
+                    $queryBuilder->$operator("u.$key >= :$key");
+                    $queryBuilder->setParameter($key, $value);
                 } else {
-                    $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
+                    $queryBuilder->$operator("u.$key = :$key");
                     $queryBuilder->setParameter($key, $value);
                 }
-            } elseif ($key === 'created_at' || $key === 'updated_at') {
-                $queryBuilder->$operator("u.$key >= :$key");
-                $queryBuilder->setParameter($key, $value);
-            } else {
-                $queryBuilder->$operator("u.$key = :$key");
-                $queryBuilder->setParameter($key, $value);
             }
+        }        
+        $queryBuilder->orderBy('u.id', 'DESC');
+        // Configuration de l'adaptateur pour Pagerfanta pour gérer la pagination
+        $adapter = new QueryAdapter($queryBuilder);
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta->setMaxPerPage($maxPerPage);
+        $pagerfanta->setCurrentPage($page);
+
+        // Obtenir les résultats de la page actuelle
+        $items = $pagerfanta->getCurrentPageResults();
+        
+        // Sérialiser les résultats paginés avec le groupe de sérialisation spécifié
+        $data = $this->serializer->serialize($items, 'json', $context);
+
+        // Vérifie si le nom de la classe se termine par "s", sinon ajoute "s" pour un pluriel de convention
+        if (!str_ends_with($class_name, 's')) {
+            $class_name = $class_name . 's';
         }
+        return $this->p($pagerfanta, json_decode($data), $page, $maxPerPage, $class_name);
     }
-
-    $queryBuilder->orderBy('u.id', 'DESC');
-
-    $adapter = new QueryAdapter($queryBuilder);
-    $pagerfanta = new Pagerfanta($adapter);
-    $pagerfanta->setMaxPerPage($maxPerPage);
-    $pagerfanta->setCurrentPage($page);
-
-    $items = $pagerfanta->getCurrentPageResults();
-
-    $data = $this->serializer->serialize($items, 'json', $context);
-
-    if (!str_ends_with($class_name, 's')) {
-        $class_name .= 's';
-    }
-
-    return $this->p($pagerfanta, json_decode($data), $page, $maxPerPage, $class_name);
-}
-
     /**
      * Récupère l'utilisateur authentifié depuis la requête HTTP.
      * Et renvoie l'objet User correspondant.
@@ -607,15 +613,6 @@ class Toolkit
             $daysAssoc[$key] = [];
         }
         return $daysAssoc;
-    }
-
-    function hasRoles(array $roles) : bool {
-        foreach ($roles as $role) {
-            if ($this->security->isGranted($role)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 
