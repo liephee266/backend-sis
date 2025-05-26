@@ -46,6 +46,10 @@ class Urgency
     #[Groups(["data_select","urgency:read"])]
     private ?string $status = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(["data_select","urgency:read"])]
+    private ?string $position = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -136,6 +140,18 @@ class Urgency
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getPosition(): ?string
+    {
+        return $this->position;
+    }
+
+    public function setPosition(string $position): static
+    {
+        $this->position = $position;
 
         return $this;
     }

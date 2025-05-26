@@ -136,7 +136,7 @@ class PatientController extends AbstractController
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
     public function show(Patient $patient, Request $request, DossierMedicale $dossierMedicale): Response
     {
-        // try {
+        try {
             // Vérification des autorisations de l'utilisateur connecté
             if (!$this->toolkit->hasRoles(['ROLE_DOCTOR', 'ROLE_AGENT_HOSPITAL', 'ROLE_ADMIN_SIS', 'ROLE_SUPER_ADMIN', 'ROLE_ADMIN_HOSPITAL'])) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
@@ -215,14 +215,66 @@ class PatientController extends AbstractController
                 'data' => json_decode($patientJson, true),
                 'code' => 200,
             ], Response::HTTP_OK);
-        // } catch (\Throwable $th) {
-        // } catch (\Throwable $th) {
-        //     return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
-     * Création d'un nouvel Patient
+     * Création d'un Patient par le patient lui même
+     *
+     * @param Request $request
+     * @return Response
+     * 
+     * @author  Orphée Lié <lieloumloum@gmail.com>
+     */
+    #[Route('/me', name: 'patient_create_me', methods: ['POST'])]
+    public function create_me(Request $request): Response
+    {
+        try {
+            // Décodage du contenu JSON envoyé dans la requête
+            $data = json_decode($request->getContent(), true);
+
+            $data["password"] = $data["password"] ?? 123456789;
+            
+            // Début de la transaction
+            $this->entityManager->beginTransaction();
+
+            // Création du User
+            $user_data = [
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'roles' => ["ROLE_PATIENT"],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'nickname' => $data['nickname']?? null,
+                'tel' => $data['tel'],
+                'birth' => new \DateTime($data['birth']),
+                'gender' => $data['gender'],
+                'address' => $data['address']?? null,
+                'image' => $data['image']?? null,
+            ];
+            $data['signaler_comme_decedé'] = false;
+            // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
+            $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data);
+            // Vérification des erreurs après la persistance des données
+            if (!empty($errors['entity'])) {
+                // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+                $this->entityManager->commit();
+                $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'patient:read']);
+                $response = json_decode($response, true);
+                return $this->json(['data' => $response,'code' => 200, 'message' => "Patient crée avec succès"], Response::HTTP_OK);
+            }
+
+            // Si une erreur se produit, retour d'une réponse JSON avec une erreur
+            return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Patient"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>"Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Création d'un nouveau Patient par un utilisateur autorisé
      *
      * @param Request $request
      * @return Response
