@@ -74,34 +74,57 @@ class Toolkit
      * Renvoie un tableau pour peupler les select de l'application avec les ID et les labels ou descriptions de chaque entité
      * @author Orphée Lié <lieloumloum@gmail.com>
      */
-    public function formatArrayEntityLabel(array $dataSelect, array $filtres=[], string $portail = null): array
+ public function formatArrayEntityLabel(array $dataSelect, array $filtres = [], string $portail = null): array
 {
     $allData = [];
-    $entities = [];
-    foreach ($dataSelect as $key => $value) {
-        if ( !empty($filtres)) {
-            // Pour les autres entités, on applique simplement le filtre
-            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
-        } else {
-            // Si aucune condition de filtre spécifique, on prend toutes les entités
-            $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
+
+    foreach ($dataSelect as $entityName) {
+        $entities = !empty($filtres)
+            ? $this->entityManager->getRepository('App\Entity\\' . $entityName)->findBy($filtres)
+            : $this->entityManager->getRepository('App\Entity\\' . $entityName)->findAll();
+
+        // Sérialiser avec le groupe "data_select"
+        $serialized = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
+
+        $formatted = [];
+
+        foreach ($serialized as $item) {
+            // On prend le champ "id"
+            $id = $item['id'] ?? null;
+
+            // Trouver le premier champ string pour le mettre comme "label"
+            $label = null;
+             // Cas spécifique : Doctor ou Patient -> label à chercher dans le champ "user"
+            if (in_array($entityName, ['Patient', 'Doctor']) && isset($item['user']) && is_array($item['user'])) {
+                foreach ($item['user'] as $key => $value) {
+                    if (is_string($value)) {
+                        $label = $value;
+                        break;
+                    }
+                }
+            } else {
+                // Cas général : chercher premier champ string autre que "id"
+                foreach ($item as $key => $value) {
+                    if ($key !== 'id' && is_string($value)) {
+                        $label = $value;
+                        break;
+                    }
+                }
+            }
+
+            $formatted[] = [
+                'id' => $id,
+                'label' => $label,
+            ];
         }
-        // Sérialisation des données
-        $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-        
-        if ($value == 'TypeHopital') {
-            # code...
-            $value = 'typeHopital';
-            $allData[$value] = $data;
-        }else {
-            # code...
-            $allData[strtolower($value)] = $data;
-        }
-        // $allData[$value] = $data;
+
+        $key = $entityName === 'TypeHopital' ? 'typeHopital' : strtolower($entityName);
+        $allData[$key] = $formatted;
     }
-    // Retourner les données transformées
-    return $this->transformArray($allData);
+
+    return $allData;
 }
+
 
     /**
      * Transforme un tableau d'entrées en un format où l'ID devient la clé et la première autre valeur est également ajoutée.

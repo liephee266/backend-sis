@@ -68,7 +68,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
-    "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read",])]
+    "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read","data_select"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
