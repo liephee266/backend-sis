@@ -95,7 +95,7 @@ class AgendaController extends AbstractController
 
         // ROLE_RECEPTIONIST (agent d'accueil)
     }elseif ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
-            $currentUser = $this->toolkit->getUser($request);
+            $currentUser = $this->toolkit->getUser($request)->getId();
             $idAgenttHospital = $currentUser->getHospital()->getId();
 
             // Vérification que le médecin appartient à l'hôpital de l'agent d'accueil

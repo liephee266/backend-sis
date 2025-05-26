@@ -1,19 +1,20 @@
 <?php
 namespace App\Services;
 
-use App\Entity\DossierMedicale;
-use App\Entity\Patient;
 use DateTime;
 use Exception;
 use DatePeriod;
 use DateInterval;
 use App\Entity\User;
 use DateTimeImmutable;
+use App\Entity\Meeting;
+use App\Entity\Patient;
 use Pagerfanta\Pagerfanta;
 use App\Entity\Disponibilite;
-use App\Entity\Meeting;
+use App\Entity\DossierMedicale;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,12 +38,14 @@ class Toolkit
     private EntityManagerInterface $entityManager;
     private SerializerInterface $serializer;
     private JWTEncoderInterface $jwtManager;
+    private Security $security;
     
-    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager)
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager, Security $security)
     {
         $this->entityManager = $entityManager;  
         $this->serializer = $serializer;
         $this->jwtManager = $jwtManager;
+        $this->security = $security;
     }
 
     /**
@@ -636,6 +639,17 @@ public function getPagitionOption(Request $request, string $class_name, string $
             $daysAssoc[$key] = [];
         }
         return $daysAssoc;
+    }
+
+    public function hasRoles(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->security->isGranted($role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
