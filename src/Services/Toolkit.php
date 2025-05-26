@@ -641,6 +641,14 @@ public function getPagitionOption(Request $request, string $class_name, string $
         return $daysAssoc;
     }
 
+    /**
+     * Vérifie si l'utilisateur a au moins un des rôles spécifiés dans le tableau soumis.
+     *
+     * @param array $roles Liste des rôles à vérifier.
+     * @return bool True si l'utilisateur a au moins un des rôles, sinon false.
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com>
+     * */
     public function hasRoles(array $roles): bool
     {
         foreach ($roles as $role) {
