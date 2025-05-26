@@ -317,7 +317,7 @@ class UrgencyController extends AbstractController
                     'Nouvelle Urgence',
                     "Une nouvelle urgence a été envoyé par le patient: " . $patient
                 );
-                $this->notificationManager->publishNotification($notification, '/notifications/urgentist');
+                $this->notificationManager->publishNotification($notification, customChannel: 'notification-urgency', isGlobal: false);
                 return $this->json(['data' => $response,'code' => 200, 'message' => "Urgence envoyée avec succès"], Response::HTTP_OK);
             }
 

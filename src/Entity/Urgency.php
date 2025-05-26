@@ -46,9 +46,9 @@ class Urgency
     #[Groups(["data_select","urgency:read"])]
     private ?string $status = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column]
     #[Groups(["data_select","urgency:read"])]
-    private ?string $position = null;
+    private array $position = [];
 
     public function __construct()
     {
@@ -144,17 +144,16 @@ class Urgency
         return $this;
     }
 
-    public function getPosition(): ?string
+    public function getPosition(): array
     {
         return $this->position;
     }
 
-    public function setPosition(string $position): static
+    public function setPosition(array $position): static
     {
         $this->position = $position;
 
         return $this;
     }
-
 
 }
