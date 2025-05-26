@@ -7,6 +7,7 @@ use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Entity\AgentHospital;
 use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -96,7 +97,7 @@ class AgendaController extends AbstractController
         // ROLE_RECEPTIONIST (agent d'accueil)
     }elseif ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
             $currentUser = $this->toolkit->getUser($request)->getId();
-            $idAgenttHospital = $currentUser->getHospital()->getId();
+            $idAgenttHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $currentUser])->getHospital()->getId();
 
             // Vérification que le médecin appartient à l'hôpital de l'agent d'accueil
             $doctor = $this->entityManager->getRepository(Doctor::class)->find($id_doctor);
