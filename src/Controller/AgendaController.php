@@ -101,7 +101,7 @@ class AgendaController extends AbstractController
 
             // Vérification que le médecin appartient à l'hôpital de l'agent d'accueil
             $doctor = $this->entityManager->getRepository(Doctor::class)->find($id_doctor);
-            if (!$doctor || $doctor->getHospital()->getId() !== $idAgenttHospital) {
+            if ($doctor->getHospital()->getId() !== $idAgenttHospital) {
                 return new JsonResponse(['code' => 403, 'message' => 'Accès refusé : ce médecin n’appartient pas à votre hôpital.'], Response::HTTP_FORBIDDEN);
             }
 
