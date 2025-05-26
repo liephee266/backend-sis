@@ -81,11 +81,15 @@ class DossierMedicaleController extends AbstractController
                     return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
                 }
 
-                // Récupérer le dossier médical du patient connecté
-                $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
-                if (!$dossierMedical) {
-                    return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
-                }
+                // // Récupérer le dossier médical du patient connecté
+                // $dossierMedical = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient]);
+                // if (!$dossierMedical) {
+                //     return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable"], Response::HTTP_NOT_FOUND);
+                // } 
+                // Limiter les dossiers accessibles uniquement à celui du patient
+                $filtre = ['patient_id' => $patient->getId()];
+
+               
             }
             else {
             // si c'est pas un ptient on vérifie si id dans champ access est le meme que l'id de l'utilisateur connecté
@@ -102,7 +106,7 @@ class DossierMedicaleController extends AbstractController
             // TODO : Ajouter une gestion spécifique via une table "autorisation" si nécessaire pour les autres rôles
 
             // Récupération des DossierMedicales avec pagination et filtre
-            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre, $dossiersAccessibles);
+            $response = $this->toolkit->getPagitionOption($request, 'DossierMedicale', 'dossier_medicale:read', $filtre,["access" => $dossiersAccessibles]);
 
             return new JsonResponse($response, Response::HTTP_OK);
         // } catch (\Throwable $th) {

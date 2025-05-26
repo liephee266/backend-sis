@@ -199,7 +199,7 @@ class GenericEntityManager
         }
 
         // Validation de la transaction
-        $this->entityManager->commit();
+        $this->entityManager->commit(); 
         return ["entity" => $errors_entite['entity']];
     }
 
