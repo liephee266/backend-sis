@@ -240,43 +240,31 @@ public function getPagitionOption(Request $request, string $class_name, string $
         } 
         // Définit le numéro de page et la limite d'éléments par page à partir de la requête
         $page = $request->query->getInt('page', $query['page'] ?? 1);
-        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
+        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 100);
         // Création du QueryBuilder pour la classe d'entité spécifiée
         $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
         // Appliquer les filtres si ils existent
         if ($filtre) {
             foreach ($filtre as $key => $value) {
-                if (true) {
-                    // Si la valeur est un tableau, on vérifie si le champ est aussi un tableau JSON
-                    // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
-                    if (in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
-                        // On utilise JSON_CONTAINS (MySQL uniquement)
-                        
-                        // $queryBuilder->andWhere("JSON_CONTAINS(u.$key, :$key) = 1");
-                        
-                        // // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
-                        // // Doctrine attend une chaîne JSON ici
-                        // // dd($value[0]);
-                        // $queryBuilder->setParameter($key, json_encode($value)); 
+                // Cas 1 : filtre entre deux valeurs (ex: date)
+                //Très pratique pour s'il faut filtrer par mois ou par année grace à un champ date qui existe dans la table
+                if (is_array($value) && isset($value['between']) && is_array($value['between']) && count($value['between']) === 2) {
+                    [$start, $end] = $value['between'];
+                    $queryBuilder->$operator("u.$key BETWEEN :start_$key AND :end_$key");
+                    $queryBuilder->setParameter("start_$key", $start);
+                    $queryBuilder->setParameter("end_$key", $end);
 
-                        $qb = $this->entityManager->createQueryBuilder();
+                // Cas 2 : JSON_CONTAINS pour les champs JSON
+                } elseif (is_array($value) && in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
+                    $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key, '$') = 1");
+                    $queryBuilder->setParameter($key, json_encode((string) $value[0]));
 
-                        $qb->select('d')
-                        ->from(\App\Entity\DossierMedicale::class, 'd')
-                        ->where("JSON_CONTAINS(d.access, :value, '$') = 1")
-                        ->setParameter('value', '"4"'); 
-                        dd($qb->getQuery()->getSQL());
-                        $queryBuilder->$operator("JSON_CONTAINS(u.access, :$key, '$') = 1");
-                        $queryBuilder->setParameter($key, json_encode((string) $value[0]));
-                        dd($queryBuilder->getQuery()->getSQL());    
-                    } else {
-                        // Cas classique avec IN
-                        $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
-                        $queryBuilder->setParameter($key, $value);
-                    }
-                } elseif ($key === 'created_at' || $key === 'updated_at') {
-                    $queryBuilder->$operator("u.$key >= :$key");
+                // Cas 3 : IN classique
+                } elseif (is_array($value)) {
+                    $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
                     $queryBuilder->setParameter($key, $value);
+
+                // Cas 4 : égalité stricte
                 } else {
                     $queryBuilder->$operator("u.$key = :$key");
                     $queryBuilder->setParameter($key, $value);
