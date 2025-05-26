@@ -113,7 +113,7 @@ class Toolkit
             }
 
             $formatted[] = [
-                'id' => $id,
+                'value' => $id,
                 'label' => $label,
             ];
         }
