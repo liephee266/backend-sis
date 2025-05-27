@@ -649,6 +649,16 @@ public function getPagitionOption(Request $request, string $class_name, string $
         return false;
     }
 
+    /***
+     * Valide l'identification de l'utilisateur en vérifiant la présence du nickname, firstName ou patient_id
+     * lors de la création d'un meeting
+     * Si le nickname est fourni, vérifie son existence dans la base de données.
+     *
+     * @param array $data Données de l'utilisateur à valider.
+     * @return JsonResponse|null Retourne une réponse JSON en cas d'erreur, sinon null.
+     * 
+     * @author Orphée Lié <michelmiyalou0@gmail.com>
+     */
     public function validateUserIdentification(array &$data): ?JsonResponse
     {
         if (!isset($data['nickname']) || empty($data['nickname'])) {
