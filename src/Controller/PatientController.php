@@ -255,6 +255,14 @@ class PatientController extends AbstractController
                 'image' => $data['image']?? null,
             ];
             $data['signaler_comme_decedé'] = false;
+            $dat['poids'] = 0;
+            $data['taille'] = 0;
+            $data['signaler_comme_decedé'] = false;
+            $data['nom_urgence'] = "NULL";
+            $data['numero_urgence'] = "NULL";
+            $data['adresse_urgence'] = "NULL";
+            $data['groupe_sanguins'] = "NULL";
+            
             // Appel à la méthode persistEntityUser pour insérer les données du User dans la base
             $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Patient", $user_data, $data);
             // Vérification des erreurs après la persistance des données

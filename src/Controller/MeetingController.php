@@ -199,7 +199,7 @@ class MeetingController extends AbstractController
             $data['state_id'] = 1;
             $data['hospital'] = $agenthospital;
 
-            // 🔍 Appel à la méthode de validation du nickname ou des alternatives
+            //Appel à la méthode de validation du nickname ou des alternatives
             $errorResponse = $this->toolkit->validateUserIdentification($data);
             if ($errorResponse !== null) {
                 return $errorResponse;
