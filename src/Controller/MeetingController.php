@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Doctor;
 use App\Entity\Meeting;
 use App\Entity\Patient;
@@ -197,6 +198,21 @@ class MeetingController extends AbstractController
             $data['state_id'] = 1;
 
             $data['hospital'] = $agenthospital;
+
+            if ($userNickname = $data['nickname']) {
+                $user = $this->entityManager->getRepository(User::class)->findOneBy(['nickname' => $userNickname]);
+
+                if (!$user) {
+                    return $this->json(['code' => 404, 'message' => "Aucun utilisateur trouvé avec ce nickname, 
+                    veuillez en choisir un autre ou utiliser un autre moyen"], Response::HTTP_NOT_FOUND);
+                }
+
+                $data['nickname'] = $user->getNickname();
+            }else {
+                
+            }
+
+            
 
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);

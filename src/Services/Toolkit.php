@@ -545,7 +545,8 @@ public function getPagitionOption(Request $request, string $class_name, string $
                 $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
                     'date_j' => new DateTime($key_a),
                     'doctor' => $filtre['id_doctor'],
-                    'hospital' => $filtre['id_hospital']
+                    'hospital' => $filtre['id_hospital'],
+                    'meeting' => null
                 ]);
                 foreach ($disponibilities as $key_d => $disponibilitie) {
                     $a[$key_a][] = [
