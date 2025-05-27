@@ -648,5 +648,36 @@ public function getPagitionOption(Request $request, string $class_name, string $
 
         return false;
     }
+
+    public function validateUserIdentification(array &$data): ?JsonResponse
+    {
+        if (!isset($data['nickname']) || empty($data['nickname'])) {
+            if (
+                (!isset($data['firstName']) || empty($data['firstName'])) &&
+                (!isset($data['patient_id']) || empty($data['patient_id']))
+            ) {
+                return new JsonResponse([
+                    'code' => 400,
+                    'message' => "Vous devez renseigner soit le nickname, soit le firstname ou le patient_id"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+        } else {
+            $user = $this->entityManager->getRepository(User::class)
+                ->findOneBy(['nickname' => $data['nickname']]);
+
+            if (!$user) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Aucun utilisateur trouvé avec ce nickname, veuillez en choisir un autre ou utiliser un autre moyen"
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $data['nickname'] = $user->getNickname();
+        }
+
+        return null;
+    }
+
 }
 
