@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Doctor;
+use App\Entity\HistoriqueMedical;
 use App\Entity\Hospital;
 use App\Entity\Meeting;
 use App\Entity\Patient;
@@ -560,6 +561,45 @@ class AppController extends AbstractController
                 'code' => 500,
                 'message' => 'Erreur interne : ' . $th->getMessage()
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    #[Route('/mon-historique', name: 'HistoriqueMedical_patient', methods: ['GET'])]
+    public function monHistorique(Request $request): Response
+    {
+        try {
+            // Vérifie que l'utilisateur est bien un patient
+            if (!$this->security->isGranted('ROLE_PATIENT')) {
+                return new JsonResponse(['code' => 403, 'message' => "Accès refusé."], Response::HTTP_FORBIDDEN);
+            }
+
+            // Récupère l'utilisateur connecté
+            $user = $this->toolkit->getUser($request);
+
+            // Trouve le patient associé à cet utilisateur
+            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+            if (!$patient) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucun patient associé à cet utilisateur."], Response::HTTP_NOT_FOUND);
+            }
+
+            // Récupère l'historique médical du patient
+            $historiqueMedical = $this->entityManager->getRepository(HistoriqueMedical::class)
+                ->findOneBy(['patient' => $patient]);
+
+            if (!$historiqueMedical) {
+                return new JsonResponse(['code' => 404, 'message' => "Aucun historique médical trouvé pour ce patient."], Response::HTTP_NOT_FOUND);
+            }
+
+            // Sérialise les données avec les consultations associées
+            $data = $this->serializer->serialize($historiqueMedical, 'json', ['groups' => 'HistoriqueMedical:read']);
+
+            return new JsonResponse(["data" => json_decode($data, true), "code" => 200], Response::HTTP_OK);
+
+        } catch (\Throwable $th) {
+            return new JsonResponse([
+                'code' => 500,
+                'message' => "Erreur interne : " . $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
