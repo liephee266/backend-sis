@@ -545,7 +545,8 @@ public function getPagitionOption(Request $request, string $class_name, string $
                 $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
                     'date_j' => new DateTime($key_a),
                     'doctor' => $filtre['id_doctor'],
-                    'hospital' => $filtre['id_hospital']
+                    'hospital' => $filtre['id_hospital'],
+                    'meeting' => null
                 ]);
                 foreach ($disponibilities as $key_d => $disponibilitie) {
                     $a[$key_a][] = [
@@ -647,5 +648,46 @@ public function getPagitionOption(Request $request, string $class_name, string $
 
         return false;
     }
+
+    /***
+     * Valide l'identification de l'utilisateur en vérifiant la présence du nickname, firstName ou patient_id
+     * lors de la création d'un meeting
+     * Si le nickname est fourni, vérifie son existence dans la base de données.
+     *
+     * @param array $data Données de l'utilisateur à valider.
+     * @return JsonResponse|null Retourne une réponse JSON en cas d'erreur, sinon null.
+     * 
+     * @author Orphée Lié <michelmiyalou0@gmail.com>
+     */
+    public function validateUserIdentification(array &$data): ?JsonResponse
+    {
+        if (!isset($data['nickname']) || empty($data['nickname'])) {
+            if (
+                (!isset($data['firstName']) || empty($data['firstName'])) &&
+                (!isset($data['patient_id']) || empty($data['patient_id']))
+            ) {
+                return new JsonResponse([
+                    'code' => 400,
+                    'message' => "Vous devez renseigner soit le nickname, soit le firstname ou le patient_id"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+        } else {
+            $user = $this->entityManager->getRepository(User::class)
+                ->findOneBy(['nickname' => $data['nickname']]);
+
+            if (!$user) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Aucun utilisateur trouvé avec ce nickname, veuillez en choisir un autre ou utiliser un autre moyen"
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $data['nickname'] = $user->getNickname();
+        }
+
+        return null;
+    }
+
 }
 

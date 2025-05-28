@@ -107,7 +107,8 @@ class AgendaController extends AbstractController
 
             $agendaData = $this->toolkit->getAgenda($filters, [
                 'id_doctor' => $id_doctor,
-                'id_hospital' => $idAgenttHospital
+                'id_hospital' => $idAgenttHospital,
+                'meeting' => null
             ]);
 
             return new JsonResponse(["data" => $agendaData, "code" => 200], Response::HTTP_OK);
