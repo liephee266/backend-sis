@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\Service;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
@@ -111,6 +112,16 @@ class Doctor
      */
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'medecinTraitant')]
     private Collection $historiqueMedicals;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
+    private ?string $image_biographie = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["doctor:read", "consultation:read", "affiliation:read", 
+    "availability:read", "hospital:read", "hospitaladmin:read"])]
+    private ?string $biographie = null;
 
     public function __construct()
     {
@@ -342,5 +353,29 @@ class Doctor
     public function getHistoriqueMedicals(): Collection
     {
         return $this->historiqueMedicals;
+    }
+
+    public function getImageBiographie(): ?string
+    {
+        return $this->image_biographie;
+    }
+
+    public function setImageBiographie(?string $image_biographie): static
+    {
+        $this->image_biographie = $image_biographie;
+
+        return $this;
+    }
+
+    public function getBiographie(): ?string
+    {
+        return $this->biographie;
+    }
+
+    public function setBiographie(?string $biographie): static
+    {
+        $this->biographie = $biographie;
+
+        return $this;
     }
 }

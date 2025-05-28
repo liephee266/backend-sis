@@ -1,19 +1,20 @@
 <?php
 namespace App\Services;
 
-use App\Entity\DossierMedicale;
-use App\Entity\Patient;
 use DateTime;
 use Exception;
 use DatePeriod;
 use DateInterval;
 use App\Entity\User;
 use DateTimeImmutable;
+use App\Entity\Meeting;
+use App\Entity\Patient;
 use Pagerfanta\Pagerfanta;
 use App\Entity\Disponibilite;
-use App\Entity\Meeting;
+use App\Entity\DossierMedicale;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,12 +38,14 @@ class Toolkit
     private EntityManagerInterface $entityManager;
     private SerializerInterface $serializer;
     private JWTEncoderInterface $jwtManager;
+    private Security $security;
     
-    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager)
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer, JWTEncoderInterface $jwtManager, Security $security)
     {
         $this->entityManager = $entityManager;  
         $this->serializer = $serializer;
         $this->jwtManager = $jwtManager;
+        $this->security = $security;
     }
 
     /**
@@ -74,34 +77,57 @@ class Toolkit
      * Renvoie un tableau pour peupler les select de l'application avec les ID et les labels ou descriptions de chaque entité
      * @author Orphée Lié <lieloumloum@gmail.com>
      */
-    public function formatArrayEntityLabel(array $dataSelect, array $filtres=[], string $portail = null): array
-    {
-        $allData = [];
-        $entities = [];
-        foreach ($dataSelect as $key => $value) {
-            if ( !empty($filtres)) {
-                // Pour les autres entités, on applique simplement le filtre
-                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findBy($filtres);
+ public function formatArrayEntityLabel(array $dataSelect, array $filtres = [], string $portail = null): array
+{
+    $allData = [];
+
+    foreach ($dataSelect as $entityName) {
+        $entities = !empty($filtres)
+            ? $this->entityManager->getRepository('App\Entity\\' . $entityName)->findBy($filtres)
+            : $this->entityManager->getRepository('App\Entity\\' . $entityName)->findAll();
+
+        // Sérialiser avec le groupe "data_select"
+        $serialized = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
+
+        $formatted = [];
+
+        foreach ($serialized as $item) {
+            // On prend le champ "id"
+            $id = $item['id'] ?? null;
+
+            // Trouver le premier champ string pour le mettre comme "label"
+            $label = null;
+             // Cas spécifique : Doctor ou Patient -> label à chercher dans le champ "user"
+            if (in_array($entityName, ['Patient', 'Doctor']) && isset($item['user']) && is_array($item['user'])) {
+                foreach ($item['user'] as $key => $value) {
+                    if (is_string($value)) {
+                        $label = $value;
+                        break;
+                    }
+                }
             } else {
-                // Si aucune condition de filtre spécifique, on prend toutes les entités
-                $entities = $this->entityManager->getRepository('App\Entity\\'.$value)->findAll();
+                // Cas général : chercher premier champ string autre que "id"
+                foreach ($item as $key => $value) {
+                    if ($key !== 'id' && is_string($value)) {
+                        $label = $value;
+                        break;
+                    }
+                }
             }
-            // Sérialisation des données
-            $data = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
-            
-            if ($value == 'TypeHopital') {
-                # code...
-                $value = 'typeHopital';
-                $allData[$value] = $data;
-            }else {
-                # code...
-                $allData[strtolower($value)] = $data;
-            }
-            // $allData[$value] = $data;
+
+            $formatted[] = [
+                'value' => $id,
+                'label' => $label,
+            ];
         }
-        // Retourner les données transformées
-        return $this->transformArray($allData);
+
+        $key = $entityName === 'TypeHopital' ? 'typeHopital' : strtolower($entityName);
+        $allData[$key] = $formatted;
     }
+
+    return $allData;
+}
+
 
     /**
      * Transforme un tableau d'entrées en un format où l'ID devient la clé et la première autre valeur est également ajoutée.
@@ -144,8 +170,6 @@ class Toolkit
                         // Recherche la première clé différente de 'id' et extrait sa valeur
                         $otherKey = array_key_first(array_diff_key($item, ['id' => '']));
                         $value = $otherKey !== null ? $item[$otherKey] : null;
-                        //______à optimiser____________
-                        is_array($value) ? $value = $value["last_name"] : $value;
                         // Ajoute le résultat transformé
                         // if ($key == 'prestation' ) {
                         //     $result[$key][] = [
@@ -202,7 +226,7 @@ class Toolkit
      * 
      * @return array Les données paginées et les informations de pagination.
      */
-    public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
+public function getPagitionOption(Request $request, string $class_name, string $groupe_attribute, array $filtre = [], $operator = 'andWhere') : array
     {
         $context = (new ObjectNormalizerContextBuilder())
             ->withGroups($groupe_attribute)
@@ -216,29 +240,31 @@ class Toolkit
         } 
         // Définit le numéro de page et la limite d'éléments par page à partir de la requête
         $page = $request->query->getInt('page', $query['page'] ?? 1);
-        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 10);
+        $maxPerPage = $request->query->getInt('maxPerPage', $query['limit'] ?? 100);
         // Création du QueryBuilder pour la classe d'entité spécifiée
         $queryBuilder = $this->entityManager->getRepository('App\Entity\\'.$class_name)->createQueryBuilder('u');
         // Appliquer les filtres si ils existent
         if ($filtre) {
             foreach ($filtre as $key => $value) {
-                if (is_array($value)) {
-                    // Si la valeur est un tableau, on vérifie si le champ est aussi un tableau JSON
-                    // Supposons ici que 'roles', 'tags', etc. sont des champs JSON en BDD
-                    if (in_array($key, ['roles', 'tags', 'permissions'])) {
-                        // On utilise JSON_CONTAINS (MySQL uniquement)
-                        $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key) = 1");
-                        // $queryBuilder->andWhere("u.$key @> :$key"); @Pour PostgreSQL
-                        // Doctrine attend une chaîne JSON ici
-                        $queryBuilder->setParameter($key, json_encode($value));
-                    } else {
-                        // Cas classique avec IN
-                        $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
-                        $queryBuilder->setParameter($key, $value);
-                    }
-                } elseif ($key === 'created_at' || $key === 'updated_at') {
-                    $queryBuilder->$operator("u.$key >= :$key");
+                // Cas 1 : filtre entre deux valeurs (ex: date)
+                //Très pratique pour s'il faut filtrer par mois ou par année grace à un champ date qui existe dans la table
+                if (is_array($value) && isset($value['between']) && is_array($value['between']) && count($value['between']) === 2) {
+                    [$start, $end] = $value['between'];
+                    $queryBuilder->$operator("u.$key BETWEEN :start_$key AND :end_$key");
+                    $queryBuilder->setParameter("start_$key", $start);
+                    $queryBuilder->setParameter("end_$key", $end);
+
+                // Cas 2 : JSON_CONTAINS pour les champs JSON
+                } elseif (is_array($value) && in_array($key, ['roles', 'tags', 'permissions', 'access'])) {
+                    $queryBuilder->$operator("JSON_CONTAINS(u.$key, :$key, '$') = 1");
+                    $queryBuilder->setParameter($key, json_encode((string) $value[0]));
+
+                // Cas 3 : IN classique
+                } elseif (is_array($value)) {
+                    $queryBuilder->$operator($queryBuilder->expr()->in("u.$key", ":$key"));
                     $queryBuilder->setParameter($key, $value);
+
+                // Cas 4 : égalité stricte
                 } else {
                     $queryBuilder->$operator("u.$key = :$key");
                     $queryBuilder->setParameter($key, $value);
@@ -519,7 +545,8 @@ class Toolkit
                 $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
                     'date_j' => new DateTime($key_a),
                     'doctor' => $filtre['id_doctor'],
-                    'hospital' => $filtre['id_hospital']
+                    'hospital' => $filtre['id_hospital'],
+                    'meeting' => null
                 ]);
                 foreach ($disponibilities as $key_d => $disponibilitie) {
                     $a[$key_a][] = [
@@ -602,6 +629,65 @@ class Toolkit
         }
         return $daysAssoc;
     }
-   
+
+    /**
+     * Vérifie si l'utilisateur a au moins un des rôles spécifiés dans le tableau soumis.
+     *
+     * @param array $roles Liste des rôles à vérifier.
+     * @return bool True si l'utilisateur a au moins un des rôles, sinon false.
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com>
+     * */
+    public function hasRoles(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->security->isGranted($role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /***
+     * Valide l'identification de l'utilisateur en vérifiant la présence du nickname, firstName ou patient_id
+     * lors de la création d'un meeting
+     * Si le nickname est fourni, vérifie son existence dans la base de données.
+     *
+     * @param array $data Données de l'utilisateur à valider.
+     * @return JsonResponse|null Retourne une réponse JSON en cas d'erreur, sinon null.
+     * 
+     * @author Orphée Lié <michelmiyalou0@gmail.com>
+     */
+    public function validateUserIdentification(array &$data): ?JsonResponse
+    {
+        if (!isset($data['nickname']) || empty($data['nickname'])) {
+            if (
+                (!isset($data['firstName']) || empty($data['firstName'])) &&
+                (!isset($data['patient_id']) || empty($data['patient_id']))
+            ) {
+                return new JsonResponse([
+                    'code' => 400,
+                    'message' => "Vous devez renseigner soit le nickname, soit le firstname ou le patient_id"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+        } else {
+            $user = $this->entityManager->getRepository(User::class)
+                ->findOneBy(['nickname' => $data['nickname']]);
+
+            if (!$user) {
+                return new JsonResponse([
+                    'code' => 404,
+                    'message' => "Aucun utilisateur trouvé avec ce nickname, veuillez en choisir un autre ou utiliser un autre moyen"
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $data['nickname'] = $user->getNickname();
+        }
+
+        return null;
+    }
+
 }
 

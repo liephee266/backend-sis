@@ -7,6 +7,9 @@ use App\Attribute\ApiEntity;
 use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\Types\Null_;
+use phpDocumentor\Reflection\Types\Nullable;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,13 +31,15 @@ class DisponibiliteController extends AbstractController
     private $entityManager;
     private $serializer;
     private $genericEntityManager;
+    private $security;
 
-    public function __construct(GenericEntityManager $genericEntityManager, EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
+    public function __construct(GenericEntityManager $genericEntityManager, Security $security,EntityManagerInterface $entityManager, SerializerInterface $serializer, Toolkit $toolkit)
     {
         $this->toolkit = $toolkit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->genericEntityManager = $genericEntityManager;
+        $this->security = $security;
     }
 
     /**
@@ -52,6 +57,22 @@ class DisponibiliteController extends AbstractController
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
+            if ($this->security->isGranted('ROLE_DOCTOR')) {
+                // Si l'utilisateur a le rôle de médecin, on récupère son ID
+                $user = $this->toolkit->getUser($request)->getId();
+
+                $doctor = $this->entityManager->getRepository('App\Entity\Doctor')->findOneBy(['user' => $user])->getId();
+                // On ajoute le filtre pour ne récupérer que les disponibilités du médecin
+                $filtre = [
+                    'doctor' => $doctor,
+
+                ];
+            }else{
+                
+                $filtre =[
+                    'meeting'=> null,
+                ];
+            }
             // Récupération des Disponibilités avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Disponibilite', 'disponibilite:read', $filtre);
 

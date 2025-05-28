@@ -16,13 +16,13 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", unique: true)]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    #[Groups(["data_select", "patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
     "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
-    #[Groups(["patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
+    #[Groups(["data_select", "patient:read", "meeting:read", "urgency:read", "consultation:read", "treatment:read", 
     "examination:read", "dossier_medicale:read","HistoriqueMedical:read","patient:read"])]
     private ?User $user = null;
 
@@ -102,6 +102,9 @@ class Patient
      */
     #[ORM\OneToMany(targetEntity: HistoriqueMedical::class, mappedBy: 'patient')]
     private Collection $HistoriqueMedical;
+
+    #[ORM\ManyToOne(inversedBy: 'patients')]
+    private ?User $created_by = null;
 
     public function __construct()
     {   
@@ -361,6 +364,18 @@ class Patient
                 $historiqueMedical->setPatient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): static
+    {
+        $this->created_by = $created_by;
 
         return $this;
     }

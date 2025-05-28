@@ -286,13 +286,10 @@ class AppController extends AbstractController
     #[Route('/archivage/{entity_name}/{id}', name: 'app_archivage', methods: ['GET'])]
     function archiver($entity_name, int $id): JsonResponse
     {
-
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
-            && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            # code...
+        if(!$this->toolkit->hasRoles(['ROLE_SUPER_ADMIN_SIS', 'ROLE_ADMIN_SIS', 'ROLE_ADMIN_HOSPITAL'])) {
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
-
+        
         $data = [
             "doctor" => "Doctor",
             "adminsis" => "SisAdmin",
@@ -338,9 +335,7 @@ class AppController extends AbstractController
     function suspendu($entity_name, int $id): JsonResponse
     {
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN_SIS') && !$this->security->isGranted('ROLE_ADMIN_SIS')
-            && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
-            # code...
+        if(!$this->toolkit->hasRoles(['ROLE_SUPER_ADMIN_SIS', 'ROLE_ADMIN_SIS', 'ROLE_ADMIN_HOSPITAL'])) {
             return new JsonResponse(["message" => "Vous n'avez pas accès à cette ressource", "code" => 403], Response::HTTP_FORBIDDEN);
         }
 
@@ -402,7 +397,7 @@ class AppController extends AbstractController
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+            if (!$this->toolkit->hasRoles(['ROLE_AGENT_HOSPITAL'])) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
 
@@ -493,7 +488,7 @@ class AppController extends AbstractController
     {
         try {
             // Vérification que l'utilisateur a bien le rôle DOCTOR
-            if (!$this->security->isGranted('ROLE_DOCTOR')) {
+            if (!$this->toolkit->hasRoles(['ROLE_DOCTOR'])) {
                 return new JsonResponse([
                     'code' => 403,
                     'message' => "Accès réservé aux médecins"

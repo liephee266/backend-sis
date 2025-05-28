@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Doctor;
 use App\Entity\Meeting;
 use App\Entity\Patient;
@@ -62,71 +63,55 @@ class MeetingController extends AbstractController
      * 
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
-    #[Route('/', name: 'meeting_index', methods: ['GET'])]
-    public function index(Request $request): Response
+    #[Route('/{month?}/{year?}', name: 'meeting_index', methods: ['GET'])]
+    public function index(Request $request, ?int $month = null, ?int $year = null): Response
     {
         try {
-            
-            // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_PATIENT') && !$this->security->isGranted('ROLE_DOCTOR') && !$this->security->isGranted('ROLE_AGENT_HOSPITAL'))  {
-                // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            if (!$this->toolkit->hasRoles(['ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_AGENT_HOSPITAL'])) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
-            
-            // Récupération de l'utilisateur connectéù&
+
             $user = $this->toolkit->getUser($request);
+            $filtre = [];
 
-            // Vérifier si l'utilisateur est un patient
             if ($this->security->isGranted('ROLE_PATIENT')) {
-            $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
-
-                // Si un patient est trouvé, appliquer le filtre sur l'ID du patient
+                $patient = $this->entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
                 if ($patient) {
                     $filtre['patient_id'] = $patient->getId();
-
                 }
             }
-            // Vérifier si l'utilisateur est un médecin
+
             if ($this->security->isGranted('ROLE_DOCTOR')) {
-                // Vérifier si l'utilisateur est un médecin
                 $doctor = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
                 if ($doctor) {
                     $filtre['doctor'] = $doctor->getId();
                 }
             }
-            
-             // Cas : Agent hospitalier
-             if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
-                // Vérifier si l'utilisateur est un agent hospitalier
+
+            if ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
                 $agentHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user]);
                 if ($agentHospital && $agentHospital->getHospital()) {
                     $filtre['hospital'] = $agentHospital->getHospital()->getId();
                 }
             }
-              // ✅ Filtrage par année et mois
-            $year = $request->query->get('year');
-            $month = $request->query->get('month');
 
-            if ($year && $month) {
+            if ($month && $year) {
                 try {
                     $startDate = new \DateTimeImmutable("$year-$month-01");
-                    $endDate = $startDate->modify('last day of this month')->setTime(23, 59, 59);
-
-                    $filtre['date_start'] = $startDate;
-                    $filtre['date_end'] = $endDate;
+                    $endDate = $startDate->modify('first day of next month')->modify('-1 second');
+                    $filtre['date'] = ['between' => [$startDate, $endDate]];
                 } catch (\Exception $e) {
-                    return new JsonResponse(['code' => 400, 'message' => "Format de date invalide"], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['code' => 400, 'message' => 'Date invalide'], Response::HTTP_BAD_REQUEST);
                 }
             }
-            // // Récupération des Meetings avec pagination
-            $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
 
-            // Retour d'une réponse JSON avec les Meetings et un statut HTTP 200 (OK)
+            $response = $this->toolkit->getPagitionOption($request, 'Meeting', 'meeting:read', $filtre);
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
-            return new JsonResponse(['code' => 500, 'message' =>'Erreur interne du serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['code' => 500, 'message' =>'Erreur interne du serveur: ' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * Affichage d'un Meeting par son ID
@@ -203,36 +188,47 @@ class MeetingController extends AbstractController
             // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
             return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
         }
-
+            try {
             $user = $this->toolkit->getUser($request);
-            $agenthospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $user])->getHospital()->getId();
+            $agenthospital = $this->entityManager->getRepository(AgentHospital::class)
+                ->findOneBy(['user' => $user])
+                ->getHospital()
+                ->getId();
 
-            // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
-
             $data['state_id'] = 1;
-
             $data['hospital'] = $agenthospital;
 
-            // Appel à la méthode persistEntity pour insérer les données dans la base
+            //Appel à la méthode de validation du nickname ou des alternatives
+            $errorResponse = $this->toolkit->validateUserIdentification($data);
+            if ($errorResponse !== null) {
+                return $errorResponse;
+            }
+
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);
 
-        // Vérification des erreurs après la persistance des données
-        if (!empty($errors['entity'])) {
-            if (key_exists("disponibilites", $data)) {
-                // Si l'entité a été correctement enregistrée, on traite les disponibilités
-                $this->entityManager->getRepository("App\Entity\Disponibilite")->find($data["disponibilites"])->setMeeting($errors['entity']);
-                $this->entityManager->flush();
-                # code...
-            }
-            // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
+            if (!empty($errors['entity'])) {
+                if (key_exists("disponibilites", $data)) {
+                    $this->entityManager->getRepository("App\Entity\Disponibilite")
+                        ->find($data["disponibilites"])
+                        ->setMeeting($errors['entity']);
+                    $this->entityManager->flush();
+                }
+
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'meeting:read']);
                 $response = json_decode($response, true);
-            return $this->json(['data' => $response,'code' => 200, 'message' => "Meeting crée avec succès"], Response::HTTP_OK);
-        }
 
+                return $this->json([
+                    'data' => $response,
+                    'code' => 200,
+                    'message' => "Meeting créé avec succès"
+                ], Response::HTTP_OK);
+            }
             // Si une erreur se produit, retour d'une réponse JSON avec une erreur
             return $this->json(['code' => 500, 'message' => "Erreur lors de la création du Meeting"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $th) {
+            return new JsonResponse(['code' => 500, 'message' =>'Erreur interne du serveur' . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

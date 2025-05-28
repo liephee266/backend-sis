@@ -76,6 +76,10 @@ class Meeting
     #[Groups(["meeting:read","agenthospital:read"])]
     private ?Hospital $hospital = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["meeting:read","agenthospital:read","hospital:read"])]
+    private ?string $nickname = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toString();
@@ -265,6 +269,18 @@ class Meeting
     public function setHospital(?Hospital $hospital): static
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getNickname(): ?string
+    {
+        return $this->nickname;
+    }
+
+    public function setNickname(?string $nickname): static
+    {
+        $this->nickname = $nickname;
 
         return $this;
     }

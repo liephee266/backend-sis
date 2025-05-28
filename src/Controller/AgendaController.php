@@ -7,6 +7,7 @@ use App\Entity\Doctor;
 use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
+use App\Entity\AgentHospital;
 use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -94,19 +95,20 @@ class AgendaController extends AbstractController
         return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
 
         // ROLE_RECEPTIONIST (agent d'accueil)
-    }elseif ($this->security->isGranted('ROLE_RECEPTIONIST')) {
-            $currentUser = $this->toolkit->getUser($request);
-            $idAgenttHospital = $currentUser->getHospital()->getId();
+    }elseif ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+            $currentUser = $this->toolkit->getUser($request)->getId();
+            $idAgenttHospital = $this->entityManager->getRepository(AgentHospital::class)->findOneBy(['user' => $currentUser])->getHospital()->getId();
 
             // Vérification que le médecin appartient à l'hôpital de l'agent d'accueil
             $doctor = $this->entityManager->getRepository(Doctor::class)->find($id_doctor);
-            if (!$doctor || $doctor->getHospital()->getId() !== $idAgenttHospital) {
+            if (!$doctor->getHospital()->exists(fn($key, $hopital) => $hopital->getId() === $idAgenttHospital)) {
                 return new JsonResponse(['code' => 403, 'message' => 'Accès refusé : ce médecin n’appartient pas à votre hôpital.'], Response::HTTP_FORBIDDEN);
             }
 
             $agendaData = $this->toolkit->getAgenda($filters, [
                 'id_doctor' => $id_doctor,
-                'id_hospital' => $idAgenttHospital
+                'id_hospital' => $idAgenttHospital,
+                'meeting' => null
             ]);
 
             return new JsonResponse(["data" => $agendaData, "code" => 200], Response::HTTP_OK);
