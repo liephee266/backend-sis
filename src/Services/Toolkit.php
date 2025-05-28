@@ -545,8 +545,7 @@ public function getPagitionOption(Request $request, string $class_name, string $
                 $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
                     'date_j' => new DateTime($key_a),
                     'doctor' => $filtre['id_doctor'],
-                    'hospital' => $filtre['id_hospital'],
-                    'meeting' => null
+                    'hospital' => $filtre['id_hospital']
                 ]);
                 foreach ($disponibilities as $key_d => $disponibilitie) {
                     $a[$key_a][] = [
@@ -561,6 +560,43 @@ public function getPagitionOption(Request $request, string $class_name, string $
         }
         return $n;
     }
+
+    /**
+     * @param array $months
+     * @param array $disponibilities
+     * @return object|null
+     * 
+     * IL s'agit de la fonction qui permet à un agent hospitalier de récupérer l'agenda d'un
+     * doctor qui n'a pas de meeting pour un mois donné. 
+     * 
+     * @author Michel MIYALOU <michelmiyalou0@gmail.com@gmail.com>
+     */
+    // public function getAgendaAgentHospital(array $months, array $filtre)
+    // {
+    //     $a = null;
+    //     $n = [];
+    //     foreach ($months['months'] as $key => $month) {
+    //         $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
+    //         foreach ($a as $key_a => $value) {
+    //             $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
+    //                 'date_j' => new DateTime($key_a),
+    //                 'doctor' => $filtre['id_doctor'],
+    //                 'hospital' => $filtre['id_hospital'],
+    //                 'meeting' => null
+    //             ]);
+    //             foreach ($disponibilities as $key_d => $disponibilitie) {
+    //                 $a[$key_a][] = [
+    //                     'id' => $disponibilitie->getId(),
+    //                     'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
+    //                     'heure_debut' => $disponibilitie->getHeureDebut(),
+    //                     'heure_fin' => $disponibilitie->getHeureFin(),
+    //                 ];
+    //             }
+    //         }
+    //         $n[$month] = $a;
+    //     }
+    //     return $n;
+    // }
 
     /**
      * Récupère l'agenda d'un patient pour un mois donné.
