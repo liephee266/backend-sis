@@ -25,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read","urgentist:read",
     "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
-    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read",])]
+    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read","HistoriqueMedical:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -68,7 +68,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
-    "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read","data_select"])]
+    "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read","data_select","HistoriqueMedical:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
@@ -76,7 +76,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
-    "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
+    "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read","HistoriqueMedical:read"])]
     private $last_name;
 
     #[ORM\Column(type: "string",unique: true, nullable: true)]
