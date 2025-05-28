@@ -571,32 +571,32 @@ public function getPagitionOption(Request $request, string $class_name, string $
      * 
      * @author Michel MIYALOU <michelmiyalou0@gmail.com@gmail.com>
      */
-    // public function getAgendaAgentHospital(array $months, array $filtre)
-    // {
-    //     $a = null;
-    //     $n = [];
-    //     foreach ($months['months'] as $key => $month) {
-    //         $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
-    //         foreach ($a as $key_a => $value) {
-    //             $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
-    //                 'date_j' => new DateTime($key_a),
-    //                 'doctor' => $filtre['id_doctor'],
-    //                 'hospital' => $filtre['id_hospital'],
-    //                 'meeting' => null
-    //             ]);
-    //             foreach ($disponibilities as $key_d => $disponibilitie) {
-    //                 $a[$key_a][] = [
-    //                     'id' => $disponibilitie->getId(),
-    //                     'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
-    //                     'heure_debut' => $disponibilitie->getHeureDebut(),
-    //                     'heure_fin' => $disponibilitie->getHeureFin(),
-    //                 ];
-    //             }
-    //         }
-    //         $n[$month] = $a;
-    //     }
-    //     return $n;
-    // }
+    public function getAgendaAgentHospital(array $months, array $filtre)
+    {
+        $a = null;
+        $n = [];
+        foreach ($months['months'] as $key => $month) {
+            $a = $this->getDaysOfMonthAssoc($months['year'],  $month);
+            foreach ($a as $key_a => $value) {
+                $disponibilities = $this->entityManager->getRepository(Disponibilite::class)->findBy([
+                    'date_j' => new DateTime($key_a),
+                    'doctor' => $filtre['id_doctor'],
+                    'hospital' => $filtre['id_hospital'],
+                    'meeting' => null
+                ]);
+                foreach ($disponibilities as $key_d => $disponibilitie) {
+                    $a[$key_a][] = [
+                        'id' => $disponibilitie->getId(),
+                        'date_j' => $disponibilitie->getDateJ()->format('Y-m-d'),
+                        'heure_debut' => $disponibilitie->getHeureDebut(),
+                        'heure_fin' => $disponibilitie->getHeureFin(),
+                    ];
+                }
+            }
+            $n[$month] = $a;
+        }
+        return $n;
+    }
 
     /**
      * Récupère l'agenda d'un patient pour un mois donné.

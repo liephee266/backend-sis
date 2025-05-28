@@ -2,14 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Doctor;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Null_;
-use phpDocumentor\Reflection\Types\Nullable;
 use Symfony\Bundle\SecurityBundle\Security;
+use phpDocumentor\Reflection\Types\Nullable;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -103,7 +104,7 @@ class DisponibiliteController extends AbstractController
         } catch (\Throwable $th) {
             return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
+    }        
 
     /**
      * Création d'une nouvelle Disponibilité

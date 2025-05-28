@@ -86,13 +86,18 @@ class AgendaController extends AbstractController
     
         // ROLE_PATIENT : accès à son propre agenda avec un médecin et un hôpital
     } elseif ($this->security->isGranted('ROLE_PATIENT')) {
-        $id_patient = $this->toolkit->getUser($request)->getId();
-        $a = $this->toolkit->getAgendaPatient($filters, [
-            'id_doctor' => $id_patient, 
-            'id_hospital' => $id_hospital]);
-        $agenda = $this->serializer->serialize($a, 'json', ['groups' => 'meeting:read']);
-        $agenda = json_decode($agenda, true);
-        return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
+        $doctor = $this->entityManager->getRepository(Doctor::class)->find($id_doctor);
+        if (!$doctor) {
+            return new JsonResponse(['code' => 404, 'message' => 'Médecin non trouvé.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $agendaData = $this->toolkit->getAgendaAgentHospital($filters, [
+            'id_doctor' => $doctor,
+            'id_hospital' => $id_hospital,
+            'meeting' => null
+        ]);
+
+        return new JsonResponse(["data" => $agendaData, "code" => 200], Response::HTTP_OK);
 
         // ROLE_RECEPTIONIST (agent d'accueil)
     }elseif ($this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
@@ -105,7 +110,7 @@ class AgendaController extends AbstractController
                 return new JsonResponse(['code' => 403, 'message' => 'Accès refusé : ce médecin n’appartient pas à votre hôpital.'], Response::HTTP_FORBIDDEN);
             }
 
-            $agendaData = $this->toolkit->getAgenda($filters, [
+            $agendaData = $this->toolkit->getAgendaAgentHospital($filters, [
                 'id_doctor' => $id_doctor,
                 'id_hospital' => $idAgenttHospital,
                 'meeting' => null

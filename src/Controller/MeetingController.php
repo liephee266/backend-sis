@@ -316,4 +316,40 @@ class MeetingController extends AbstractController
             return new JsonResponse(['code' => 500, 'message' => "Erreur interne du serveur" . $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/{id_hospital}/{id_patient}/{month?}/{year?}', name: 'agenda_index', methods: ['GET'])]
+    public function doctor_index(Request $request, $id_hospital, $id_patient, $month = null, $year = null): Response
+    {
+        // Par défaut, on prend l'année actuelle si non fournie
+        $year = $year ?? (int) date('Y');
+    
+        // Validation simple de l'année (optionnelle : tu peux l'améliorer)
+        if (!is_numeric($year) || $year < 2000 || $year > 2100) {
+            return new JsonResponse(['code' => 400, 'message' => 'Année invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+        // Gestion des mois : mois courant ou tous les mois
+        if ($month === null) {
+            $months = range(1, 12); // Tous les mois
+        } else {
+            $month = (int) $month;
+            if ($month < 1 || $month > 12) {
+                return new JsonResponse(['code' => 400, 'message' => 'Mois invalide.'], Response::HTTP_BAD_REQUEST);
+            }
+            $months = [$month, $month === 12 ? 1 : $month + 1];
+        }
+    
+        $filters = [
+            'months' => $months,
+            'year' => $year,
+        ];
+
+        
+        $id_patient = $this->toolkit->getUser($request)->getId();
+        $a = $this->toolkit->getAgendaPatient($filters, [
+            'id_patient' => $id_patient, 
+            'id_hospital' => $id_hospital]);
+        $agenda = $this->serializer->serialize($a, 'json', ['groups' => 'meeting:read']);
+        $agenda = json_decode($agenda, true);
+        return new JsonResponse(["data" => $agenda, "code" => 200], Response::HTTP_OK);
+    }
 }
