@@ -317,7 +317,7 @@ class MeetingController extends AbstractController
         }
     }
 
-    #[Route('/{id_hospital}/{id_patient}/{month?}/{year?}', name: 'agenda_index', methods: ['GET'])]
+    #[Route('/{id_hospital}/{id_patient}/{month?}/{year?}', name: 'agenda_patient_index', methods: ['GET'])]
     public function doctor_index(Request $request, $id_hospital, $id_patient, $month = null, $year = null): Response
     {
         // Par défaut, on prend l'année actuelle si non fournie
