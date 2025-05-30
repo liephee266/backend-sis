@@ -316,7 +316,7 @@ class AppController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(
-            ['message' => $entity_name.' archivé(e) avec succès'], 
+            ['message' => $entity_name.' archivé(e) avec succès', 'code' => 200], 
             Response::HTTP_OK
         );
     }
@@ -364,7 +364,7 @@ class AppController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(
-            ['message' => $entity_name.' suspendu(e) avec succès'], 
+            ['message' => $entity_name.' suspendu(e) avec succès', 'code' => 200], 
             Response::HTTP_OK
         );
     }
