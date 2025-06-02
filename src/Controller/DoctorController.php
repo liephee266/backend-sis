@@ -109,9 +109,12 @@ class DoctorController extends AbstractController
 
                 // Ajouter ce filtre pour n'afficher que les médecins de cet hôpital
                 $filtre['id'] = $doctorIds;
+                $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
             }
-    
-            $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read', $filtre);
+            else {
+                // Si c'est un super admin ou un admin SIS, on récupère tous les docteurs
+                $response = $this->toolkit->getPagitionOption($request, 'Doctor', 'doctor:read');
+            }
     
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Throwable $th) {
@@ -293,7 +296,7 @@ class DoctorController extends AbstractController
     #[Route('/{id}', name: 'doctor_update', methods: ['PUT'])]
     public function update(Request $request, $id): Response
     {
-        try {
+        // try {
             //code...
             if (
                 !$this->security->isGranted('ROLE_ADMIN_SIS') &&
@@ -330,11 +333,7 @@ class DoctorController extends AbstractController
                 $adminHospital = $hospitalAdmin->getHospital();
     
                 // Vérification via DoctorHospital
-                $doctorHospital = $this->entityManager->getRepository(Hospital::class)->findOneBy([
-                    'doctor' => $doctor,
-                ]);
-    
-                if (!$doctorHospital) {
+                if (!$doctor->getHospital()->contains($adminHospital)) {
                     return new JsonResponse([
                         "message" => "Ce médecin n'appartient pas à votre hôpital.",
                         "code" => 403
@@ -348,8 +347,7 @@ class DoctorController extends AbstractController
             $data['serviceStartingDate'] = new \DateTime($data['serviceStartingDate']);
         
             // Appel à la méthode persistEntity pour mettre à jour l'entité Doctor dans la base de données
-            $errors = $this->genericEntityManager->persistEntityUser("App\Entity\Doctor", $data, true);
-        
+            $errors = $this->genericEntityManager->persistEntity("App\Entity\Doctor", $data, true);
             // Vérification si l'entité a été mise à jour sans erreur
             if (!empty($errors['entity'])) {
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'doctor:read']);
@@ -357,12 +355,12 @@ class DoctorController extends AbstractController
                 return new JsonResponse(['data' => $response,'code' => 200, 'message' => "Médecin modifié avec succès"], Response::HTTP_OK);
             }
     
-            return $this->json(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['code' => 500, 'message' => "Erreur lors de la modification du médecin"], Response::HTTP_INTERNAL_SERVER_ERROR);
     
-        } catch (\Throwable $e) {
-            //throw $th;
-            return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // } catch (\Throwable $e) {
+        //     //throw $th;
+        //     return $this->json(['code' => 500, 'message' => "Erreur serveur: " . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     
