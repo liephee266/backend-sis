@@ -118,8 +118,18 @@ class DisponibiliteController extends AbstractController
     public function create(Request $request): Response
     {
         try {
+
+            if (!$this->toolkit->hasRoles(['ROLE_DOCTOR'])) {
+                // Si l'utilisateur n'a pas le rôle de médecin, retour d'une erreur 403 (Accès interdit)
+                return new JsonResponse(["message" => 'Accès interdit', "code" => 403], Response::HTTP_FORBIDDEN);
+            }
+
+            $user = $this->toolkit->getUser($request);
+            $doctorId = $this->entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user->getId()])->getId();
             // Décodage du contenu JSON envoyé dans la requête
             $data = json_decode($request->getContent(), true);
+
+            $data['doctor'] = $doctorId; 
             
             // Appel à la méthode persistEntity pour insérer les données dans la base
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Disponibilite", $data);
