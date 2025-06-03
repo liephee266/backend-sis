@@ -19,6 +19,7 @@ class Disponibilite
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'disponibilites')]
+    #[Groups(["disponibilite:read","meeting:read"])]
     private ?Doctor $doctor = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]

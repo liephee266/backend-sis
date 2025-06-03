@@ -25,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read","urgentist:read",
     "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
-    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read","HistoriqueMedical:read"])]
+    "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read","HistoriqueMedical:read","disponibilite:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -33,7 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "dossier_medicale:read","agenthospital:read","urgentist:read",
-    "patient:read:restricted", "autorisation:read", "hospitaladmin:read"])]
+    "patient:read:restricted", "autorisation:read", "hospitaladmin:read","disponibilite:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
@@ -67,12 +67,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read","disponibilite:read",
     "patient:read:restricted", "hospital:read", "autorisation:read", "hospitaladmin:read","data_select","HistoriqueMedical:read"])]
     private $first_name;
 
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["data_select","user:read", "doctor:read", "patient:read","urgency:read",
+    #[Groups(["data_select","user:read", "doctor:read", "patient:read","urgency:read","disponibilite:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",

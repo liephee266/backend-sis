@@ -1,22 +1,24 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Doctor;
-use App\Entity\HistoriqueMedical;
-use App\Entity\Hospital;
 use App\Entity\Meeting;
 use App\Entity\Patient;
-use App\Entity\User;
+use App\Entity\Hospital;
 use App\Services\Toolkit;
+use App\Services\MailerService;
+use App\Entity\HistoriqueMedical;
+use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use phpDocumentor\Reflection\DocBlock\Tags\Generic;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
-use App\Services\MailerService;
 
 /**
  * Controleur principal de l'application
@@ -31,13 +33,19 @@ class AppController extends AbstractController
     private $entityManager;
     private $serializer;
     private $security;
+    private $genericEntityManager;
 
-    public function __construct(Toolkit $toolKit, EntityManagerInterface $entityManager,  SerializerInterface $serializer, Security $security)
+    public function __construct(Toolkit $toolKit, 
+                                EntityManagerInterface $entityManager,  
+                                SerializerInterface $serializer, 
+                                Security $security,
+                                GenericEntityManager $genericEntityManager)
     {
         $this->toolkit = $toolKit;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
         $this->security = $security;
+        $this->genericEntityManager = $genericEntityManager;
     }
 
     /**
@@ -597,4 +605,53 @@ class AppController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-}
+
+    //Juste pour des test
+    #[Route('/disponibilite/all', name: 'disponibilite_all', methods: ['POST'])]
+    public function create_disponibilite(Request $request): Response
+    {
+        // try {
+            $data = json_decode($request->getContent(), true);
+
+            $doctors = $this->entityManager->getRepository(Doctor::class)->findAll();
+            $createdDisponibilites = [];
+
+            foreach ($doctors as $doc) {
+                $dispoData = $data;
+                $doctorHospitals = $doc->getHospital(); // PersistentCollection
+
+                foreach ($doctorHospitals as $hospital) {
+                    $dispoData['doctor'] = $doc->getId();       // ou $doc
+                    $dispoData['hospital'] = $hospital->getId(); // ou $hospital
+
+                $result = $this->genericEntityManager->persistEntity("App\Entity\Disponibilite", $dispoData);
+
+                if (!empty($result['entity'])) {
+                $disponibilite = $result['entity'];
+                $createdDisponibilites[] = $this->serializer->normalize(
+                    $disponibilite,
+                    'json',
+                    ['groups' => 'disponibilite:read']
+                );
+            }
+        }
+    }
+
+        if (!empty($createdDisponibilites)) {
+            return $this->json([
+                'data' => $createdDisponibilites,
+                'code' => 200,
+                'message' => "Disponibilités créées pour tous les docteurs"
+            ], Response::HTTP_OK);
+        }
+
+        return $this->json([
+            'code' => 500,
+            'message' => "Aucune disponibilité n'a été créée"
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        // } catch (\Throwable $th) {
+        //     return new JsonResponse(["message" => 'Erreur interne du serveur' . $th->getMessage(), "code" => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
+    }
+    }

@@ -59,7 +59,7 @@ class PatientController extends AbstractController
     {
         try {
             // Vérification des autorisations
-            if(!$this->toolkit->hasRoles(['ROLE_PATIENT'])) {
+            if(!$this->toolkit->hasRoles(['ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_AGENT_HOSPITAL', 'ROLE_ADMIN_SIS', 'ROLE_SUPER_ADMIN', 'ROLE_ADMIN_HOSPITAL'])) {
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
             $user = $this->toolkit->getUser($request);
