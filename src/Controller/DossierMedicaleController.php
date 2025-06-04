@@ -127,7 +127,7 @@ class DossierMedicaleController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'dossier-medicale_show', methods: ['GET'])]
-    public function show(DossierMedicale $DossierMedicale, Request $request): Response
+    public function show(int $id, Request $request): Response
     {
         try {
              // Vérification des autorisations de l'utilisateur connecté
@@ -140,6 +140,12 @@ class DossierMedicaleController extends AbstractController
             }
             $user = $this->toolkit->getUser($request);
 
+            $patient = $this->entityManager->getRepository('App\Entity\Patient')->findOneBy(['id' => $id]);
+
+            if (!$patient) {
+                return new JsonResponse(['code' => 404, 'message' => "ce patient n'existe pas"], Response::HTTP_NOT_FOUND);
+            }
+
             if (!$user) {
                 return new JsonResponse(['code' => 401, 'message' => "Utilisateur non connecté"], Response::HTTP_UNAUTHORIZED);
             }
@@ -147,29 +153,26 @@ class DossierMedicaleController extends AbstractController
             $isPatient = $this->security->isGranted('ROLE_PATIENT');
 
             if ($isPatient) {
-                $patient = $this->entityManager
-                    ->getRepository('App\Entity\Patient')
-                    ->findOneBy(['user' => $user]);
-
-                if (!$patient) {
-                    return new JsonResponse(['code' => 404, 'message' => "Profil patient introuvable"], Response::HTTP_NOT_FOUND);
-                }
-
-                if ($DossierMedicale->getPatientId() !== $patient) {
-                    return new JsonResponse(['code' => 403, 'message' => "Accès refusé à ce dossier médical"], Response::HTTP_FORBIDDEN);
+                
+                $DossierMedicale = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient->getId()]);
+                if (!$DossierMedicale) {
+                    return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable pour ce patient"], Response::HTTP_NOT_FOUND);
                 }
             } else {
-                // Vérifie que l'utilisateur connecté a bien accès à ce dossier
-                $accessList = $DossierMedicale->getAccess() ?? [];
+                    $DossierMedicale = $this->entityManager->getRepository('App\Entity\DossierMedicale')->findOneBy(['patient_id' => $patient->getId()]);
+                    if (!$DossierMedicale) {
+                        return new JsonResponse(['code' => 404, 'message' => "Dossier médical introuvable pour ce patient"], Response::HTTP_NOT_FOUND);
+                    }
 
-            if (!in_array($user->getId(), $accessList)) {
-                return new JsonResponse([
-                    'code' => 403,
-                    'message' => "Vous n'avez pas accès à ce dossier médical",
-                    'access' => $accessList,
-                    'user_id' => $user->getId()
-                ],Response::HTTP_FORBIDDEN);
-            }
+                    $accessList = $DossierMedicale->getAccess() ?? [];
+                    if (!in_array($user->getId(), $accessList)) {
+                        return new JsonResponse([
+                            'code' => 403,
+                            'message' => "Vous n'avez pas accès à ce dossier médical",
+                            'access' => $accessList,
+                            'user_id' => $user->getId()
+                        ], Response::HTTP_FORBIDDEN);
+                    }
             }
             $historiqueSerialized = $this->serializer->serialize($DossierMedicale,'json',['groups' => 'dossier_medicale:read']);
 

@@ -112,7 +112,7 @@ class AutorisationController extends AbstractController
      * @author  Michel MIYALOU<michelmiyalou0@gmail.com>
      */
     #[Route('/{entity_name}/{id}', name: 'autorisation_create', methods: ['POST'])]
-    public function create(Request $request, $entity_name, $id): Response
+    public function create(Request $request, $entity_name,int $id): Response
     {
         try {
             if (!$this->security->isGranted('ROLE_DOCTOR')) {
@@ -128,14 +128,21 @@ class AutorisationController extends AbstractController
                 return new JsonResponse(['message' => 'Entité non trouvée', "code" => 404], Response::HTTP_NOT_FOUND);
             }
 
-            // Récupération de l'ID  par la methode ExistRepository
-            $entity = $this->toolkit->ExistRepository($dataEntity, $entity_name, $id);
+            if ($entity_name === "hopital") {
+                // Récupération de l'ID  par la methode ExistRepository
+                $entity = $this->toolkit->ExistRepository($dataEntity, $entity_name, $id);
 
-            if (!$entity) {
-                return new JsonResponse(
-                    ['message' => $entity_name.' non trouvé(e)', 'code' => 404], 
-                    Response::HTTP_NOT_FOUND
-                );
+                if (!$entity) {
+                    return new JsonResponse(
+                        ['message' => $entity_name.' non trouvé(e)', 'code' => 404], 
+                        Response::HTTP_NOT_FOUND
+                    );
+                }
+            }else{
+                $entity = $this->entityManager->getRepository(DossierMedicale::class)->findOneBy(['patient_id' => $id]);
+                if (!$entity) {
+                    return new JsonResponse(['message' => 'Dossier médical non trouvé', 'code' => 404], Response::HTTP_NOT_FOUND);
+                }
             }
 
             // Décodage du contenu JSON envoyé dans la requête
@@ -168,13 +175,10 @@ class AutorisationController extends AbstractController
                 // Si l'entité a été correctement enregistrée, retour d'une réponse JSON avec succès
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'autorisation:read']);
                 $response = json_decode($response, true);
-
-                // Récupération de l'ID du dossier médical associé à l'autorisation
-                $dossier_medicale_patient = $this->entityManager->getRepository(DossierMedicale::class)->find($id)->getPatientId();
-
+        
                 if ($this->security->isGranted('ROLE_DOCTOR') && $entity_name === "dossier_medicale") {
                     // Récupération de l'utilisateur associé au dossier médical
-                    $user = $this->entityManager->getRepository(Patient::class)->find($dossier_medicale_patient)->getUser();
+                    $user = $this->entityManager->getRepository(Patient::class)->find($id)->getUser();
                     // Envoi de la notification
                     $notification = $this->notificationManager->createNotification(
                         'Demande d\'accès',
