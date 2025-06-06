@@ -9,6 +9,7 @@ use App\Entity\Patient;
 use App\Services\Toolkit;
 use App\Attribute\ApiEntity;
 use App\Entity\AgentHospital;
+use App\Entity\Disponibilite;
 use App\Services\GenericEntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -199,24 +200,40 @@ class MeetingController extends AbstractController
             $data['state_id'] = 1;
             $data['hospital'] = $agenthospital;
 
-            //Appel à la méthode de validation du nickname ou des alternatives
+            // Vérifie si la disponibilité est déjà liée à un Meeting
+            if (array_key_exists('disponibilites', $data)) {
+                $disponibilite = $this->entityManager
+                    ->getRepository(Disponibilite::class)
+                    ->find($data['disponibilites']);
+
+                if (!$disponibilite) {
+                    return $this->json(['code' => 404, 'message' => "Disponibilité non trouvée"], Response::HTTP_NOT_FOUND);
+                }
+
+                if ($disponibilite->getMeeting()) {
+                    return $this->json(['code' => 400, 'message' => "Cette disponibilité est déjà utilisée"], Response::HTTP_BAD_REQUEST);
+                }
+            } else {
+                return $this->json(['code' => 400, 'message' => "Aucune disponibilité fournie"], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Appel à la validation (nickname, etc.)
             $errorResponse = $this->toolkit->validateUserIdentification($data);
             if ($errorResponse !== null) {
                 return $errorResponse;
             }
 
+            // On persiste le meeting
             $errors = $this->genericEntityManager->persistEntity("App\Entity\Meeting", $data);
 
             if (!empty($errors['entity'])) {
-                if (key_exists("disponibilites", $data)) {
-                    $this->entityManager->getRepository("App\Entity\Disponibilite")
-                        ->find($data["disponibilites"])
-                        ->setMeeting($errors['entity']);
-                    $this->entityManager->flush();
-                }
+                // Liaison de la disponibilité au meeting
+                $disponibilite->setMeeting($errors['entity']);
+                $this->entityManager->flush();
 
                 $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'meeting:read']);
                 $response = json_decode($response, true);
+
 
                 return $this->json([
                     'data' => $response,
@@ -243,6 +260,11 @@ class MeetingController extends AbstractController
     #[Route('/{id}', name: 'meeting_update', methods: ['PUT'])]
     public function update(Request $request,  $id): Response
     {
+        if (!$this->security->isGranted('ROLE_AGENT_HOSPITAL')) {
+            // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
+            return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+
         // Décodage du contenu JSON envoyé dans la requête pour récupérer les données
         $data = json_decode($request->getContent(), true);
         // Ajout de l'ID dans les données reçues pour identifier l'entité à modifier
