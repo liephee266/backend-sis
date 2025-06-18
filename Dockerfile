@@ -37,6 +37,8 @@ ENV PATH="/root/.symfony5/bin:${PATH}"
 
 # Installer les dépendances PHP sans exécuter les scripts
 RUN composer install --no-scripts --ignore-platform-reqs
+#
+RUN composer install --ignore-platform-reqs
 
 # Ajuster les permissions pour l’utilisateur www-data
 RUN chown -R www-data:www-data /var/www/
