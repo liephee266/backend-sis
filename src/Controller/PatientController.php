@@ -69,22 +69,43 @@ class PatientController extends AbstractController
                 if (!$doctor) {
                     return new JsonResponse(['code' => 403, 'message' => "Médecin non trouvé"], Response::HTTP_FORBIDDEN);
                 }
-                // Récupérer les patients associés au médecin via consultations
-                $consultations = $this->entityManager->getRepository(Consultation::class)
+                // Patients via consultations
+                $consultationPatients = $this->entityManager->getRepository(Consultation::class)
                     ->createQueryBuilder('c')
-                    ->select('DISTINCT p.id') // ne pas charger tous les patients, juste leurs IDs
+                    ->select('DISTINCT p.id')
                     ->innerJoin('c.patient', 'p')
                     ->where('c.doctor = :doctor')
                     ->setParameter('doctor', $doctor)
                     ->getQuery()
                     ->getScalarResult();
-                $patientIds = array_column($consultations, 'id');
-                // Paginer sur les patients, pas sur les consultations
-                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
-                    'id' => $patientIds
-                ]);
-            }
+                $consultationPatientIds = array_column($consultationPatients, 'id');
 
+                // Patients créés par le docteur
+                $createdPatients = $this->entityManager->getRepository(Patient::class)
+                    ->createQueryBuilder('p')
+                    ->select('p.id')
+                    ->where('p.created_by = :doctor')
+                    ->setParameter('doctor', $user->getId())
+                    ->getQuery()
+                    ->getScalarResult();
+                $createdPatientIds = array_column($createdPatients, 'id');
+
+                // Fusionner les deux ensembles d'IDs
+                $allPatientIds = array_unique(array_merge($consultationPatientIds, $createdPatientIds));
+
+                if (empty($allPatientIds)) {
+                    return new JsonResponse([
+                        'code' => 204,
+                        'message' => 'Aucun patient trouvé.'
+                    ], Response::HTTP_NO_CONTENT);
+                }
+
+                // Appliquer le filtre dans la pagination
+                $response = $this->toolkit->getPagitionOption($request, 'Patient', 'patient:read', [
+                    'id' => $allPatientIds
+                ]);
+
+            }
             // Si utilisateur est un admin hospitalier
             elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
