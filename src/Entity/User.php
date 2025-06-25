@@ -24,7 +24,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read","urgentist:read",
-    "affiliation:read", "agenda:read", "availability:read","agenthospital:read", 
+    "affiliation:read", "agenda:read", "availability:read","agenthospital:read",'online:read', 
     "dossier_medicale:read", "autorisation:read", "hospitaladmin:read","conversation:read","HistoriqueMedical:read","disponibilite:read"])]
     private ?int $id = null;
 
@@ -32,12 +32,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
-    "availability:read", "dossier_medicale:read","agenthospital:read","urgentist:read",
+    "availability:read", "dossier_medicale:read","agenthospital:read","urgentist:read",'online:read',
     "patient:read:restricted", "autorisation:read", "hospitaladmin:read","disponibilite:read"])]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",
+    #[Groups(["user:read", "doctor:read", "patient:read","urgency:read",'online:read',
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
@@ -48,7 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(["user:read", "doctor:read", "patient:read",
+    #[Groups(["user:read", "doctor:read", "patient:read",'online:read',
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
@@ -64,7 +64,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     
     #[ORM\Column(type: "string", nullable: true)]
-    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",
+    #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgency:read",'online:read',
     "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read","disponibilite:read",
@@ -73,7 +73,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: "string", nullable: true)]
     #[Groups(["data_select","user:read", "doctor:read", "patient:read","urgency:read","disponibilite:read",
-    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",'online:read',
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "dossier_medicale:read","agenthospital:read", "urgentist:read",
     "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read","HistoriqueMedical:read"])]
@@ -81,7 +81,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: "string",unique: true, nullable: true)]
     #[Groups(["user:read", "doctor:read", "patient:read", "meeting:read","urgentist:read","urgency:read",
-    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",
+    "urgentist:read", "urgency:read", "consultation:read", "message:read", "treatment:read",'online:read',
     "examination:read", "notification:read", "hospitaladmin:read", "affiliation:read", "agenda:read",
     "availability:read", "hospital:read", "autorisation:read", "hospitaladmin:read","agenthospital:read"])]
     private $nickname;
@@ -179,6 +179,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'created_by')]
     private Collection $patients;
 
+    /**
+     * @var Collection<int, Online>
+     */
+    #[ORM\OneToMany(targetEntity: Online::class, mappedBy: 'user_id')]
+    private Collection $onlines;
+
+    /**
+     * @var Collection<int, Online>
+     */
+    #[ORM\OneToMany(targetEntity: Online::class, mappedBy: 'user_id')]
+    private Collection $online;
+
 
     public function __construct()
     {
@@ -192,6 +204,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->conversationsSender = new ArrayCollection();
         $this->notification = new ArrayCollection();
         $this->patients = new ArrayCollection();
+        $this->onlines = new ArrayCollection();
+        $this->online = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -520,4 +534,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, Online>
+     */
+    public function getOnlines(): Collection
+    {
+        return $this->onlines;
+    }
+
+    /**
+     * @return Collection<int, Online>
+     */
+    public function getOnline(): Collection
+    {
+        return $this->online;
+    }
+
+    public function addOnline(Online $online): static
+    {
+        if (!$this->online->contains($online)) {
+            $this->online->add($online);
+            $online->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOnline(Online $online): static
+    {
+        if ($this->online->removeElement($online)) {
+            // set the owning side to null (unless already changed)
+            if ($online->getUserId() === $this) {
+                $online->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
 }
