@@ -155,7 +155,7 @@ class PatientController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'patient_show', methods: ['GET'])]
-    public function show(Patient $patient, Request $request, DossierMedicale $dossierMedicale): Response
+    public function show(Patient $patient, Request $request): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
@@ -187,12 +187,21 @@ class PatientController extends AbstractController
                         break;
                     }
                 }
-                if (!$patientFound) {
+                
+                // Vérifie si le médecin a créé ce patient
+                $isCreator = $patient->getCreatedBy() === $user;
+                if (!$patientFound && !$isCreator) {
                     return new JsonResponse([
                         'code' => 403,
                         'message' => "Ce patient n'a pas de consultation avec vous."
                     ], Response::HTTP_FORBIDDEN);
                 }
+
+                return new JsonResponse([
+                    'data' => json_decode($this->serializer->serialize($patient, 'json', ['groups' => 'patient:read']), true),
+                    'code' => 200,
+                ], Response::HTTP_OK);
+                    
             } elseif ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
                 // Récupérer l'admin hospitalier de l'utilisateur connecté
                 $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)
