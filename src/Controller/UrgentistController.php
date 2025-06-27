@@ -159,7 +159,7 @@ class UrgentistController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgentist:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse(['data' => $response, 'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response, 'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_OK);
                     }
 
                     // Erreur dans la persistance
@@ -180,7 +180,7 @@ class UrgentistController extends AbstractController
                         $this->entityManager->commit();
                         $response = $this->serializer->serialize($errors['entity'], 'json', ['groups' => 'urgentist:read']);
                         $response = json_decode($response, true);
-                        return new JsonResponse(['data' => $response,'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_CREATED);
+                        return new JsonResponse(['data' => $response,'code' => 200,'message' => "Urgentist créé avec succès"], Response::HTTP_OK);
                     }
 
                     // Erreur dans la persistance
