@@ -30,7 +30,13 @@ class Urgentist
     #[Groups(['urgentist:read',"urgency:read"])]
     private ?string $uuid = null;
 
+    #[ORM\Column(type: "datetime")]
+    #[Groups(['urgentist:read',"urgency:read"])]
+    private ?\DateTimeInterface $created_at = null;
 
+    #[ORM\Column(type: "datetime")]
+    #[Groups(['urgentist:read',"urgency:read"])]
+    private ?\DateTimeInterface $updated_at = null;
 
     /**
      * @var Collection<int, Urgency>
@@ -42,6 +48,8 @@ class Urgentist
     {
         $this->urgencies = new ArrayCollection();
         $this->uuid = Uuid::v7()->toString();
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int
@@ -110,6 +118,29 @@ class Urgentist
     public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): self
+    {
+        $this->created_at = $created_at;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    {
+        $this->updated_at = $updated_at;
+
         return $this;
     }
 }
