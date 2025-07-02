@@ -81,32 +81,54 @@ class Toolkit
 {
     $allData = [];
 
-    foreach ($dataSelect as $entityName) {
-        $entities = !empty($filtres)
-            ? $this->entityManager->getRepository('App\Entity\\' . $entityName)->findBy($filtres)
-            : $this->entityManager->getRepository('App\Entity\\' . $entityName)->findAll();
+    $user = $this->security->getUser();
+    $isAdminHospital = in_array('ROLE_ADMIN_HOSPITAL', $user->getRoles());
 
-        // Sérialiser avec le groupe "data_select"
+    foreach ($dataSelect as $entityName) {
+        $localFilters = $filtres;
+        $entities = [];
+
+        if ($entityName === 'Doctor' && $isAdminHospital) {
+            $admin = $this->entityManager->getRepository(\App\Entity\HospitalAdmin::class)
+                        ->findOneBy(['user' => $user]);
+
+            if ($admin && $admin->getHospital()) {
+                $hospital = $admin->getHospital();
+
+                // le QueryBuilder pour ManyToMany Docto et Hospital
+                $qb = $this->entityManager->createQueryBuilder();
+                $qb->select('d')
+                    ->from(\App\Entity\Doctor::class, 'd')
+                    ->join('d.hospital', 'h') 
+                    ->where('h = :hospital')
+                    ->setParameter('hospital', $hospital);
+
+                $entities = $qb->getQuery()->getResult();
+            }
+        } else {
+            // Cas général (pas Doctor ou pas admin hospitalier)
+            $entities = !empty($localFilters)
+                ? $this->entityManager->getRepository('App\Entity\\' . $entityName)->findBy($localFilters)
+                : $this->entityManager->getRepository('App\Entity\\' . $entityName)->findAll();
+        }
+
+        // Sérialisation
         $serialized = json_decode($this->serializer->serialize($entities, 'json', ['groups' => 'data_select']), true);
 
         $formatted = [];
 
         foreach ($serialized as $item) {
-            // On prend le champ "id"
             $id = $item['id'] ?? null;
-
-            // Trouver le premier champ string pour le mettre comme "label"
             $label = null;
-             // Cas spécifique : Doctor ou Patient -> label à chercher dans le champ "user"
+
             if (in_array($entityName, ['Patient', 'Doctor']) && isset($item['user']) && is_array($item['user'])) {
-                foreach ($item['user'] as $key => $value) {
+                foreach ($item['user'] as $value) {
                     if (is_string($value)) {
                         $label = $value;
                         break;
                     }
                 }
             } else {
-                // Cas général : chercher premier champ string autre que "id"
                 foreach ($item as $key => $value) {
                     if ($key !== 'id' && is_string($value)) {
                         $label = $value;
@@ -127,6 +149,8 @@ class Toolkit
 
     return $allData;
 }
+
+
 
 
     /**
