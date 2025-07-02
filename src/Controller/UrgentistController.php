@@ -55,13 +55,20 @@ class UrgentistController extends AbstractController
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN') && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL'))  {
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
             // Tableau de filtres initialisé vide (peut être utilisé pour filtrer les résultats)
             $filtre = [];
 
+            // Si l'utilisateur connecté est un administrateur d'hôpital, on récupère l'hôpital associé
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
+                // Ajout du filtre pour l'hôpital
+                $filtre['hospital_id'] = $hospitalAdmin;
+            }
             // Récupération des Urgentists avec pagination
             $response = $this->toolkit->getPagitionOption($request, 'Urgentist', 'urgentist:read', $filtre);
 
@@ -81,14 +88,25 @@ class UrgentistController extends AbstractController
      * @author  Orphée Lié <lieloumloum@gmail.com>
      */
     #[Route('/{id}', name: 'urgentist_show', methods: ['GET'])]
-    public function show(Urgentist $urgentist): Response
+    public function show(Urgentist $urgentist, Request $request): Response
     {
         try {
             // Vérification des autorisations de l'utilisateur connecté
-            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN'))  {
+            if (!$this->security->isGranted('ROLE_ADMIN_SIS') && !$this->security->isGranted('ROLE_SUPER_ADMIN') && !$this->security->isGranted('ROLE_ADMIN_HOSPITAL'))  {
                 // Si l'utilisateur n'a pas les autorisations, retour d'une réponse JSON avec une erreur 403 (Interdit)
                 return new JsonResponse(['code' => 403, 'message' => "Accès refusé"], Response::HTTP_FORBIDDEN);
             }
+            // Si l'utilisateur connecté est un administrateur d'hôpital, on vérifie si l'urgentist appartient à cet hôpital
+            if ($this->security->isGranted('ROLE_ADMIN_HOSPITAL')) {
+                $user = $this->toolkit->getUser($request);
+                $hospitalAdmin = $this->entityManager->getRepository(HospitalAdmin::class)->findOneBy(['user' => $user])->getHospital()->getId();
+                
+                // Si l'urgentist n'appartient pas à l'hôpital de l'administrateur, on retourne une erreur 403
+                if ($urgentist->getHospitalId()->getId() !== $hospitalAdmin) {
+                    return new JsonResponse(['code' => 403, 'message' => "Accès refusé pour cet urgentist"], Response::HTTP_FORBIDDEN);
+                }
+            }
+
             // Sérialisation de l'entité Urgentist en JSON avec le groupe de sérialisation 'Urgentist:read'
             $urgentist = $this->serializer->serialize($urgentist, 'json', ['groups' => 'urgentist:read']);
         

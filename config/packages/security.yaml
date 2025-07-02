@@ -31,6 +31,5 @@ security:
         ROLE_PATIENT:  [ROLE_USER]  # Patient hérite de ROLE_USER
     access_control:
         - { path: ^/api/v1/connexion, roles: PUBLIC_ACCESS }
-        - { path: ^/api/v1/urgencys, roles: PUBLIC_ACCESS }
         # - { path: ^/api/v1/main/powerbi/*, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: PUBLIC_ACCESS }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
